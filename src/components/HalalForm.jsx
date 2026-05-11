@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download } from 'lucide-react';
+import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -12,6 +12,7 @@ const HalalForm = ({ job, onClose }) => {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
     tatacara: '',
     photo: '',
+    surveyDriveLink: '',
     bahan: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
     pembersih: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
     kemasan: Array(10).fill({ merk: '', produsen: '', sertifikat: '' })
@@ -264,14 +265,28 @@ const HalalForm = ({ job, onClose }) => {
           <div className="section-title mt-4">Tatacara Pembuatan Produk</div>
           <textarea rows="6" value={formData.tatacara} onChange={e => setFormData({...formData, tatacara: e.target.value})} placeholder="Uraikan sedetail mungkin..."></textarea>
 
+
           <div className="section-title mt-4">Photo Produk Jadi</div>
-          <div className="photo-upload glass-card">
+          <div className="photo-upload glass-card mb-4">
             {formData.photo ? (
               <img src={formData.photo} alt="Produk" className="preview-img" />
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Photo Produk</p></div>
             )}
             <input type="file" accept="image/*" onChange={handleImageUpload} />
+          </div>
+
+          <div className="input-group glass-card p-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+            <label style={{ color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <ExternalLink size={16} /> Link Google Drive (Foto Survey Lapangan)
+            </label>
+            <input 
+              type="url" 
+              placeholder="https://drive.google.com/..." 
+              value={formData.surveyDriveLink} 
+              onChange={e => setFormData({...formData, surveyDriveLink: e.target.value})}
+              style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px', borderRadius: '8px' }}
+            />
           </div>
         </div>
 

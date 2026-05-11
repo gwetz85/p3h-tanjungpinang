@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, Timer, MessageSquare, PhoneCall, Trash2, Save } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -274,6 +274,20 @@ const CekPekerjaan = () => {
                           : selectedJob.keterangan || '-'}
                       </p>
                     </div>
+
+                    {selectedJob.halalData?.surveyDriveLink && (
+                      <div className="info-item full glass-card p-4 mt-2" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                        <label style={{ color: '#60a5fa', marginBottom: '8px', display: 'block' }}>Link Foto Survey Lapangan</label>
+                        <a 
+                          href={selectedJob.halalData.surveyDriveLink} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'white', textDecoration: 'none', fontWeight: '600' }}
+                        >
+                          <ExternalLink size={18} /> Buka Google Drive Survey
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   <div className="modal-footer-actions">

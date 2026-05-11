@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer, ExternalLink } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -193,6 +193,21 @@ const PendaftaranSihalal = () => {
                     <p>{selectedJob.kelurahan || '-'}</p>
                   </div>
                 </div>
+
+                {selectedJob.halalData?.surveyDriveLink && (
+                  <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <label style={{ color: '#60a5fa', marginBottom: '8px', display: 'block' }}>Link Foto Survey Lapangan</label>
+                    <a 
+                      href={selectedJob.halalData.surveyDriveLink} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="btn-primary-outline"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid #3b82f6', color: 'white' }}
+                    >
+                      <ExternalLink size={18} /> Buka Google Drive Survey
+                    </a>
+                  </div>
+                )}
 
                 <div className="action-box glass-card p-4 mb-6" style={{ background: 'rgba(255,255,255,0.03)' }}>
                   <label className="mb-2 block text-sm font-bold text-accent">Catatan Admin / Alasan Pengembalian</label>
