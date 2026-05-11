@@ -129,14 +129,25 @@ select option {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Spasi antar tombol */
+  gap: 10px; /* Sedikit dirapatkan */
+  overflow-y: auto; /* Agar bisa scroll jika menu penuh */
+  padding-right: 5px;
+}
+
+/* Scrollbar halus untuk sidebar */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 14px 20px;
+  padding: 12px 20px; /* Sedikit lebih kecil agar muat banyak */
   text-decoration: none;
   color: var(--text);
   background: rgba(255, 255, 255, 0.08);
@@ -144,6 +155,7 @@ select option {
   transition: var(--transition);
   font-weight: 500;
   border: 1px solid transparent;
+  flex-shrink: 0; /* Pastikan item tidak gepeng */
 }
 
 .nav-item:hover {
