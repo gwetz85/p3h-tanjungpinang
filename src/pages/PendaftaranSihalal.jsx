@@ -2,9 +2,47 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
+
+const CountdownReview = ({ startTime, jobId }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const thirtyMinutes = 30 * 60 * 1000;
+      const target = startTime + thirtyMinutes;
+      const now = new Date().getTime();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setTimeLeft('Waktu Habis! Auto-Selesai...');
+        // Auto verify logic
+        update(ref(rtdb, `pekerjaan/${jobId}`), { 
+          status: 'Selesai',
+          verifiedAt: Date.now(),
+          adminNote: 'Diverifikasi otomatis oleh Sistem (30 Menit Tanpa Respon)'
+        });
+        return;
+      }
+
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      setTimeLeft(`${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
+    };
+
+    calculateTime();
+    const timer = setInterval(calculateTime, 1000);
+    return () => clearInterval(timer);
+  }, [startTime, jobId]);
+
+  return (
+    <div className="countdown-badge" style={{ background: '#f59e0b', color: '#000' }}>
+      <Timer size={12} /> {timeLeft}
+    </div>
+  );
+};
 
 const PendaftaranSihalal = () => {
   const { role } = useAuth();
@@ -98,6 +136,7 @@ const PendaftaranSihalal = () => {
         ) : (
           filteredJobs.map((job) => (
             <motion.div key={job.id} onClick={() => setSelectedJob(job)} className="job-card glass-card">
+              {job.reviewStartedAt && <CountdownReview startTime={job.reviewStartedAt} jobId={job.id} />}
               <div className="job-main">
                 <div className="job-info">
                   <span className="badge-type" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>Menunggu Verifikasi</span>

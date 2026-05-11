@@ -49,9 +49,10 @@ const HalalForm = ({ job, onClose }) => {
       await update(ref(rtdb, `pekerjaan/${job.id}`), { 
         halalData: formData,
         progress: progress,
-        status: progress >= 100 ? 'Review' : 'Proses'
+        status: progress >= 100 ? 'Review' : 'Proses',
+        reviewStartedAt: progress >= 100 ? Date.now() : null
       });
-      alert(progress >= 100 ? 'Data lengkap! Pekerjaan kini diteruskan ke Admin untuk Verifikasi.' : `Data Disimpan! Progres otomatis: ${progress}%`);
+      alert(progress >= 100 ? 'Data lengkap! Pekerjaan kini diteruskan ke Admin untuk Verifikasi (30 Menit).' : `Data Disimpan! Progres otomatis: ${progress}%`);
     } catch (err) {
       alert('Gagal simpan: ' + err.message);
     } finally {

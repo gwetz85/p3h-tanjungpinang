@@ -199,6 +199,15 @@ const CekPekerjaan = () => {
                     <span className="badge-type-large">{selectedJob.jenisPekerjaan}</span>
                   </div>
 
+                  {selectedJob.adminNote && (
+                    <div className="admin-note-box glass-card mb-6" style={{ background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #ef4444', padding: '1rem' }}>
+                      <h4 style={{ color: '#ef4444', marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Info size={16} /> Catatan Perbaikan Admin:
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'white' }}>{selectedJob.adminNote}</p>
+                    </div>
+                  )}
+
 
 
                   <div className="detail-info-grid">
