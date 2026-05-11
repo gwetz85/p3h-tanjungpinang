@@ -32,7 +32,7 @@ const CekPekerjaan = () => {
       if (data) {
         const list = Object.keys(data)
           .map(key => ({ id: key, ...data[key] }))
-          .filter(job => job.status === 'Proses');
+          .filter(job => job.status === 'Proses' || job.status === 'Returned');
         setJobs(list);
       } else {
         setJobs([]);
@@ -159,7 +159,10 @@ const CekPekerjaan = () => {
                 </div>
               </div>
               <div className="job-footer">
-                <span className="status-badge"><Clock size={14} /> {job.status}</span>
+                <span className={`status-badge ${job.status === 'Returned' ? 'text-danger' : ''}`}>
+                  {job.status === 'Returned' ? <X size={14} /> : <Clock size={14} />} 
+                  {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
+                </span>
                 <div className="job-actions" style={{ display: 'flex', gap: '8px' }}>
                   <button className="btn-icon text-accent" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                     <Calendar size={18} />

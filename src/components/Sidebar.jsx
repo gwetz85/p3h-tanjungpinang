@@ -7,7 +7,8 @@ import {
   History, 
   LogOut,
   LayoutDashboard,
-  MessageCircle
+  MessageCircle,
+  FileSearch
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +28,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     { name: 'Manajemen User', path: '/users', icon: Users, roles: ['Admin'] },
     { name: 'Input Pekerjaan', path: '/input', icon: PlusSquare, roles: ['Admin'] },
+    { name: 'Pendaftaran SIHALAL', path: '/pendaftaran', icon: FileSearch, roles: ['Admin'] },
     { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['Admin', 'Petugas', 'Monitoring'] },
     { name: 'Riwayat Selesai', path: '/selesai', icon: History, roles: ['Admin', 'Petugas', 'Monitoring'] },
     { name: 'Pesan', path: '/chat', icon: MessageCircle, roles: ['Admin', 'Petugas', 'Monitoring'] },

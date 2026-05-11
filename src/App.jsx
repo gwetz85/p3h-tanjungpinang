@@ -11,6 +11,7 @@ import Selesai from './pages/Selesai';
 import Setup from './pages/Setup';
 import DataUser from './pages/DataUser';
 import Chat from './pages/Chat';
+import PendaftaranSihalal from './pages/PendaftaranSihalal';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
@@ -96,6 +97,12 @@ function App() {
             <Route path="input" element={
               <ProtectedRoute allowedRoles={['Admin']}>
                 <InputPekerjaan />
+              </ProtectedRoute>
+            } />
+
+            <Route path="pendaftaran" element={
+              <ProtectedRoute allowedRoles={['Admin']}>
+                <PendaftaranSihalal />
               </ProtectedRoute>
             } />
             
