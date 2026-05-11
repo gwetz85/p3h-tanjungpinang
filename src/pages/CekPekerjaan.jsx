@@ -317,61 +317,15 @@ const CekPekerjaan = () => {
                         <div className="input-group"><label>NIK</label><input type="text" value={selectedJob.nik} onChange={(e) => setSelectedJob({...selectedJob, nik: e.target.value})} /></div>
                         <div className="input-group"><label>WhatsApp</label><input type="text" value={selectedJob.wa} onChange={(e) => setSelectedJob({...selectedJob, wa: e.target.value})} /></div>
                         <div className="input-group"><label>Alamat</label><input type="text" value={selectedJob.alamat} onChange={(e) => setSelectedJob({...selectedJob, alamat: e.target.value})} /></div>
-                        {selectedJob.jenisPekerjaan === 'Sertifikasi Halal' && (
-                          <>
-                            <div className="input-group"><label>Nama Usaha</label><input type="text" value={selectedJob.namaUsaha} onChange={(e) => setSelectedJob({...selectedJob, namaUsaha: e.target.value})} /></div>
-                            <div className="input-group"><label>Kelurahan</label><input type="text" value={selectedJob.kelurahan} onChange={(e) => setSelectedJob({...selectedJob, kelurahan: e.target.value})} /></div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {selectedJob.jenisPekerjaan === 'BPJS' && (
-
-                    <div className="bpjs-extra-fields glass-card p-4 mb-4">
-                      <h4 className="mb-3 text-primary">Detail BPJS</h4>
-                      <div className="input-group mb-3">
-                        <label>Paket Yang Diambil</label>
-                        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                          {['JKM', 'JKK', 'JHT'].map(p => (
-                            <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                              <input 
-                                type="checkbox" 
-                                checked={selectedJob.bpjsData?.paket?.includes(p)} 
-                                onChange={(e) => {
-                                  const currentPaket = selectedJob.bpjsData?.paket || [];
-                                  const newPaket = e.target.checked ? [...currentPaket, p] : currentPaket.filter(i => i !== p);
-                                  setSelectedJob({ ...selectedJob, bpjsData: { ...selectedJob.bpjsData, paket: newPaket } });
-                                }}
-                              /> {p}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="input-group">
-                        <label>Jenis BPJS TK</label>
-                        <select 
-                          value={selectedJob.bpjsData?.jenisTk || ''} 
-                          onChange={(e) => setSelectedJob({ ...selectedJob, bpjsData: { ...selectedJob.bpjsData, jenisTk: e.target.value } })}
-                        >
-                          <option value="">Pilih Jenis...</option>
-                          <option value="PU">PU (Penerima Upah)</option>
-                          <option value="BPU">BPU (Bukan Penerima Upah)</option>
-                        </select>
+                        <div className="input-group"><label>Nama Usaha</label><input type="text" value={selectedJob.namaUsaha} onChange={(e) => setSelectedJob({...selectedJob, namaUsaha: e.target.value})} /></div>
+                        <div className="input-group"><label>Kelurahan</label><input type="text" value={selectedJob.kelurahan} onChange={(e) => setSelectedJob({...selectedJob, kelurahan: e.target.value})} /></div>
                       </div>
                     </div>
                   )}
 
-                  {selectedJob.jenisPekerjaan !== 'Sertifikasi Halal' ? (
-
-                    <div className="input-group"><label>Progres (%)</label>
-                      <input type="number" min="0" max="100" value={selectedJob.progress} onChange={(e) => setSelectedJob({...selectedJob, progress: e.target.value})} />
-                    </div>
-                  ) : (
-                    <div className="info-box mb-4">
-                      <p>ℹ️ Progres untuk Sertifikasi Halal dihitung otomatis dari kelengkapan formulir.</p>
-                    </div>
-                  )}
+                  <div className="info-box mb-4">
+                    <p>ℹ️ Progres untuk Sertifikasi Halal dihitung otomatis dari kelengkapan formulir.</p>
+                  </div>
                   <div className="input-group"><label>Keterangan</label>
                     <textarea rows="4" value={selectedJob.keterangan} onChange={(e) => setSelectedJob({...selectedJob, keterangan: e.target.value})}></textarea>
                   </div>
