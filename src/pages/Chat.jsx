@@ -56,13 +56,31 @@ const Chat = () => {
     const unsubscribers = [];
     users.forEach((user) => {
       const chatId = getChatId(currentUser.uid, user.id);
+      
+      // Listen for clearedAt timestamp
+      const clearedRef = ref(rtdb, `chats/${chatId}/clearedAt/${currentUser.uid}`);
+      let clearedAt = 0;
+      onValue(clearedRef, (snap) => {
+        clearedAt = snap.val() || 0;
+      });
+
       const messagesRef = ref(rtdb, `chats/${chatId}/messages`);
       const unsub = onValue(messagesRef, (snapshot) => {
         if (snapshot.exists()) {
           const msgs = Object.values(snapshot.val());
-          const sorted = msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-          const lastMsg = sorted[sorted.length - 1];
-          setLastMessages(prev => ({ ...prev, [user.id]: lastMsg }));
+          const filtered = msgs.filter(m => (m.timestamp || 0) > clearedAt);
+          const sorted = filtered.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+          
+          if (sorted.length > 0) {
+            const lastMsg = sorted[sorted.length - 1];
+            setLastMessages(prev => ({ ...prev, [user.id]: lastMsg }));
+          } else {
+            setLastMessages(prev => {
+              const newState = { ...prev };
+              delete newState[user.id];
+              return newState;
+            });
+          }
 
           // Count unread
           const unread = sorted.filter(
@@ -83,27 +101,35 @@ const Chat = () => {
 
     const chatId = getChatId(currentUser.uid, selectedUser.id);
     const messagesRef = ref(rtdb, `chats/${chatId}/messages`);
+    const clearedRef = ref(rtdb, `chats/${chatId}/clearedAt/${currentUser.uid}`);
 
-    const unsub = onValue(messagesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const list = Object.entries(data)
-          .map(([id, val]) => ({ id, ...val }))
-          .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-        setMessages(list);
+    // Get clearedAt once or listen? Listening is safer
+    const unsubCleared = onValue(clearedRef, (clearedSnap) => {
+      const clearedAt = clearedSnap.val() || 0;
+      
+      onValue(messagesRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const list = Object.entries(data)
+            .map(([id, val]) => ({ id, ...val }))
+            .filter(m => (m.timestamp || 0) > clearedAt)
+            .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+          
+          setMessages(list);
 
-        // Mark messages as read
-        Object.entries(data).forEach(([msgId, msg]) => {
-          if (msg.senderId !== currentUser.uid && !msg.read) {
-            update(ref(rtdb, `chats/${chatId}/messages/${msgId}`), { read: true });
-          }
-        });
-      } else {
-        setMessages([]);
-      }
+          // Mark messages as read
+          Object.entries(data).forEach(([msgId, msg]) => {
+            if (msg.senderId !== currentUser.uid && !msg.read && (msg.timestamp || 0) > clearedAt) {
+              update(ref(rtdb, `chats/${chatId}/messages/${msgId}`), { read: true });
+            }
+          });
+        } else {
+          setMessages([]);
+        }
+      });
     });
 
-    return () => unsub();
+    return () => unsubCleared();
   }, [selectedUser, currentUser]);
 
   // Auto-scroll to bottom
@@ -139,14 +165,15 @@ const Chat = () => {
 
   const handleClearChat = async () => {
     if (!selectedUser || !currentUser) return;
-    if (window.confirm(`Hapus seluruh riwayat pesan dengan ${selectedUser.nama || selectedUser.email}?`)) {
+    if (window.confirm(`Hapus riwayat pesan Anda dengan ${selectedUser.nama || selectedUser.email}? (Pesan tetap ada di akun lawan bicara)`)) {
       const chatId = getChatId(currentUser.uid, selectedUser.id);
       try {
-        await remove(ref(rtdb, `chats/${chatId}`));
+        // Set clearedAt for current user to now
+        await set(ref(rtdb, `chats/${chatId}/clearedAt/${currentUser.uid}`), Date.now());
         setMessages([]);
-        alert('Riwayat chat berhasil dihapus.');
+        alert('Riwayat chat Anda berhasil dibersihkan.');
       } catch (err) {
-        alert('Gagal menghapus riwayat chat.');
+        alert('Gagal membersihkan riwayat chat.');
       }
     }
   };
