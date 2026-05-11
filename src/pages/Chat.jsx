@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { rtdb } from '../firebase';
-import { ref, onValue, push, serverTimestamp, set, get, update } from 'firebase/database';
+import { ref, onValue, push, serverTimestamp, set, get, update, remove } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MessageCircle, ArrowLeft, Circle, Users } from 'lucide-react';
+import { Send, Search, MessageCircle, ArrowLeft, Circle, Users, Trash2 } from 'lucide-react';
 
 const Chat = () => {
   const { currentUser } = useAuth();
@@ -137,6 +137,20 @@ const Chat = () => {
     inputRef.current?.focus();
   };
 
+  const handleClearChat = async () => {
+    if (!selectedUser || !currentUser) return;
+    if (window.confirm(`Hapus seluruh riwayat pesan dengan ${selectedUser.nama || selectedUser.email}?`)) {
+      const chatId = getChatId(currentUser.uid, selectedUser.id);
+      try {
+        await remove(ref(rtdb, `chats/${chatId}`));
+        setMessages([]);
+        alert('Riwayat chat berhasil dihapus.');
+      } catch (err) {
+        alert('Gagal menghapus riwayat chat.');
+      }
+    }
+  };
+
   const handleSelectUser = (user) => {
     setSelectedUser(user);
     setIsMobileListOpen(false);
@@ -265,6 +279,13 @@ const Chat = () => {
                   <h3>{selectedUser.nama || selectedUser.email}</h3>
                   <span className="role-tag" style={{ color: getRoleColor(selectedUser.role) }}>{selectedUser.role}</span>
                 </div>
+                <button 
+                  onClick={handleClearChat} 
+                  className="clear-chat-btn"
+                  title="Hapus Riwayat Chat"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
 
               {/* Messages */}
@@ -533,6 +554,23 @@ const Chat = () => {
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+        }
+        .clear-chat-btn {
+          margin-left: auto;
+          background: none;
+          border: none;
+          color: rgba(255,255,255,0.3);
+          cursor: pointer;
+          padding: 8px;
+          border-radius: 8px;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .clear-chat-btn:hover {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
         }
 
         /* Messages */
