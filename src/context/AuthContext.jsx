@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, rtdb } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { ref, get, update, remove, onValue } from 'firebase/database';
 
 const AuthContext = createContext();
@@ -11,9 +11,11 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sessionKicked, setSessionKicked] = useState(false);
 
   useEffect(() => {
     let roleUnsubscribe = () => {};
+    let sessionUnsubscribe = () => {};
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -48,6 +50,21 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
           }
         });
+
+        // Listen for session changes (single-device enforcement)
+        const sessionRef = ref(rtdb, `users/${user.uid}/activeSession`);
+        sessionUnsubscribe = onValue(sessionRef, (snapshot) => {
+          const localSession = sessionStorage.getItem('sessionId');
+          const remoteSession = snapshot.val();
+
+          // If we have a local session and it doesn't match remote, we've been kicked
+          if (localSession && remoteSession && localSession !== remoteSession) {
+            sessionStorage.removeItem('sessionId');
+            setSessionKicked(true);
+            signOut(auth);
+          }
+        });
+
       } else {
         setCurrentUser(null);
         setRole(null);
@@ -58,13 +75,16 @@ export const AuthProvider = ({ children }) => {
     return () => {
       unsubscribe();
       roleUnsubscribe();
+      sessionUnsubscribe();
     };
   }, []);
 
   const value = {
     currentUser,
     role,
-    loading
+    loading,
+    sessionKicked,
+    clearSessionKicked: () => setSessionKicked(false)
   };
 
   return (

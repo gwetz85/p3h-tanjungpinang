@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db, rtdb } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { ref, set } from 'firebase/database';
+import { ref, set, update } from 'firebase/database';
 import { Lock, Mail, Award, User, ArrowLeft, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -16,6 +17,15 @@ const Login = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
+  const { sessionKicked, clearSessionKicked } = useAuth();
+
+  // Show kicked message
+  React.useEffect(() => {
+    if (sessionKicked) {
+      setError('Akun Anda telah login di perangkat lain. Sesi ini telah berakhir.');
+      clearSessionKicked();
+    }
+  }, [sessionKicked]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,7 +33,17 @@ const Login = () => {
     setError('');
     
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Generate unique session ID for single-device enforcement
+      const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      sessionStorage.setItem('sessionId', sessionId);
+      
+      // Write session to RTDB
+      await update(ref(rtdb, `users/${userCredential.user.uid}`), {
+        activeSession: sessionId
+      });
+      
       navigate('/');
     } catch (err) {
       setError('Email atau Password salah. Pastikan akun sudah aktif.');
