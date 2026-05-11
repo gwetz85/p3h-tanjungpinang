@@ -41,7 +41,7 @@ const Chat = () => {
       const data = snapshot.val();
       if (data) {
         const list = Object.entries(data)
-          .filter(([id, val]) => id !== currentUser.uid && val.role !== 'Pending')
+          .filter(([id, val]) => id !== currentUser.uid && val.role !== 'Pending' && val.email !== 'admin@tarunabangsa.id')
           .map(([id, val]) => ({ id, ...val }));
         setUsers(list);
       }

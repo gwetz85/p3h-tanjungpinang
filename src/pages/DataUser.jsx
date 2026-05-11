@@ -18,10 +18,9 @@ const DataUser = () => {
     const unsubscribe = onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list = Object.entries(data).map(([id, val]) => ({
-          id,
-          ...val
-        }));
+        const list = Object.entries(data)
+          .map(([id, val]) => ({ id, ...val }))
+          .filter(user => user.email !== 'admin@tarunabangsa.id');
         setUsers(list);
       } else {
         setUsers([]);
