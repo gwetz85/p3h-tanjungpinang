@@ -10,6 +10,7 @@ import CekPekerjaan from './pages/CekPekerjaan';
 import Selesai from './pages/Selesai';
 import Setup from './pages/Setup';
 import DataUser from './pages/DataUser';
+import Chat from './pages/Chat';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
@@ -100,6 +101,7 @@ function App() {
             
             <Route path="cek" element={<CekPekerjaan />} />
             <Route path="selesai" element={<Selesai />} />
+            <Route path="chat" element={<Chat />} />
           </Route>
         </Routes>
       </BrowserRouter>
