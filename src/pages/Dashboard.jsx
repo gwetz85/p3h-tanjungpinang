@@ -3,11 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { Briefcase, CheckCircle, Clock, Users } from 'lucide-react';
+import { Briefcase, CheckCircle, Clock, Users, Calendar, MapPin, User } from 'lucide-react';
 
 const Dashboard = () => {
   const { currentUser, role } = useAuth();
   const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, koordinator: 0 });
+  const [upcomingVisits, setUpcomingVisits] = useState([]);
 
   useEffect(() => {
     // Count Jobs
@@ -22,6 +23,14 @@ const Dashboard = () => {
           proses: list.filter(j => j.status === 'Proses').length,
           selesai: list.filter(j => j.status === 'Selesai').length
         }));
+
+        // Filter and sort upcoming visits
+        const now = new Date();
+        const visits = list
+          .filter(j => j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now)
+          .sort((a, b) => new Date(a.jadwalKunjungan) - new Date(b.jadwalKunjungan))
+          .slice(0, 5); // Show top 5
+        setUpcomingVisits(visits);
       }
     });
 
@@ -58,6 +67,38 @@ const Dashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="upcoming-section glass-card">
+        <div className="section-header">
+          <Calendar className="text-primary" size={24} />
+          <h2>Kunjungan Mendatang</h2>
+        </div>
+        
+        <div className="visits-list">
+          {upcomingVisits.length === 0 ? (
+            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>Tidak ada kunjungan terjadwal dalam waktu dekat.</p>
+          ) : (
+            upcomingVisits.map((visit, idx) => (
+              <div key={idx} className="visit-card-compact">
+                <div className="visit-time">
+                  <span className="date">{new Date(visit.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                  <span className="hour">{new Date(visit.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div className="visit-details">
+                  <h4>{visit.nama}</h4>
+                  <div className="visit-meta">
+                    <span><User size={14} /> {visit.jenisPekerjaan}</span>
+                    <span><MapPin size={14} /> {visit.kelurahan || 'Tanjungpinang'}</span>
+                  </div>
+                </div>
+                <div className="visit-badge urgent">
+                  Upcoming
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 };
