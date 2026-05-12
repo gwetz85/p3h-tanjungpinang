@@ -16,9 +16,9 @@ const HalalForm = ({ job, onClose }) => {
     location: null,
     siHalalEmail: '',
     siHalalPassword: '',
-    bahan: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
-    pembersih: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
-    kemasan: Array(10).fill({ merk: '', produsen: '', sertifikat: '' })
+    bahan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
+    pembersih: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
+    kemasan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '' }))
   });
 
   const calculateProgress = (data) => {
@@ -48,9 +48,25 @@ const HalalForm = ({ job, onClose }) => {
   const handleUpdate = async (isFinal = false) => {
     setLoading(true);
     try {
-      const progress = calculateProgress(formData);
+      // Clean sub data: remove empty strings from sub arrays
+      const cleanedBahan = formData.bahan.map(b => ({
+        ...b,
+        sub: b.sub.filter(s => s && s.trim() !== '')
+      }));
+      const cleanedPembersih = formData.pembersih.map(p => ({
+        ...p,
+        sub: p.sub.filter(s => s && s.trim() !== '')
+      }));
+      
+      const dataToSave = {
+        ...formData,
+        bahan: cleanedBahan,
+        pembersih: cleanedPembersih
+      };
+
+      const progress = calculateProgress(dataToSave);
       const updates = {
-        halalData: formData,
+        halalData: dataToSave,
         progress: progress,
         status: isFinal ? 'Review' : (progress >= 100 ? 'Review' : 'Proses'),
         reviewStartedAt: (isFinal || progress >= 100) ? Date.now() : null
@@ -250,13 +266,25 @@ const HalalForm = ({ job, onClose }) => {
                 </div>
                 <div className="sub-data">
                   <p>Sub Data Pengganti:</p>
-                  {b.sub.map((s, si) => (
-                    <input key={si} placeholder={`Pengganti ${si+1}`} value={s} onChange={e => {
-                      const newSub = [...b.sub]; newSub[si] = e.target.value;
-                      const newBahan = [...formData.bahan]; newBahan[i] = {...b, sub: newSub};
-                      setFormData({...formData, bahan: newBahan});
-                    }} />
-                  ))}
+                  {(() => {
+                    // Always show existing sub data + 1 empty input if the last one is not empty
+                    const displaySub = [...b.sub];
+                    if (displaySub.length === 0 || displaySub[displaySub.length - 1] !== '') {
+                      displaySub.push('');
+                    }
+                    return displaySub.map((s, si) => (
+                      <input key={si} placeholder={`Pengganti ${si+1}`} value={s} onChange={e => {
+                        const newSub = [...displaySub]; 
+                        newSub[si] = e.target.value;
+                        // Filter out trailing empties except the last one managed by displaySub logic
+                        // but here we just update the actual b.sub
+                        const actualSub = [...newSub];
+                        const newBahan = [...formData.bahan]; 
+                        newBahan[i] = {...b, sub: actualSub};
+                        setFormData({...formData, bahan: newBahan});
+                      }} />
+                    ));
+                  })()}
                 </div>
               </div>
             ))}
@@ -274,13 +302,22 @@ const HalalForm = ({ job, onClose }) => {
                 </div>
                 <div className="sub-data">
                   <p>Sub Data Pengganti:</p>
-                  {b.sub.map((s, si) => (
-                    <input key={si} placeholder={`Pengganti ${si+1}`} value={s} onChange={e => {
-                      const newSub = [...b.sub]; newSub[si] = e.target.value;
-                      const newPem = [...formData.pembersih]; newPem[i] = {...b, sub: newSub};
-                      setFormData({...formData, pembersih: newPem});
-                    }} />
-                  ))}
+                  {(() => {
+                    const displaySub = [...b.sub];
+                    if (displaySub.length === 0 || displaySub[displaySub.length - 1] !== '') {
+                      displaySub.push('');
+                    }
+                    return displaySub.map((s, si) => (
+                      <input key={si} placeholder={`Pengganti ${si+1}`} value={s} onChange={e => {
+                        const newSub = [...displaySub]; 
+                        newSub[si] = e.target.value;
+                        const actualSub = [...newSub];
+                        const newPem = [...formData.pembersih]; 
+                        newPem[i] = {...b, sub: actualSub};
+                        setFormData({...formData, pembersih: newPem});
+                      }} />
+                    ));
+                  })()}
                 </div>
               </div>
             ))}
