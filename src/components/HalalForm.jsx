@@ -14,13 +14,15 @@ const HalalForm = ({ job, onClose }) => {
     photo: '',
     surveyDriveLink: '',
     location: null,
+    siHalalEmail: '',
+    siHalalPassword: '',
     bahan: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
     pembersih: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
     kemasan: Array(10).fill({ merk: '', produsen: '', sertifikat: '' })
   });
 
   const calculateProgress = (data) => {
-    let totalFields = 14; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 Drive + 1 Location
+    let totalFields = 16; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 Drive + 1 Location + 2 siHalal
     let filledFields = 0;
 
     if (data.nib) filledFields++;
@@ -37,6 +39,8 @@ const HalalForm = ({ job, onClose }) => {
     if (data.photo) filledFields++;
     if (data.surveyDriveLink) filledFields++;
     if (data.location) filledFields++;
+    if (data.siHalalEmail) filledFields++;
+    if (data.siHalalPassword) filledFields++;
 
     return Math.round((filledFields / totalFields) * 100);
   };
@@ -159,11 +163,17 @@ const HalalForm = ({ job, onClose }) => {
       </div>
 
 
-      <h3 style="background: #f3f4f6; padding: 10px;">III. TATACARA PEMBUATAN</h3>
+      <h3 style="background: #f3f4f6; padding: 10px;">III. AKUN SIHALAL (RESMI)</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr><td style="padding: 8px; font-weight: bold; width: 30%;">Email siHalal</td><td>: ${formData.siHalalEmail || '-'}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Kata Sandi</td><td>: ${formData.siHalalPassword || '-'}</td></tr>
+      </table>
+
+      <h3 style="background: #f3f4f6; padding: 10px;">IV. TATACARA PEMBUATAN</h3>
       <p style="white-space: pre-wrap; line-height: 1.6;">${formData.tatacara || '-'}</p>
 
       ${formData.photo ? `
-        <h3 style="background: #f3f4f6; padding: 10px;">IV. FOTO PRODUK</h3>
+        <h3 style="background: #f3f4f6; padding: 10px;">V. FOTO PRODUK</h3>
         <div style="text-align: center; margin-top: 20px;">
           <img src="${formData.photo}" style="max-width: 400px; border: 1px solid #ddd; padding: 5px;" />
         </div>
@@ -286,6 +296,18 @@ const HalalForm = ({ job, onClose }) => {
                 }} />
               </div>
             ))}
+          </div>
+
+          <div className="section-title mt-4">Akses Akun siHalal (Resmi)</div>
+          <div className="detail-grid glass-card p-4 mb-4" style={{ background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
+            <div className="input-group">
+              <label style={{ color: '#f59e0b' }}>Email siHalal</label>
+              <input type="email" placeholder="example@email.com" value={formData.siHalalEmail} onChange={e => setFormData({...formData, siHalalEmail: e.target.value})} />
+            </div>
+            <div className="input-group">
+              <label style={{ color: '#f59e0b' }}>Kata Sandi siHalal</label>
+              <input type="text" placeholder="Password siHalal" value={formData.siHalalPassword} onChange={e => setFormData({...formData, siHalalPassword: e.target.value})} />
+            </div>
           </div>
 
           <div className="section-title mt-4">Tatacara Pembuatan Produk</div>
