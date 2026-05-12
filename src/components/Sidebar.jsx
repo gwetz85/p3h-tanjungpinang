@@ -8,7 +8,8 @@ import {
   LogOut,
   LayoutDashboard,
   MessageCircle,
-  FileSearch
+  FileSearch,
+  X
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';

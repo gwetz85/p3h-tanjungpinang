@@ -337,21 +337,6 @@ const HalalForm = ({ job, onClose }) => {
         </div>
       </motion.div>
 
-      <style jsx>{`
-        .halal-modal { max-width: 1000px !important; max-height: 90vh; }
-        .halal-form-scroll { overflow-y: auto; padding: 1rem; flex: 1; text-align: left; background: var(--background); }
-        .section-title { font-weight: 700; color: var(--primary); margin-bottom: 1rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; }
-        .bahan-item { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
-        .bahan-main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-        .sub-data { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 1rem; align-items: center; border-top: 1px dashed var(--glass-border); padding-top: 0.5rem; font-size: 0.8rem; }
-        .photo-upload { position: relative; height: 250px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .photo-upload input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        .preview-img { max-height: 100%; border-radius: 12px; }
-        .photo-placeholder { text-align: center; color: var(--text-muted); }
-        .mt-4 { margin-top: 2rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .header-actions { display: flex; gap: 1rem; align-items: center; }
-      `}</style>
     </div>
   );
 };
