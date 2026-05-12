@@ -28,16 +28,21 @@ const CekPekerjaan = () => {
   useEffect(() => {
     const jobsRef = ref(rtdb, 'pekerjaan');
     const unsubscribe = onValue(jobsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.keys(data)
-          .map(key => ({ id: key, ...data[key] }))
-          .filter(job => job.status === 'Proses' || job.status === 'Returned');
-        setJobs(list);
-      } else {
-        setJobs([]);
+      try {
+        const data = snapshot.val();
+        if (data) {
+          const list = Object.keys(data)
+            .map(key => ({ id: key, ...data[key] }))
+            .filter(job => job.status === 'Proses' || job.status === 'Returned');
+          setJobs(list);
+        } else {
+          setJobs([]);
+        }
+      } catch (err) {
+        console.error("Error processing jobs:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -96,6 +101,12 @@ const CekPekerjaan = () => {
       const calculateTime = () => {
         const target = new Date(targetDate).getTime();
         const now = new Date().getTime();
+
+        if (isNaN(target)) {
+          setTimeLeft('Jadwal tidak valid');
+          return;
+        }
+
         const diff = target - now;
 
         if (diff <= 0) {
@@ -119,7 +130,7 @@ const CekPekerjaan = () => {
     }, [targetDate]);
 
     return (
-      <div className="countdown-badge">
+      <div className={`countdown-badge ${timeLeft === 'Waktunya Kunjungan!' ? 'urgent-glow' : ''}`}>
         <Timer size={12} /> {timeLeft}
       </div>
     );
@@ -128,8 +139,8 @@ const CekPekerjaan = () => {
 
 
   const filteredJobs = jobs.filter(job => 
-    job.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.jenisPekerjaan.toLowerCase().includes(searchTerm.toLowerCase())
+    (job.nama?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (job.jenisPekerjaan?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -151,8 +162,32 @@ const CekPekerjaan = () => {
                 <div className="job-info">
                   <span className="badge-type">{job.jenisPekerjaan}</span>
                   <h3>{job.nama}</h3>
-                  <p className="job-date">{new Date(job.tanggalInput).toLocaleDateString()}</p>
+                  <p className="job-date">
+                    {isNaN(new Date(job.tanggalInput).getTime()) 
+                      ? 'Tanggal tidak valid' 
+                      : new Date(job.tanggalInput).toLocaleDateString()}
+                  </p>
                 </div>
+                {job.jadwalKunjungan && (
+                  <div className="job-schedule">
+                    <Calendar size={16} />
+                    <div>
+                      <span className="schedule-label">Jadwal Kunjungan</span>
+                      <span>
+                        {isNaN(new Date(job.jadwalKunjungan).getTime())
+                          ? 'Jadwal tidak valid'
+                          : new Date(job.jadwalKunjungan).toLocaleString('id-ID', { 
+                              weekday: 'long',
+                              day: 'numeric', 
+                              month: 'short', 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })
+                        }
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <div className="job-progress-section">
                   <div className="progress-label"><span>Progres</span><span>{job.progress}%</span></div>
                   <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${job.progress}%` }}></div></div>

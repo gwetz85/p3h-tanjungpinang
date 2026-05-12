@@ -477,6 +477,19 @@ select option {
   border: 2px solid #022c22;
 }
 
+.urgent-glow {
+  background: #ef4444 !important;
+  color: white !important;
+  animation: urgent-pulse 1.5s infinite;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+}
+
+@keyframes urgent-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
+  50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); }
+}
+
 .modal-header .countdown-badge {
   position: static !important;
   margin: 0;
@@ -484,6 +497,34 @@ select option {
 }
 
 .job-card { position: relative !important; }
+
+.job-schedule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  color: var(--secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.job-schedule svg {
+  color: var(--secondary);
+}
+
+.schedule-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 2px;
+}
 
 /* Input Page Styles */
 .section-divider {
