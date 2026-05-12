@@ -20,7 +20,9 @@ const Layout = () => {
       <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       
       <main className="main-content" onClick={() => setIsMobileMenuOpen(false)}>
-        <Outlet />
+        <div className="layout-content-wrapper">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

@@ -41,6 +41,7 @@ body {
   border: 1px solid var(--surface-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  padding: 2rem;
 }
 
 .btn-primary {
@@ -85,9 +86,12 @@ select option {
 }
 
 .page-container {
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 2.5rem;
+  max-width: 1100px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .title-gradient {
@@ -97,6 +101,14 @@ select option {
   font-weight: 700;
   letter-spacing: -1px;
 }
+
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2.5rem;
+}
+
 /* Sidebar Styles */
 /* Sidebar Pill Style Redesign */
 .sidebar {
@@ -219,9 +231,16 @@ select option {
 .main-content { 
   flex: 1; 
   margin-left: 300px; 
-  padding: 2rem; 
+  padding: 3rem; 
   min-height: 100vh;
   transition: var(--transition);
+  display: flex;
+  justify-content: center;
+}
+
+.layout-content-wrapper {
+  width: 100%;
+  max-width: 1200px;
 }
 
 /* Responsive Adjustments */
