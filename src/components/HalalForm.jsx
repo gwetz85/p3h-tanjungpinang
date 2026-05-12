@@ -8,7 +8,7 @@ import html2canvas from 'html2canvas';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(job.halalData || {
+  const defaultData = {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
     tatacara: '',
     photo: '',
@@ -19,6 +19,21 @@ const HalalForm = ({ job, onClose }) => {
     bahan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     pembersih: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     kemasan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '' }))
+  };
+
+  const [formData, setFormData] = useState({
+    ...defaultData,
+    ...(job.halalData || {}),
+    // Deeply ensure arrays and sub-properties exist
+    bahan: (job.halalData?.bahan || defaultData.bahan).map(b => ({
+      ...b,
+      sub: b.sub || ['']
+    })),
+    pembersih: (job.halalData?.pembersih || defaultData.pembersih).map(p => ({
+      ...p,
+      sub: p.sub || ['']
+    })),
+    kemasan: (job.halalData?.kemasan || defaultData.kemasan)
   });
 
   const calculateProgress = (data) => {
@@ -51,11 +66,11 @@ const HalalForm = ({ job, onClose }) => {
       // Clean sub data: remove empty strings from sub arrays
       const cleanedBahan = formData.bahan.map(b => ({
         ...b,
-        sub: b.sub.filter(s => s && s.trim() !== '')
+        sub: (b.sub || []).filter(s => s && s.trim() !== '')
       }));
       const cleanedPembersih = formData.pembersih.map(p => ({
         ...p,
-        sub: p.sub.filter(s => s && s.trim() !== '')
+        sub: (p.sub || []).filter(s => s && s.trim() !== '')
       }));
       
       const dataToSave = {
@@ -65,11 +80,21 @@ const HalalForm = ({ job, onClose }) => {
       };
 
       const progress = calculateProgress(dataToSave);
+      
+      let newStatus = job.status; // Default keep current status
+      if (isFinal) {
+        newStatus = 'Review';
+      } else if (job.status === 'Returned') {
+        newStatus = 'Returned'; // Stay returned
+      } else {
+        newStatus = 'Proses';
+      }
+
       const updates = {
         halalData: dataToSave,
         progress: progress,
-        status: isFinal ? 'Review' : (progress >= 100 ? 'Review' : 'Proses'),
-        reviewStartedAt: (isFinal || progress >= 100) ? Date.now() : null
+        status: newStatus,
+        reviewStartedAt: (isFinal || (newStatus === 'Review' && job.status !== 'Review')) ? Date.now() : (job.reviewStartedAt || null)
       };
       
       await update(ref(rtdb, `pekerjaan/${job.id}`), updates);
@@ -268,7 +293,7 @@ const HalalForm = ({ job, onClose }) => {
                   <p>Sub Data Pengganti:</p>
                   {(() => {
                     // Always show existing sub data + 1 empty input if the last one is not empty
-                    const displaySub = [...b.sub];
+                    const displaySub = [...(b.sub || [])];
                     if (displaySub.length === 0 || displaySub[displaySub.length - 1] !== '') {
                       displaySub.push('');
                     }
@@ -303,7 +328,7 @@ const HalalForm = ({ job, onClose }) => {
                 <div className="sub-data">
                   <p>Sub Data Pengganti:</p>
                   {(() => {
-                    const displaySub = [...b.sub];
+                    const displaySub = [...(b.sub || [])];
                     if (displaySub.length === 0 || displaySub[displaySub.length - 1] !== '') {
                       displaySub.push('');
                     }
