@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer, ExternalLink, PlayCircle } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -60,7 +60,7 @@ const PendaftaranSihalal = () => {
       if (data) {
         const list = Object.keys(data)
           .map(key => ({ id: key, ...data[key] }))
-          .filter(job => job.status === 'Review');
+          .filter(job => job.status === 'Review' || job.status === 'AdminProcessing');
         setJobs(list);
       } else {
         setJobs([]);
@@ -69,6 +69,18 @@ const PendaftaranSihalal = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleStartProcess = async (jobId) => {
+    try {
+      await update(ref(rtdb, `pekerjaan/${jobId}`), { 
+        status: 'AdminProcessing',
+        adminProcessStartedAt: Date.now()
+      });
+      alert('Pekerjaan ditandai: Sedang dikerjakan. Countdown otomatis dihentikan.');
+    } catch (err) {
+      alert('Gagal memperbarui status');
+    }
+  };
 
   const handleVerify = async (jobId) => {
     if (window.confirm('Nyatakan pendaftaran ini SELESAI dan VALID?')) {
@@ -136,10 +148,15 @@ const PendaftaranSihalal = () => {
         ) : (
           filteredJobs.map((job) => (
             <motion.div key={job.id} onClick={() => setSelectedJob(job)} className="job-card glass-card">
-              {job.reviewStartedAt && <CountdownReview startTime={job.reviewStartedAt} jobId={job.id} />}
+              {job.status === 'Review' && job.reviewStartedAt && <CountdownReview startTime={job.reviewStartedAt} jobId={job.id} />}
               <div className="job-main">
                 <div className="job-info">
-                  <span className="badge-type" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>Menunggu Verifikasi</span>
+                  <span className="badge-type" style={{ 
+                    background: job.status === 'AdminProcessing' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
+                    color: job.status === 'AdminProcessing' ? '#3b82f6' : '#10b981' 
+                  }}>
+                    {job.status === 'AdminProcessing' ? 'Sedang dikerjakan' : 'Menunggu Verifikasi Admin'}
+                  </span>
                   <h3>{job.nama}</h3>
                   <p className="job-date">{job.namaUsaha || 'Nama Usaha Belum Diisi'}</p>
                 </div>
@@ -225,12 +242,24 @@ const PendaftaranSihalal = () => {
                     <FileText size={18} /> Lihat Dokumen Lengkap
                   </button>
                   
+                  {selectedJob.status === 'Review' && (
+                    <button onClick={() => handleStartProcess(selectedJob.id)} className="btn-primary-filled" style={{ gridColumn: 'span 2', marginBottom: '1rem', background: '#3b82f6' }}>
+                      <PlayCircle size={18} /> Mulai Kerjakan (Stop Timer)
+                    </button>
+                  )}
+
                   <button onClick={() => handleReturn(selectedJob.id)} className="btn-danger-outline" style={{ border: '1px solid #ef4444', color: '#ef4444' }}>
                     <XCircle size={18} /> Kembalikan ke Petugas
                   </button>
 
-                  <button onClick={() => handleVerify(selectedJob.id)} className="btn-primary-filled" style={{ background: '#10b981' }}>
-                    <CheckCircle size={18} /> Verifikasi & Selesai
+                  <button 
+                    onClick={() => handleVerify(selectedJob.id)} 
+                    className="btn-primary-filled" 
+                    style={{ background: '#10b981', opacity: selectedJob.status === 'Review' ? 0.5 : 1 }}
+                    disabled={selectedJob.status === 'Review'}
+                    title={selectedJob.status === 'Review' ? 'Klik "Mulai Kerjakan" terlebih dahulu' : 'Verifikasi Selesai'}
+                  >
+                    <CheckCircle size={18} /> Done (Selesai)
                   </button>
                 </div>
               </div>

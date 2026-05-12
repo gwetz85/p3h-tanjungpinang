@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink } from 'lucide-react';
+import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink, MapPin } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -13,6 +13,7 @@ const HalalForm = ({ job, onClose }) => {
     tatacara: '',
     photo: '',
     surveyDriveLink: '',
+    location: null,
     bahan: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
     pembersih: Array(10).fill({ merk: '', produsen: '', sertifikat: '', sub: ['', '', ''] }),
     kemasan: Array(10).fill({ merk: '', produsen: '', sertifikat: '' })
@@ -59,6 +60,26 @@ const HalalForm = ({ job, onClose }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Browser Anda tidak mendukung Geolocation');
+      return;
+    }
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setFormData({ ...formData, location: { lat: latitude, lng: longitude } });
+        setLoading(false);
+        alert('Lokasi berhasil diambil!');
+      },
+      () => {
+        setLoading(false);
+        alert('Gagal mengambil lokasi. Pastikan izin lokasi diberikan.');
+      }
+    );
   };
 
 
@@ -276,7 +297,7 @@ const HalalForm = ({ job, onClose }) => {
             <input type="file" accept="image/*" onChange={handleImageUpload} />
           </div>
 
-          <div className="input-group glass-card p-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+          <div className="input-group glass-card p-4 mb-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
             <label style={{ color: '#60a5fa', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <ExternalLink size={16} /> Link Google Drive (Foto Survey Lapangan)
             </label>
@@ -287,6 +308,25 @@ const HalalForm = ({ job, onClose }) => {
               onChange={e => setFormData({...formData, surveyDriveLink: e.target.value})}
               style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px', borderRadius: '8px' }}
             />
+          </div>
+
+          <div className="input-group glass-card p-4 mb-4" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+            <label style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <MapPin size={16} /> Titik Koordinat Verval (GPS)
+            </label>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <div style={{ flex: 1, background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', fontSize: '0.85rem', color: formData.location ? 'white' : 'rgba(255,255,255,0.3)' }}>
+                {formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : 'Lokasi Belum Diambil'}
+              </div>
+              <button 
+                type="button" 
+                onClick={handleGetLocation} 
+                className="btn-primary" 
+                style={{ padding: '10px 20px', background: '#10b981', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+              >
+                AMBIL LOKASI VERVAL
+              </button>
+            </div>
           </div>
         </div>
 
