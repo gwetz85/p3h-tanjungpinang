@@ -39,6 +39,9 @@ const Sidebar = ({ isOpen, onClose }) => {
       <div className="sidebar-brand">
         <img src="/logo-p3h.png" alt="P3H" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
         <h2 className="title-gradient">P3H TPI</h2>
+        <button onClick={onClose} className="mobile-close-btn" style={{ display: 'none', marginLeft: 'auto', background: 'none', border: 'none', color: 'white' }}>
+          <X size={24} />
+        </button>
       </div>
       
       <nav className="sidebar-nav">

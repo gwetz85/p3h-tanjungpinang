@@ -276,6 +276,9 @@ select option {
   .mobile-menu-toggle {
     display: flex;
   }
+  .mobile-close-btn {
+    display: flex !important;
+  }
 }
 
 
@@ -862,4 +865,126 @@ select option {
   text-align: center;
   font-size: 0.75rem;
   color: rgba(255,255,255,0.5);
+}
+/* Global Mobile Optimizations */
+@media (max-width: 768px) {
+  :root {
+    --radius: 12px;
+  }
+
+  .page-container {
+    padding: 1rem 0.8rem;
+  }
+
+  .main-content {
+    padding: 1rem 0.8rem;
+    padding-top: 4.5rem;
+  }
+
+  .title-gradient {
+    font-size: 1.5rem;
+  }
+
+  /* Modal Mobile Optimization */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .halal-modal {
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  .modal-header {
+    padding: 12px 16px;
+    border-radius: 0;
+  }
+
+  /* Form & Grid Mobile Optimization */
+  .form-grid, .detail-info-grid, .stats-grid, .job-list, .admin-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .input-group.full-width, .info-item.full {
+    grid-column: span 1 !important;
+  }
+
+  .bahan-main {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem !important;
+  }
+
+  .sub-data {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+    padding-left: 10px;
+    border-left: 2px solid var(--glass-border);
+  }
+
+  /* Button Mobile Optimization */
+  .modal-footer-actions, .modal-actions {
+    flex-direction: column !important;
+    gap: 0.8rem !important;
+  }
+
+  .btn-primary, .btn-primary-filled, .btn-primary-outline, .btn-danger-outline {
+    width: 100% !important;
+    padding: 14px !important;
+    justify-content: center !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* Location Section Mobile */
+  .input-group div[style*="display: flex"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .input-group button[style*="white-space: nowrap"] {
+    width: 100% !important;
+    margin-top: 8px;
+  }
+
+  /* Card Mobile */
+  .job-card {
+    padding: 1.2rem !important;
+  }
+
+  .contact-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .action-btn {
+    flex: 1;
+    height: 40px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 480px) {
+  .sidebar-brand h2 {
+    font-size: 1.1rem;
+  }
+  
+  .nav-item {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
 }
