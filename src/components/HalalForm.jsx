@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink, MapPin } from 'lucide-react';
+import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink, MapPin, Send } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -20,10 +20,9 @@ const HalalForm = ({ job, onClose }) => {
   });
 
   const calculateProgress = (data) => {
-    let totalFields = 12; // 7 Data Usaha + 3 Daftar (Bahan, Pembersih, Kemasan) + 1 Tatacara + 1 Photo
+    let totalFields = 14; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 Drive + 1 Location
     let filledFields = 0;
 
-    // Check Data Usaha (7 fields)
     if (data.nib) filledFields++;
     if (data.kbli) filledFields++;
     if (data.usahaNib) filledFields++;
@@ -31,30 +30,36 @@ const HalalForm = ({ job, onClose }) => {
     if (data.modalUsaha) filledFields++;
     if (data.lokasiUsaha) filledFields++;
     if (data.pendapatan) filledFields++;
-
-    // Check Lists (Minimal 1 item terisi)
-    if (data.bahan.some(b => b.merk || b.produsen)) filledFields++;
+    if (data.bahan.some(b => b.merk)) filledFields++;
     if (data.pembersih.some(p => p.merk)) filledFields++;
     if (data.kemasan.some(k => k.merk)) filledFields++;
-
-    // Check Tatacara & Photo
     if (data.tatacara) filledFields++;
     if (data.photo) filledFields++;
+    if (data.surveyDriveLink) filledFields++;
+    if (data.location) filledFields++;
 
     return Math.round((filledFields / totalFields) * 100);
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (isFinal = false) => {
     setLoading(true);
     try {
       const progress = calculateProgress(formData);
-      await update(ref(rtdb, `pekerjaan/${job.id}`), { 
+      const updates = {
         halalData: formData,
         progress: progress,
-        status: progress >= 100 ? 'Review' : 'Proses',
-        reviewStartedAt: progress >= 100 ? Date.now() : null
-      });
-      alert(progress >= 100 ? 'Data lengkap! Pekerjaan kini diteruskan ke Admin untuk Verifikasi (30 Menit).' : `Data Disimpan! Progres otomatis: ${progress}%`);
+        status: isFinal ? 'Review' : (progress >= 100 ? 'Review' : 'Proses'),
+        reviewStartedAt: (isFinal || progress >= 100) ? Date.now() : null
+      };
+      
+      await update(ref(rtdb, `pekerjaan/${job.id}`), updates);
+      
+      if (isFinal) {
+        alert('Data BERHASIL DIKIRIM ke Admin untuk Verifikasi!');
+        onClose();
+      } else {
+        alert(`Draft Disimpan! Progres: ${progress}%`);
+      }
     } catch (err) {
       alert('Gagal simpan: ' + err.message);
     } finally {
@@ -330,10 +335,16 @@ const HalalForm = ({ job, onClose }) => {
           </div>
         </div>
 
-        <div className="modal-actions mt-4">
-          <button onClick={handleUpdate} className="btn-primary" disabled={loading}>
-            <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Semua Data'}
+        <div className="modal-actions mt-4" style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={() => handleUpdate(false)} className="btn-primary-outline" disabled={loading} style={{ flex: 1 }}>
+            <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Draft'}
           </button>
+          
+          {calculateProgress(formData) >= 100 && (
+            <button onClick={() => handleUpdate(true)} className="btn-primary" disabled={loading} style={{ flex: 2, background: '#10b981' }}>
+              <Send size={18} /> {loading ? 'Mengirim...' : 'KIRIM KE ADMIN'}
+            </button>
+          )}
         </div>
       </motion.div>
 
