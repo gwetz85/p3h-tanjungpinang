@@ -362,11 +362,20 @@ const HalalForm = ({ job, onClose }) => {
             <Save size={18} /> {loading ? 'Menyimpan...' : 'Simpan Draft'}
           </button>
           
-          {calculateProgress(formData) >= 100 && (
-            <button onClick={() => handleUpdate(true)} className="btn-primary" disabled={loading} style={{ flex: 2, background: '#10b981' }}>
-              <Send size={18} /> {loading ? 'Mengirim...' : 'KIRIM KE ADMIN'}
-            </button>
-          )}
+          <button 
+            onClick={() => handleUpdate(true)} 
+            className="btn-primary" 
+            disabled={loading || calculateProgress(formData) < 100} 
+            style={{ 
+              flex: 2, 
+              background: calculateProgress(formData) < 100 ? '#374151' : '#10b981',
+              cursor: calculateProgress(formData) < 100 ? 'not-allowed' : 'pointer',
+              opacity: calculateProgress(formData) < 100 ? 0.6 : 1
+            }}
+            title={calculateProgress(formData) < 100 ? 'Lengkapi semua data (100%) termasuk Lokasi & Link Drive untuk mengirim' : 'Kirim ke Admin'}
+          >
+            <Send size={18} /> {loading ? 'Mengirim...' : 'KIRIM KE ADMIN'}
+          </button>
         </div>
       </motion.div>
 
