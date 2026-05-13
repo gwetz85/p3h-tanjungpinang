@@ -1230,55 +1230,184 @@ select option {
   box-shadow: none;
 }
 
-/* Kelurahan Grouping */
-.grouped-job-container {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
+/* Verification Table Styles */
+.table-wrapper {
+  padding: 0 !important;
+  overflow: hidden;
 }
 
-.kelurahan-group {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.table-container {
+  overflow-x: auto;
 }
 
-.kelurahan-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 1rem;
+.verification-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.verification-table th {
+  padding: 1.2rem 1.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
   border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.kelurahan-title {
+.verification-table td {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  vertical-align: middle;
+}
+
+.table-row {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.table-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Schedule Cell */
+.schedule-cell {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.kelurahan-title h3 {
-  font-size: 1.4rem;
+.date-time {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-time .date {
   font-weight: 700;
   color: white;
-  letter-spacing: -0.5px;
 }
 
-.kelurahan-count {
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 6px 14px;
-  border-radius: 50px;
-  color: var(--primary);
-  border: 1px solid var(--glass-border);
+.date-time .time {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
-.job-location {
+/* Applicant Cell */
+.applicant-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.applicant-cell .name {
+  font-weight: 700;
+  color: white;
+  font-size: 1rem;
+}
+
+.applicant-cell .address {
+  font-size: 0.8rem;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 4px;
+  gap: 4px;
 }
+
+/* Kelurahan Badge */
+.kelurahan-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+/* Type & Progress */
+.type-progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.job-type-small {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+}
+
+.mini-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-bar-bg {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+}
+
+.mini-progress .percent {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* Status Pill */
+.status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pill.proses { background: rgba(245, 158, 11, 0.1); color: var(--secondary); border: 1px solid rgba(245, 158, 11, 0.2); }
+.status-pill.returned { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* Table Actions */
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-table-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: white;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-table-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.italic { font-style: italic; }
+
+@media (max-width: 768px) {
+  .verification-table th:nth-child(3),
+  .verification-table td:nth-child(3) {
+    display: none;
+  }
+}
+

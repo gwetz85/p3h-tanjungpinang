@@ -4,6 +4,27 @@ import { ref, push, serverTimestamp } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { Send, User, MapPin, CreditCard, Phone, Briefcase } from 'lucide-react';
 
+const KELURAHAN_LIST = [
+  "Tanjungpinang Kota",
+  "Senggarang",
+  "Kampung Bugis",
+  "Penyengat",
+  "Tanjungpinang Barat",
+  "Kemboja",
+  "Bukit Cermin",
+  "Kampung Baru",
+  "Pinang Kencana",
+  "Air Raja",
+  "Melayu Kota Piring",
+  "Kampung Bulang",
+  "Batu IX",
+  "Tanjungpinang Timur",
+  "Sei Jang",
+  "Tanjung Unggat",
+  "Dompak",
+  "Tanjung Ayun Sakti"
+];
+
 const InputPekerjaan = () => {
   const [formData, setFormData] = useState({
     jenisPekerjaan: 'Sertifikasi Halal',
@@ -126,7 +147,16 @@ const InputPekerjaan = () => {
             </div>
             <div className="input-group">
               <label>Kelurahan</label>
-              <input type="text" placeholder="Kelurahan" value={formData.kelurahan} onChange={(e) => setFormData({...formData, kelurahan: e.target.value})} required />
+              <select 
+                value={formData.kelurahan} 
+                onChange={(e) => setFormData({...formData, kelurahan: e.target.value})} 
+                required
+              >
+                <option value="">Pilih Kelurahan</option>
+                {KELURAHAN_LIST.map(kel => (
+                  <option key={kel} value={kel}>{kel}</option>
+                ))}
+              </select>
             </div>
             <div className="input-group">
               <label>Nama Usaha</label>
