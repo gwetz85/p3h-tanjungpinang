@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2 } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2 } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -112,6 +112,19 @@ const CekPekerjaan = () => {
       setSelectedJob(null);
     } catch (err) {
       alert('Gagal set jadwal');
+    }
+  };
+
+  const handleDeleteSchedule = async (jobId) => {
+    if (window.confirm('Hapus jadwal kunjungan untuk pemohon ini?')) {
+      try {
+        await update(ref(rtdb, `pekerjaan/${jobId}`), {
+          jadwalKunjungan: null
+        });
+      } catch (err) {
+        console.error(err);
+        alert('Gagal menghapus jadwal');
+      }
     }
   };
   const Countdown = ({ targetDate }) => {
@@ -265,6 +278,11 @@ const CekPekerjaan = () => {
                         <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                           <Calendar size={16} />
                         </button>
+                        {job.jadwalKunjungan && (
+                          <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
+                            <CalendarX size={16} />
+                          </button>
+                        )}
                         {job.jenisPekerjaan === 'Sertifikasi Halal' && (
                           <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={() => { setSelectedJob(job); setShowHalal(true); }}>
                             <FileText size={16} />
