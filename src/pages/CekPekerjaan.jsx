@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2 } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -140,8 +140,18 @@ const CekPekerjaan = () => {
 
   const filteredJobs = jobs.filter(job => 
     (job.nama?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-    (job.jenisPekerjaan?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    (job.jenisPekerjaan?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (job.kelurahan?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
+
+  const groupedJobs = filteredJobs.reduce((groups, job) => {
+    const kel = job.kelurahan || 'Belum Ditentukan';
+    if (!groups[kel]) groups[kel] = [];
+    groups[kel].push(job);
+    return groups;
+  }, {});
+
+  const kelurahans = Object.keys(groupedJobs).sort();
 
   return (
     <div className="page-container">
@@ -149,70 +159,119 @@ const CekPekerjaan = () => {
         <h1 className="title-gradient">Proses & Verifikasi</h1>
       </div>
 
-      <div className="job-list">
-        {loading ? (
-          <div className="loading">Memuat...</div>
-        ) : filteredJobs.length === 0 ? (
-          <div className="empty-state glass-card">Tidak ada pekerjaan aktif.</div>
-        ) : (
-          filteredJobs.map((job) => (
-            <motion.div key={job.id} onClick={() => setSelectedJob(job)} className="job-card glass-card">
-              {job.jadwalKunjungan && <Countdown targetDate={job.jadwalKunjungan} />}
-              <div className="job-main">
-                <div className="job-info">
-                  <span className="badge-type">{job.jenisPekerjaan}</span>
-                  <h3>{job.nama}</h3>
-                  <p className="job-date">
-                    {isNaN(new Date(job.tanggalInput).getTime()) 
-                      ? 'Tanggal tidak valid' 
-                      : new Date(job.tanggalInput).toLocaleDateString()}
-                  </p>
-                </div>
-                {job.jadwalKunjungan && (
-                  <div className="job-schedule">
-                    <Calendar size={16} />
-                    <div>
-                      <span className="schedule-label">Jadwal Kunjungan</span>
-                      <span>
-                        {isNaN(new Date(job.jadwalKunjungan).getTime())
-                          ? 'Jadwal tidak valid'
-                          : new Date(job.jadwalKunjungan).toLocaleString('id-ID', { 
-                              weekday: 'long',
-                              day: 'numeric', 
-                              month: 'short', 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })
-                        }
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <div className="job-progress-section">
-                  <div className="progress-label"><span>Progres</span><span>{job.progress}%</span></div>
-                  <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${job.progress}%` }}></div></div>
-                </div>
-              </div>
-              <div className="job-footer">
-                <span className={`status-badge ${job.status === 'Returned' ? 'text-danger' : ''}`}>
-                  {job.status === 'Returned' ? <X size={14} /> : <Clock size={14} />} 
-                  {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
-                </span>
-                <div className="job-actions" style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn-icon text-accent" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
-                    <Calendar size={18} />
-                  </button>
-                  {job.jenisPekerjaan === 'Sertifikasi Halal' && (
-                    <button className="btn-icon text-primary" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowHalal(true); }}>
-                      <FileText size={18} />
-                    </button>
-                  )}
-                  <button className="btn-icon"><Info size={18} /></button>
-                </div>
-              </div>
-            </motion.div>
-          ))
+      <div className="stats-summary-grid">
+        <div className="stat-summary-card glass-card">
+          <div className="stat-summary-info">
+            <span className="stat-summary-label">Total Pekerjaan</span>
+            <h2 className="stat-summary-value">{filteredJobs.length}</h2>
+          </div>
+          <div className="stat-summary-icon text-primary"><CheckCircle2 size={24} /></div>
+        </div>
+        <div className="stat-summary-card glass-card">
+          <div className="stat-summary-info">
+            <span className="stat-summary-label">Total Kelurahan</span>
+            <h2 className="stat-summary-value">{kelurahans.length}</h2>
+          </div>
+          <div className="stat-summary-icon text-accent"><MapPin size={24} /></div>
+        </div>
+      </div>
 
+      <div className="search-section">
+        <div className="search-bar glass-card">
+          <Search size={20} className="text-muted" />
+          <input 
+            type="text" 
+            placeholder="Cari nama, jenis pekerjaan, atau kelurahan..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && <button onClick={() => setSearchTerm('')} className="btn-icon"><X size={18} /></button>}
+        </div>
+      </div>
+
+      <div className="grouped-job-container">
+        {loading ? (
+          <div className="loading">Memuat data...</div>
+        ) : filteredJobs.length === 0 ? (
+          <div className="empty-state glass-card">Tidak ada pekerjaan aktif yang ditemukan.</div>
+        ) : (
+          kelurahans.map((kel) => (
+            <div key={kel} className="kelurahan-group">
+              <div className="kelurahan-header">
+                <div className="kelurahan-title">
+                  <MapPin size={18} className="text-primary" />
+                  <h3>Kelurahan {kel}</h3>
+                </div>
+                <span className="kelurahan-count">{groupedJobs[kel].length} Pekerjaan</span>
+              </div>
+              <div className="job-list">
+                {groupedJobs[kel].map((job) => (
+                  <motion.div 
+                    key={job.id} 
+                    layoutId={job.id}
+                    onClick={() => setSelectedJob(job)} 
+                    className="job-card glass-card"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {job.jadwalKunjungan && <Countdown targetDate={job.jadwalKunjungan} />}
+                    <div className="job-main">
+                      <div className="job-info">
+                        <span className="badge-type">{job.jenisPekerjaan}</span>
+                        <h3>{job.nama}</h3>
+                        <p className="job-location"><MapPin size={12} /> {job.alamat}</p>
+                      </div>
+                      
+                      {job.jadwalKunjungan && (
+                        <div className="job-schedule">
+                          <Calendar size={16} />
+                          <div>
+                            <span className="schedule-label">Jadwal Kunjungan</span>
+                            <span>
+                              {new Date(job.jadwalKunjungan).toLocaleString('id-ID', { 
+                                day: 'numeric', 
+                                month: 'short', 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="job-progress-section">
+                        <div className="progress-label">
+                          <span>Progres</span>
+                          <span>{job.progress}%</span>
+                        </div>
+                        <div className="progress-bar-bg">
+                          <div className="progress-bar-fill" style={{ width: `${job.progress}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="job-footer">
+                      <span className={`status-badge ${job.status === 'Returned' ? 'text-danger' : ''}`}>
+                        {job.status === 'Returned' ? <X size={14} /> : <Clock size={14} />} 
+                        {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
+                      </span>
+                      <div className="job-actions">
+                        <button className="btn-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                          <Calendar size={18} />
+                        </button>
+                        {job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                          <button className="btn-icon text-primary" title="Isi Form Halal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowHalal(true); }}>
+                            <FileText size={18} />
+                          </button>
+                        )}
+                        <button className="btn-icon" title="Detail"><Info size={18} /></button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          ))
         )}
       </div>
 

@@ -1170,3 +1170,115 @@ select option {
     align-self: flex-end;
   }
 }
+
+/* Stats Summary Grid */
+.stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-summary-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem !important;
+  border-left: 4px solid var(--primary);
+}
+
+.stat-summary-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-summary-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-summary-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+}
+
+/* Search Section */
+.search-section {
+  margin-bottom: 2.5rem;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.5rem 1.5rem !important;
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  padding: 12px 0;
+  box-shadow: none;
+}
+
+.search-bar input:focus {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Kelurahan Grouping */
+.grouped-job-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.kelurahan-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.kelurahan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.kelurahan-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kelurahan-title h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+}
+
+.kelurahan-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 14px;
+  border-radius: 50px;
+  color: var(--primary);
+  border: 1px solid var(--glass-border);
+}
+
+.job-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
