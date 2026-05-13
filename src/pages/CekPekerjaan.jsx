@@ -115,6 +115,17 @@ const CekPekerjaan = () => {
     }
   };
 
+  const handleDOBChange = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    setSelectedJob({ ...selectedJob, tanggalLahir: dob, usia: age > 0 ? age : 0 });
+  };
+
   const handleDeleteSchedule = async (jobId) => {
     if (window.confirm('Hapus jadwal kunjungan untuk pemohon ini?')) {
       try {
@@ -450,6 +461,23 @@ const CekPekerjaan = () => {
                             ))}
                           </select>
                         </div>
+                        <div className="input-group"><label>Tempat Lahir</label><input type="text" value={selectedJob.tempatLahir || ''} onChange={(e) => setSelectedJob({...selectedJob, tempatLahir: e.target.value})} /></div>
+                        <div className="input-group">
+                          <label>Tanggal Lahir & Usia</label>
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <input type="date" value={selectedJob.tanggalLahir || ''} onChange={(e) => handleDOBChange(e.target.value)} style={{ flex: 2 }} />
+                            <input type="text" value={selectedJob.usia ? `${selectedJob.usia} Thn` : ''} readOnly style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.05)' }} />
+                          </div>
+                        </div>
+                        <div className="input-group">
+                          <label>Jenis Usaha</label>
+                          <select value={selectedJob.jenisUsaha || 'Makanan'} onChange={(e) => setSelectedJob({...selectedJob, jenisUsaha: e.target.value})}>
+                            <option value="Makanan">Makanan</option>
+                            <option value="Minuman">Minuman</option>
+                          </select>
+                        </div>
+                        <div className="input-group"><label>Tahun Berdiri</label><input type="number" value={selectedJob.tahunBerdiri || ''} onChange={(e) => setSelectedJob({...selectedJob, tahunBerdiri: e.target.value})} /></div>
+                        <div className="input-group" style={{ gridColumn: 'span 2' }}><label>Alamat Usaha</label><input type="text" value={selectedJob.alamatUsaha || ''} onChange={(e) => setSelectedJob({...selectedJob, alamatUsaha: e.target.value})} /></div>
                       </div>
                     </div>
                   )}

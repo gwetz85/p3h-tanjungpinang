@@ -2,9 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer, ExternalLink, PlayCircle } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, Timer, ExternalLink, PlayCircle, Edit3 } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
+
+const KELURAHAN_LIST = [
+  "Tanjungpinang Kota",
+  "Senggarang",
+  "Kampung Bugis",
+  "Penyengat",
+  "Tanjungpinang Barat",
+  "Kemboja",
+  "Bukit Cermin",
+  "Kampung Baru",
+  "Pinang Kencana",
+  "Air Raja",
+  "Melayu Kota Piring",
+  "Kampung Bulang",
+  "Batu IX",
+  "Tanjungpinang Timur",
+  "Sei Jang",
+  "Tanjung Unggat",
+  "Dompak",
+  "Tanjung Ayun Sakti"
+];
 
 const CountdownReview = ({ startTime, jobId }) => {
   const [timeLeft, setTimeLeft] = useState('');
@@ -52,6 +73,7 @@ const PendaftaranSihalal = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showHalal, setShowHalal] = useState(false);
   const [adminNote, setAdminNote] = useState('');
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const jobsRef = ref(rtdb, 'pekerjaan');
@@ -114,6 +136,32 @@ const PendaftaranSihalal = () => {
       } catch (err) {
         alert('Gagal mengembalikan data');
       }
+    }
+  };
+
+  const handleDOBChange = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    setSelectedJob({ ...selectedJob, tanggalLahir: dob, usia: age > 0 ? age : 0 });
+  };
+
+  const handleUpdateJob = async (e) => {
+    e.preventDefault();
+    try {
+      const jobRef = ref(rtdb, `pekerjaan/${selectedJob.id}`);
+      const updateData = { ...selectedJob };
+      delete updateData.id;
+      
+      await update(jobRef, updateData);
+      setEditMode(false);
+      alert('Data berhasil diperbarui!');
+    } catch (err) {
+      alert('Gagal memperbarui data');
     }
   };
 
@@ -184,84 +232,140 @@ const PendaftaranSihalal = () => {
               </div>
 
               <div className="job-detail-modern p-6">
-                <div className="detail-header-section mb-6">
-                  <h2 className="title-gradient">{selectedJob.nama}</h2>
-                  <p className="text-muted">{selectedJob.nik}</p>
-                </div>
-
-                <div className="detail-info-grid mb-6">
-                  <div className="info-item">
-                    <label>Nama Usaha</label>
-                    <p>{selectedJob.halalData?.namaUsaha || selectedJob.namaUsaha}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>NIB</label>
-                    <p>{selectedJob.halalData?.nib || '-'}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>Kontak</label>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <p>{selectedJob.wa}</p>
-                      <a href={`https://wa.me/${selectedJob.wa.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-primary"><MessageSquare size={16} /></a>
+                {!editMode ? (
+                  <>
+                    <div className="detail-header-section mb-6">
+                      <h2 className="title-gradient">{selectedJob.nama}</h2>
+                      <p className="text-muted">{selectedJob.nik}</p>
                     </div>
-                  </div>
-                  <div className="info-item">
-                    <label>Wilayah</label>
-                    <p>{selectedJob.kelurahan || '-'}</p>
-                  </div>
-                </div>
 
-                {selectedJob.halalData?.surveyDriveLink && (
-                  <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                    <label style={{ color: '#60a5fa', marginBottom: '8px', display: 'block' }}>Link Foto Survey Lapangan</label>
-                    <a 
-                      href={selectedJob.halalData.surveyDriveLink} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="btn-primary-outline"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid #3b82f6', color: 'white' }}
-                    >
-                      <ExternalLink size={18} /> Buka Google Drive Survey
-                    </a>
-                  </div>
+                    <div className="detail-info-grid mb-6">
+                      <div className="info-item">
+                        <label>Nama Usaha</label>
+                        <p>{selectedJob.halalData?.namaUsaha || selectedJob.namaUsaha}</p>
+                      </div>
+                      <div className="info-item">
+                        <label>NIB</label>
+                        <p>{selectedJob.halalData?.nib || '-'}</p>
+                      </div>
+                      <div className="info-item">
+                        <label>Kontak</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <p>{selectedJob.wa}</p>
+                          <a href={`https://wa.me/${selectedJob.wa.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-primary"><MessageSquare size={16} /></a>
+                        </div>
+                      </div>
+                      <div className="info-item">
+                        <label>Wilayah</label>
+                        <p>{selectedJob.kelurahan || '-'}</p>
+                      </div>
+                    </div>
+
+                    {selectedJob.halalData?.surveyDriveLink && (
+                      <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                        <label style={{ color: '#60a5fa', marginBottom: '8px', display: 'block' }}>Link Foto Survey Lapangan</label>
+                        <a 
+                          href={selectedJob.halalData.surveyDriveLink} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="btn-primary-outline"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', background: 'rgba(59, 130, 246, 0.2)', border: '1px solid #3b82f6', color: 'white' }}
+                        >
+                          <ExternalLink size={18} /> Buka Google Drive Survey
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="action-box glass-card p-4 mb-6" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      <label className="mb-2 block text-sm font-bold text-accent">Catatan Admin / Alasan Pengembalian</label>
+                      <textarea 
+                        className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white text-sm"
+                        rows="3"
+                        placeholder="Contoh: Lampiran foto kurang jelas, harap upload ulang..."
+                        value={adminNote}
+                        onChange={(e) => setAdminNote(e.target.value)}
+                      ></textarea>
+                    </div>
+
+                    <div className="modal-footer-actions" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                      <button onClick={() => setShowHalal(true)} className="btn-primary-outline" style={{ gridColumn: 'span 2', marginBottom: '1rem' }}>
+                        <FileText size={18} /> Lihat Dokumen Lengkap
+                      </button>
+                      
+                      {role === 'Admin' && (
+                        <button onClick={() => setEditMode(true)} className="btn-primary-outline" style={{ gridColumn: 'span 2', marginBottom: '1rem', border: '1px solid #f59e0b', color: '#f59e0b' }}>
+                          <Edit3 size={18} /> Edit Data Pekerjaan
+                        </button>
+                      )}
+
+                      {selectedJob.status === 'Review' && (
+                        <button onClick={() => handleStartProcess(selectedJob.id)} className="btn-primary-filled" style={{ gridColumn: 'span 2', marginBottom: '1rem', background: '#3b82f6' }}>
+                          <PlayCircle size={18} /> Mulai Kerjakan (Stop Timer)
+                        </button>
+                      )}
+
+                      <button onClick={() => handleReturn(selectedJob.id)} className="btn-danger-outline" style={{ border: '1px solid #ef4444', color: '#ef4444' }}>
+                        <XCircle size={18} /> Kembalikan ke Petugas
+                      </button>
+
+                      <button 
+                        onClick={() => handleVerify(selectedJob.id)} 
+                        className="btn-primary-filled" 
+                        style={{ background: '#10b981', opacity: selectedJob.status === 'Review' ? 0.5 : 1 }}
+                        disabled={selectedJob.status === 'Review'}
+                        title={selectedJob.status === 'Review' ? 'Klik "Mulai Kerjakan" terlebih dahulu' : 'Verifikasi Selesai'}
+                      >
+                        <CheckCircle size={18} /> Done (Selesai)
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <form onSubmit={handleUpdateJob} className="edit-form">
+                    <div className="admin-edit-section glass-card p-4 mb-6">
+                      <h4 className="mb-4 text-accent">Edit Informasi Utama</h4>
+                      <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                        <div className="input-group"><label>Nama</label><input type="text" value={selectedJob.nama} onChange={(e) => setSelectedJob({...selectedJob, nama: e.target.value})} /></div>
+                        <div className="input-group"><label>NIK</label><input type="text" value={selectedJob.nik} onChange={(e) => setSelectedJob({...selectedJob, nik: e.target.value})} /></div>
+                        <div className="input-group"><label>WhatsApp</label><input type="text" value={selectedJob.wa} onChange={(e) => setSelectedJob({...selectedJob, wa: e.target.value})} /></div>
+                        <div className="input-group"><label>Alamat</label><input type="text" value={selectedJob.alamat} onChange={(e) => setSelectedJob({...selectedJob, alamat: e.target.value})} /></div>
+                        <div className="input-group"><label>Nama Usaha</label><input type="text" value={selectedJob.namaUsaha} onChange={(e) => setSelectedJob({...selectedJob, namaUsaha: e.target.value})} /></div>
+                        <div className="input-group">
+                          <label>Kelurahan</label>
+                          <select 
+                            value={selectedJob.kelurahan} 
+                            onChange={(e) => setSelectedJob({...selectedJob, kelurahan: e.target.value})}
+                          >
+                            <option value="">Pilih Kelurahan</option>
+                            {KELURAHAN_LIST.map(kel => (
+                              <option key={kel} value={kel}>{kel}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="input-group"><label>Tempat Lahir</label><input type="text" value={selectedJob.tempatLahir || ''} onChange={(e) => setSelectedJob({...selectedJob, tempatLahir: e.target.value})} /></div>
+                        <div className="input-group">
+                          <label>Tanggal Lahir & Usia</label>
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <input type="date" value={selectedJob.tanggalLahir || ''} onChange={(e) => handleDOBChange(e.target.value)} style={{ flex: 2 }} />
+                            <input type="text" value={selectedJob.usia ? `${selectedJob.usia} Thn` : ''} readOnly style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.05)' }} />
+                          </div>
+                        </div>
+                        <div className="input-group">
+                          <label>Jenis Usaha</label>
+                          <select value={selectedJob.jenisUsaha || 'Makanan'} onChange={(e) => setSelectedJob({...selectedJob, jenisUsaha: e.target.value})}>
+                            <option value="Makanan">Makanan</option>
+                            <option value="Minuman">Minuman</option>
+                          </select>
+                        </div>
+                        <div className="input-group"><label>Tahun Berdiri</label><input type="number" value={selectedJob.tahunBerdiri || ''} onChange={(e) => setSelectedJob({...selectedJob, tahunBerdiri: e.target.value})} /></div>
+                        <div className="input-group" style={{ gridColumn: 'span 2' }}><label>Alamat Usaha</label><input type="text" value={selectedJob.alamatUsaha || ''} onChange={(e) => setSelectedJob({...selectedJob, alamatUsaha: e.target.value})} /></div>
+                      </div>
+                    </div>
+                    <div className="modal-actions" style={{ display: 'flex', gap: '10px' }}>
+                      <button type="button" onClick={() => setEditMode(false)} className="btn-secondary" style={{ flex: 1 }}>Batal</button>
+                      <button type="submit" className="btn-primary" style={{ flex: 1 }}>Simpan Perubahan</button>
+                    </div>
+                  </form>
                 )}
-
-                <div className="action-box glass-card p-4 mb-6" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                  <label className="mb-2 block text-sm font-bold text-accent">Catatan Admin / Alasan Pengembalian</label>
-                  <textarea 
-                    className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white text-sm"
-                    rows="3"
-                    placeholder="Contoh: Lampiran foto kurang jelas, harap upload ulang..."
-                    value={adminNote}
-                    onChange={(e) => setAdminNote(e.target.value)}
-                  ></textarea>
-                </div>
-
-                <div className="modal-footer-actions" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                   <button onClick={() => setShowHalal(true)} className="btn-primary-outline" style={{ gridColumn: 'span 2', marginBottom: '1rem' }}>
-                    <FileText size={18} /> Lihat Dokumen Lengkap
-                  </button>
-                  
-                  {selectedJob.status === 'Review' && (
-                    <button onClick={() => handleStartProcess(selectedJob.id)} className="btn-primary-filled" style={{ gridColumn: 'span 2', marginBottom: '1rem', background: '#3b82f6' }}>
-                      <PlayCircle size={18} /> Mulai Kerjakan (Stop Timer)
-                    </button>
-                  )}
-
-                  <button onClick={() => handleReturn(selectedJob.id)} className="btn-danger-outline" style={{ border: '1px solid #ef4444', color: '#ef4444' }}>
-                    <XCircle size={18} /> Kembalikan ke Petugas
-                  </button>
-
-                  <button 
-                    onClick={() => handleVerify(selectedJob.id)} 
-                    className="btn-primary-filled" 
-                    style={{ background: '#10b981', opacity: selectedJob.status === 'Review' ? 0.5 : 1 }}
-                    disabled={selectedJob.status === 'Review'}
-                    title={selectedJob.status === 'Review' ? 'Klik "Mulai Kerjakan" terlebih dahulu' : 'Verifikasi Selesai'}
-                  >
-                    <CheckCircle size={18} /> Done (Selesai)
-                  </button>
-                </div>
               </div>
             </motion.div>
           </div>
