@@ -114,7 +114,6 @@ const CekPekerjaan = () => {
       alert('Gagal set jadwal');
     }
   };
-
   const Countdown = ({ targetDate }) => {
     const [timeLeft, setTimeLeft] = useState('');
 
@@ -122,31 +121,25 @@ const CekPekerjaan = () => {
       const calculateTime = () => {
         const target = new Date(targetDate).getTime();
         const now = new Date().getTime();
-
         if (isNaN(target)) {
           setTimeLeft('Jadwal tidak valid');
           return;
         }
-
         const diff = target - now;
-
         if (diff <= 0) {
           setTimeLeft('Waktunya Kunjungan!');
           return;
         }
-
         const d = Math.floor(diff / (1000 * 60 * 60 * 24));
         const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((diff % (1000 * 60)) / 1000);
-
         const pad = (num) => String(num).padStart(2, '0');
         setTimeLeft(`${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`);
       };
 
       calculateTime();
-      const timer = setInterval(calculateTime, 1000); // Update setiap detik untuk format SS
-
+      const timer = setInterval(calculateTime, 1000);
       return () => clearInterval(timer);
     }, [targetDate]);
 
@@ -156,8 +149,6 @@ const CekPekerjaan = () => {
       </div>
     );
   };
-
-
 
   const filteredJobs = jobs.filter(job => 
     (job.nama?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -241,7 +232,6 @@ const CekPekerjaan = () => {
                               {new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <Countdown targetDate={job.jadwalKunjungan} />
                         </div>
                       ) : (
                         <span className="text-muted italic">Belum diset</span>
