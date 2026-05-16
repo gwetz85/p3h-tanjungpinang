@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
-import { ref, push, onValue, remove } from 'firebase/database';
+import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { UserPlus, Trash2, User, Phone, MapPin } from 'lucide-react';
+import { UserPlus, Trash2, User, Phone, MapPin, Edit3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const DataKoordinator = () => {
@@ -10,6 +10,7 @@ const DataKoordinator = () => {
   const [coordinators, setCoordinators] = useState([]);
   const [formData, setFormData] = useState({ nama: '', phone: '', wilayah: '' });
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     const coordRef = ref(rtdb, 'koordinators');
@@ -29,7 +30,12 @@ const DataKoordinator = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await push(ref(rtdb, 'koordinators'), formData);
+      if (editingId) {
+        await update(ref(rtdb, `koordinators/${editingId}`), formData);
+        setEditingId(null);
+      } else {
+        await push(ref(rtdb, 'koordinators'), formData);
+      }
       setFormData({ nama: '', phone: '', wilayah: '' });
     } catch (err) {
       console.error(err);
@@ -44,6 +50,11 @@ const DataKoordinator = () => {
     }
   };
 
+  const handleEdit = (coord) => {
+    setFormData({ nama: coord.nama, phone: coord.phone, wilayah: coord.wilayah });
+    setEditingId(coord.id);
+  };
+
   return (
     <div className="page-container">
       <h1 className="title-gradient mb-8">Data Petugas Lapangan</h1>
@@ -55,13 +66,13 @@ const DataKoordinator = () => {
               <th><User size={16} /> Nama Petugas</th>
               <th><Phone size={16} /> No. WhatsApp</th>
               <th><MapPin size={16} /> Wilayah Kerja</th>
-              {role === 'Admin' && <th style={{ textAlign: 'center' }}>Aksi</th>}
+              {['Admin', 'superadmin'].includes(role) && <th style={{ textAlign: 'center' }}>Aksi</th>}
             </tr>
           </thead>
           <tbody>
             {coordinators.length === 0 ? (
               <tr>
-                <td colSpan={role === 'Admin' ? 4 : 3} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
+                <td colSpan={['Admin', 'superadmin'].includes(role) ? 4 : 3} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
                   Belum ada data petugas lapangan.
                 </td>
               </tr>
@@ -71,8 +82,13 @@ const DataKoordinator = () => {
                   <td><strong>{coord.nama}</strong></td>
                   <td>{coord.phone}</td>
                   <td>{coord.wilayah}</td>
-                  {role === 'Admin' && (
+                  {['Admin', 'superadmin'].includes(role) && (
                     <td style={{ textAlign: 'center' }}>
+                      {role === 'superadmin' && (
+                        <button onClick={() => handleEdit(coord)} className="btn-icon text-accent" title="Edit" style={{ marginRight: '0.5rem' }}>
+                          <Edit3 size={18} />
+                        </button>
+                      )}
                       <button onClick={() => handleDelete(coord.id)} className="btn-delete" title="Hapus">
                         <Trash2 size={18} />
                       </button>
@@ -85,9 +101,14 @@ const DataKoordinator = () => {
         </table>
       </div>
 
-      {role === 'Admin' && (
+      {['Admin', 'superadmin'].includes(role) && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="form-card glass-card mt-8" style={{ maxWidth: '600px' }}>
-          <h3 className="mb-4">Tambah Petugas Baru</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0 }}>{editingId ? 'Edit Data Petugas' : 'Tambah Petugas Baru'}</h3>
+            {editingId && (
+              <button onClick={() => { setEditingId(null); setFormData({ nama: '', phone: '', wilayah: '' }); }} className="text-muted" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Batal</button>
+            )}
+          </div>
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="input-group" style={{ gridColumn: 'span 2' }}>
               <label><User size={14} /> Nama Lengkap</label>
@@ -102,7 +123,7 @@ const DataKoordinator = () => {
               <input type="text" value={formData.wilayah} onChange={(e) => setFormData({...formData, wilayah: e.target.value})} required />
             </div>
             <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', marginTop: '0.5rem' }} disabled={loading}>
-              <UserPlus size={18} /> {loading ? 'Menyimpan...' : 'Simpan Data Petugas'}
+              <UserPlus size={18} /> {loading ? 'Menyimpan...' : (editingId ? 'Update Data Petugas' : 'Simpan Data Petugas')}
             </button>
           </form>
         </motion.div>
