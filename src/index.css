@@ -113,14 +113,18 @@ select option {
 /* Sidebar Pill Style Redesign */
 .sidebar {
   width: 260px;
-  height: calc(100vh - 40px);
+  height: 100vh;
   position: fixed;
-  left: 20px;
-  top: 20px;
+  left: 0;
+  top: 0;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
   z-index: 100;
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
 }
 
 .sidebar-brand {
@@ -231,8 +235,8 @@ select option {
 .layout { display: flex; min-height: 100vh; width: 100%; }
 .main-content { 
   flex: 1; 
-  margin-left: 280px; 
-  padding: 2rem; 
+  margin-left: 260px; 
+  padding: 90px 2rem 2rem 2rem; 
   min-height: 100vh;
   transition: var(--transition);
   display: flex;
@@ -256,7 +260,7 @@ select option {
   .main-content {
     margin-left: 0;
     padding: 1.5rem;
-    padding-top: 5rem;
+    padding-top: 120px;
   }
 }
 
@@ -1439,9 +1443,22 @@ select option {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  margin-bottom: 2rem;
-  position: relative;
-  z-index: 10;
+  margin-bottom: 0;
+  position: fixed;
+  top: 0;
+  left: 260px;
+  right: 0;
+  height: 70px;
+  border-radius: 0;
+  border-top: none;
+  border-right: none;
+  z-index: 99;
+}
+
+@media (max-width: 1024px) {
+  .topbar {
+    left: 0;
+  }
 }
 
 .topbar-left {
@@ -1535,6 +1552,9 @@ select option {
     padding: 1rem;
     align-items: center;
     text-align: center;
+    height: auto;
+    position: relative;
+    left: 0;
   }
   
   .topbar-datetime {
