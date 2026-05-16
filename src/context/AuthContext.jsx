@@ -10,6 +10,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [role, setRole] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sessionKicked, setSessionKicked] = useState(false);
 
@@ -26,12 +27,14 @@ export const AuthProvider = ({ children }) => {
         roleUnsubscribe = onValue(userRef, async (snapshot) => {
           if (user.email === 'admin@tarunabangsa.id') {
             setRole('superadmin');
+            if (snapshot.exists()) setUserData(snapshot.val());
             setLoading(false);
             return;
           }
           
           if (snapshot.exists()) {
             setRole(snapshot.val().role);
+            setUserData(snapshot.val());
             setLoading(false);
           } else {
             // Check by Email (for pre-registered users)
@@ -74,6 +77,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setCurrentUser(null);
         setRole(null);
+        setUserData(null);
         setLoading(false);
       }
     });
@@ -88,6 +92,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     role,
+    userData,
     loading,
     sessionKicked,
     clearSessionKicked: () => setSessionKicked(false)
