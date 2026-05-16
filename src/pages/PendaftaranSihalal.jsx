@@ -166,7 +166,6 @@ const PendaftaranSihalal = () => {
               </div>
 
               <div className="job-detail-modern p-6">
-                {!editMode ? (
                   <>
                     <div className="detail-header-section mb-6">
                       <h2 className="title-gradient">{selectedJob.nama}</h2>
@@ -247,7 +246,6 @@ const PendaftaranSihalal = () => {
                       </button>
                     </div>
                   </>
-}
               </div>
             </motion.div>
           </div>
