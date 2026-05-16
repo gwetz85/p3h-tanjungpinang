@@ -24,6 +24,12 @@ export const AuthProvider = ({ children }) => {
         // Listen to role changes in real-time
         const userRef = ref(rtdb, `users/${user.uid}`);
         roleUnsubscribe = onValue(userRef, async (snapshot) => {
+          if (user.email === 'admin@tarunabangsa.id') {
+            setRole('superadmin');
+            setLoading(false);
+            return;
+          }
+          
           if (snapshot.exists()) {
             setRole(snapshot.val().role);
             setLoading(false);

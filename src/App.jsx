@@ -81,27 +81,27 @@ function App() {
             <Route index element={<Dashboard />} />
             
             <Route path="koordinator" element={
-              <ProtectedRoute allowedRoles={['Admin', 'Petugas']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
                 <DataKoordinator />
               </ProtectedRoute>
             } />
 
 
             <Route path="users" element={
-              <ProtectedRoute allowedRoles={['Admin']}>
+              <ProtectedRoute allowedRoles={['superadmin']}>
                 <DataUser />
               </ProtectedRoute>
             } />
 
             
             <Route path="input" element={
-              <ProtectedRoute allowedRoles={['Admin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
                 <InputPekerjaan />
               </ProtectedRoute>
             } />
 
             <Route path="pendaftaran" element={
-              <ProtectedRoute allowedRoles={['Admin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
                 <PendaftaranSihalal />
               </ProtectedRoute>
             } />

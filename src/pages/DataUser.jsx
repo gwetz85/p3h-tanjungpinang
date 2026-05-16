@@ -20,7 +20,7 @@ const DataUser = () => {
       if (data) {
         const list = Object.entries(data)
           .map(([id, val]) => ({ id, ...val }))
-          .filter(user => user.email !== 'admin@tarunabangsa.id');
+          .filter(user => user.email !== 'admin@tarunabangsa.id' && user.role !== 'superadmin');
         setUsers(list);
       } else {
         setUsers([]);

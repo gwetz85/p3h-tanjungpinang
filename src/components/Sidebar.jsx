@@ -24,15 +24,14 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const navItems = [
-    { name: 'Ringkasan', path: '/', icon: LayoutDashboard, roles: ['Admin', 'Petugas', 'Monitoring'] },
-    { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['Admin', 'Petugas'] },
-
-    { name: 'Manajemen User', path: '/users', icon: Users, roles: ['Admin'] },
-    { name: 'Input Pekerjaan', path: '/input', icon: PlusSquare, roles: ['Admin'] },
-    { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['Admin', 'Petugas', 'Monitoring'] },
-    { name: 'Pendaftaran SIHALAL', path: '/pendaftaran', icon: FileSearch, roles: ['Admin'] },
-    { name: 'Riwayat Selesai', path: '/selesai', icon: History, roles: ['Admin', 'Petugas', 'Monitoring'] },
-    { name: 'Pesan', path: '/chat', icon: MessageCircle, roles: ['Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Ringkasan', path: '/', icon: LayoutDashboard, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
+    { name: 'Manajemen User', path: '/users', icon: Users, roles: ['superadmin'] },
+    { name: 'Input Pekerjaan', path: '/input', icon: PlusSquare, roles: ['superadmin', 'Admin'] },
+    { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Pendaftaran SIHALAL', path: '/pendaftaran', icon: FileSearch, roles: ['superadmin', 'Admin'] },
+    { name: 'Riwayat Selesai', path: '/selesai', icon: History, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Pesan', path: '/chat', icon: MessageCircle, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
   ];
 
   return (
