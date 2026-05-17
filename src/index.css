@@ -1452,6 +1452,9 @@ select option {
   border-radius: 0;
   border-top: none;
   border-right: none;
+  background: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e2e8f0;
   z-index: 99;
 }
 
@@ -1468,12 +1471,9 @@ select option {
 
 .topbar-title {
   font-size: 1.25rem;
-  font-weight: 700;
-  color: white;
+  font-weight: 800;
+  color: var(--primary);
   margin: 0;
-  background: linear-gradient(to right, #fff, #a7f3d0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .topbar-center {
@@ -1483,14 +1483,10 @@ select option {
 }
 
 .topbar-datetime {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--primary);
-  padding: 8px 16px;
-  border-radius: 30px;
+  color: #475569;
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 0.5px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .topbar-right {
@@ -1502,16 +1498,12 @@ select option {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 6px 12px;
-  border-radius: 50px;
-  border: 1px solid var(--glass-border);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .user-info:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.8;
 }
 
 .user-dropdown {
@@ -1572,13 +1564,13 @@ select option {
 .user-name {
   font-weight: 700;
   font-size: 0.9rem;
-  color: white;
+  color: #1e293b;
   line-height: 1.2;
 }
 
 .user-role {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -1589,9 +1581,6 @@ select option {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 50%;
-  padding: 2px;
 }
 
 @media (max-width: 768px) {
@@ -1608,7 +1597,6 @@ select option {
   
   .topbar-datetime {
     font-size: 0.8rem;
-    padding: 6px 12px;
   }
 
   .user-details {
