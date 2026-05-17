@@ -146,7 +146,11 @@ const DataKoordinator = () => {
                       <strong>{coord.nama}</strong>
                     </div>
                   </td>
-                  <td>{coord.phone}</td>
+                  <td>
+                    <a href={`https://wa.me/${coord.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ color: '#10b981', textDecoration: 'none', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      {coord.phone}
+                    </a>
+                  </td>
                   <td>{coord.wilayah}</td>
                   {['Admin', 'superadmin'].includes(role) && (
                     <td style={{ textAlign: 'center' }}>
@@ -187,7 +191,9 @@ const DataKoordinator = () => {
                 <div style={{ flex: 1 }}>
                   <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: 'white' }}>{coord.nama}</h4>
                   <div className="visit-meta" style={{ flexDirection: 'column', gap: '4px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> {coord.phone}</span>
+                    <a href={`https://wa.me/${coord.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', textDecoration: 'none', fontWeight: '500' }}>
+                      <Phone size={14} /> {coord.phone}
+                    </a>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} /> {coord.wilayah}</span>
                   </div>
                 </div>
