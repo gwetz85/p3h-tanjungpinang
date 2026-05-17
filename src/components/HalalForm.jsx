@@ -157,7 +157,8 @@ const HalalForm = ({ job, onClose }) => {
     setLoading(true);
     // Create a hidden formal element for PDF
     const printEl = document.createElement('div');
-    printEl.style.position = 'fixed';
+    printEl.style.position = 'absolute';
+    printEl.style.top = '0';
     printEl.style.left = '-9999px';
     printEl.style.width = '800px';
     printEl.style.padding = '40px';
@@ -179,6 +180,7 @@ const HalalForm = ({ job, onClose }) => {
         <tr><td style="padding: 8px; font-weight: bold;">Nama Usaha</td><td>: ${formData.namaUsaha || '-'}</td></tr>
         <tr><td style="padding: 8px; font-weight: bold;">Modal Usaha</td><td>: ${formData.modalUsaha || '-'}</td></tr>
         <tr><td style="padding: 8px; font-weight: bold;">Lokasi Usaha</td><td>: ${formData.lokasiUsaha || '-'}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold;">Titik Koordinat (GPS)</td><td>: ${formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : '-'}</td></tr>
         <tr><td style="padding: 8px; font-weight: bold;">Pendapatan</td><td>: ${formData.pendapatan || '-'}</td></tr>
       </table>
 
@@ -249,23 +251,42 @@ const HalalForm = ({ job, onClose }) => {
     document.body.appendChild(printEl);
     
     try {
-      const canvas = await html2canvas(printEl, { scale: 2, useCORS: true });
+      const canvas = await html2canvas(printEl, { 
+        scale: 2, 
+        useCORS: true,
+        windowHeight: printEl.scrollHeight
+      });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const margin = 15;
+      const pdfWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
       const pageHeight = pdf.internal.pageSize.getHeight();
+      const contentHeightPerPage = pageHeight - (margin * 2);
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
       
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pageHeight;
+      let heightLeft = imgHeight;
+      let slice_start_y = 0;
+      
+      // Page 1
+      pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, imgHeight);
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), margin, 'F'); // Top margin mask
+      pdf.rect(0, pageHeight - margin, pdf.internal.pageSize.getWidth(), margin, 'F'); // Bottom margin mask
+      
+      heightLeft -= contentHeightPerPage;
+      slice_start_y += contentHeightPerPage;
 
       while (heightLeft > 0) {
-        position -= pageHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pageHeight;
+        let position_on_page = margin - slice_start_y;
+        pdf.addImage(imgData, 'PNG', margin, position_on_page, pdfWidth, imgHeight);
+        
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), margin, 'F'); // Top margin mask
+        pdf.rect(0, pageHeight - margin, pdf.internal.pageSize.getWidth(), margin, 'F'); // Bottom margin mask
+        
+        heightLeft -= contentHeightPerPage;
+        slice_start_y += contentHeightPerPage;
       }
       
       pdf.save(`HALAL_TPI_${formData.namaUsaha || 'DOKUMEN'}.pdf`);
