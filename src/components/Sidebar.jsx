@@ -16,13 +16,6 @@ import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { role } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    auth.signOut();
-    navigate('/login');
-  };
-
   const navItems = [
     { name: 'Ringkasan', path: '/', icon: LayoutDashboard, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
@@ -58,13 +51,6 @@ const Sidebar = ({ isOpen, onClose }) => {
           </NavLink>
         ))}
       </nav>
-
-      <div className="sidebar-footer">
-        <button onClick={handleLogout} className="btn-logout">
-          <LogOut size={20} />
-          <span>Keluar</span>
-        </button>
-      </div>
 
     </div>
   );

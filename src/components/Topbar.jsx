@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserCircle } from 'lucide-react';
+import { UserCircle, LogOut } from 'lucide-react';
+import { auth } from '../firebase';
 
 const Topbar = () => {
   const { userData, currentUser, role } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleLogout = () => {
+    auth.signOut();
+    navigate('/login');
+  };
 
   // Determine current page title
   const getPageTitle = (path) => {
@@ -58,7 +66,7 @@ const Topbar = () => {
       </div>
       
       <div className="topbar-right">
-        <div className="user-info">
+        <div className="user-info" onClick={() => setShowDropdown(!showDropdown)}>
           <div className="user-details">
             <span className="user-name">{displayName}</span>
             <span className="user-role">{role || 'Pending'}</span>
@@ -66,6 +74,15 @@ const Topbar = () => {
           <div className="user-icon">
             <UserCircle size={36} strokeWidth={1.5} />
           </div>
+          
+          {showDropdown && (
+            <div className="user-dropdown glass-card">
+              <button onClick={handleLogout} className="btn-dropdown-item text-danger">
+                <LogOut size={18} />
+                <span>Keluar</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
