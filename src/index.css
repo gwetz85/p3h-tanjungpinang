@@ -1249,6 +1249,29 @@ select option {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.visit-badge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  align-self: center;
+}
+
+.visit-countdown {
+  font-size: 0.75rem;
+  color: #10b981;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
 @media (max-width: 640px) {
   .visit-card-compact {
     flex-direction: column;
@@ -1266,6 +1289,15 @@ select option {
   }
   .visit-badge {
     align-self: flex-end;
+    margin: 0;
+  }
+  .visit-badge-container {
+    align-self: flex-end;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
   }
 }
 

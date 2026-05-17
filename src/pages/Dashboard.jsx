@@ -5,6 +5,40 @@ import { ref, onValue } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { Briefcase, CheckCircle, Clock, Users, Calendar, MapPin, User } from 'lucide-react';
 
+const CountdownTimer = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const difference = new Date(targetDate) - new Date();
+      if (difference <= 0) {
+        return 'Mulai...';
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+
+      if (days > 0) {
+        return `${days} Hari ${hours} Jam`;
+      }
+      
+      const pad = (num) => String(num).padStart(2, '0');
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  return <span>{timeLeft}</span>;
+};
+
 const Dashboard = () => {
   const { currentUser, role } = useAuth();
   const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, koordinator: 0 });
@@ -91,8 +125,14 @@ const Dashboard = () => {
                     <span><MapPin size={14} /> {visit.kelurahan || 'Tanjungpinang'}</span>
                   </div>
                 </div>
-                <div className="visit-badge urgent">
-                  Upcoming
+                <div className="visit-badge-container">
+                  <div className="visit-badge urgent">
+                    Upcoming
+                  </div>
+                  <div className="visit-countdown">
+                    <Clock size={12} />
+                    <CountdownTimer targetDate={visit.jadwalKunjungan} />
+                  </div>
                 </div>
               </div>
             ))
