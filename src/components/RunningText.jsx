@@ -1,0 +1,31 @@
+import React, { useEffect, useState } from 'react';
+import { rtdb } from '../firebase';
+import { ref, onValue } from 'firebase/database';
+
+const RunningText = () => {
+  const [text, setText] = useState('');
+
+  useEffect(() => {
+    const textRef = ref(rtdb, 'settings/runningText');
+    const unsub = onValue(textRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setText(snapshot.val());
+      } else {
+        setText("INFORMASI MANAJEMEN PELAKU USAHA | APLIKASI MANAJEMEN DATA YANG DIKEMBANGKAN SECARA MANDIRI OLEH TEAM PENDATAAN GUNA MENGOPTIMALKAN EFISIENSI KERJA PETUGAS DI LAPANGAN | DIDUKUNG PENUH OLEH SISTEM REALTIME DATA");
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  if (!text) return null;
+
+  return (
+    <div className="running-text-bar">
+      <div className="running-text-content">
+        {text} &nbsp;&bull;&nbsp; {text} &nbsp;&bull;&nbsp; {text}
+      </div>
+    </div>
+  );
+};
+
+export default RunningText;

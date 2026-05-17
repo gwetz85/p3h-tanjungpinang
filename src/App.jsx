@@ -10,6 +10,7 @@ import CekPekerjaan from './pages/CekPekerjaan';
 import Selesai from './pages/Selesai';
 import Setup from './pages/Setup';
 import DataUser from './pages/DataUser';
+import RunningTextSettings from './pages/RunningTextSettings';
 import Chat from './pages/Chat';
 import PendaftaranSihalal from './pages/PendaftaranSihalal';
 import { motion } from 'framer-motion';
@@ -90,6 +91,12 @@ function App() {
             <Route path="users" element={
               <ProtectedRoute allowedRoles={['superadmin']}>
                 <DataUser />
+              </ProtectedRoute>
+            } />
+
+            <Route path="running-text" element={
+              <ProtectedRoute allowedRoles={['superadmin']}>
+                <RunningTextSettings />
               </ProtectedRoute>
             } />
 

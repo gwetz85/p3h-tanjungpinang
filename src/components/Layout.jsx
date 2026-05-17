@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import NotificationManager from './NotificationManager';
+import RunningText from './RunningText';
 
 import { Menu, X } from 'lucide-react';
 
@@ -28,6 +29,8 @@ const Layout = () => {
           <Outlet />
         </div>
       </main>
+
+      <RunningText />
     </div>
   );
 };
