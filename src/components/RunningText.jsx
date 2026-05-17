@@ -3,9 +3,9 @@ import { rtdb } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 
 const RunningText = () => {
-  const [text, setText] = useState('');
-  
   const defaultText = "INFORMASI MANAJEMEN PELAKU USAHA | APLIKASI MANAJEMEN DATA YANG DIKEMBANGKAN SECARA MANDIRI OLEH TEAM PENDATAAN GUNA MENGOPTIMALKAN EFISIENSI KERJA PETUGAS DI LAPANGAN | DIDUKUNG PENUH OLEH SISTEM REALTIME DATA";
+  
+  const [text, setText] = useState(defaultText);
 
   useEffect(() => {
     // Store in root level 'runningText' to bypass any potential 'settings' path restrictions in database rules
