@@ -250,7 +250,7 @@ const CekPekerjaan = () => {
                         <div className="schedule-cell">
                           <div className="date-time">
                             <span className="date">
-                              {new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                              {new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
                             </span>
                             <span className="time">
                               {new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
@@ -401,7 +401,7 @@ const CekPekerjaan = () => {
                       <label>Keterangan / Jadwal Kunjungan</label>
                       <p className={selectedJob.jadwalKunjungan ? 'text-accent font-bold' : ''}>
                         {selectedJob.jadwalKunjungan 
-                          ? `Kunjungan pada: ${new Date(selectedJob.jadwalKunjungan).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })}` 
+                          ? `Kunjungan pada: ${new Date(selectedJob.jadwalKunjungan).toLocaleString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` 
                           : selectedJob.keterangan || '-'}
                       </p>
                     </div>
