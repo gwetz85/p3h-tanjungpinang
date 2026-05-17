@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserCircle, LogOut } from 'lucide-react';
-import { auth } from '../firebase';
+import { UserCircle, LogOut, Camera, X, Upload } from 'lucide-react';
+import { auth, rtdb } from '../firebase';
+import { ref, update } from 'firebase/database';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Topbar = () => {
   const { userData, currentUser, role } = useAuth();
@@ -10,10 +12,67 @@ const Topbar = () => {
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const handleLogout = () => {
     auth.signOut();
     navigate('/login');
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Harap pilih file gambar (JPG/PNG).');
+      return;
+    }
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 150;
+        const MAX_HEIGHT = 150;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress as JPEG 80% quality
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+        try {
+          await update(ref(rtdb, `users/${currentUser.uid}`), { photoURL: dataUrl });
+          setShowPhotoModal(false);
+        } catch (error) {
+          console.error("Error updating photo:", error);
+          alert("Gagal memperbarui foto profil.");
+        } finally {
+          setUploading(false);
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   // Determine current page title
@@ -71,12 +130,23 @@ const Topbar = () => {
             <span className="user-name">{displayName}</span>
             <span className="user-role">{role || 'Pending'}</span>
           </div>
-          <div className="user-icon">
-            <UserCircle size={36} strokeWidth={1.5} />
+          <div className="user-icon" style={{ overflow: 'hidden', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {userData?.photoURL ? (
+              <img src={userData.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <UserCircle size={36} strokeWidth={1.5} />
+            )}
           </div>
           
           {showDropdown && (
             <div className="user-dropdown glass-card">
+              <button 
+                onClick={(e) => { e.stopPropagation(); setShowPhotoModal(true); setShowDropdown(false); }} 
+                className="btn-dropdown-item"
+              >
+                <Camera size={18} />
+                <span>Ubah Foto Profil</span>
+              </button>
               <button onClick={handleLogout} className="btn-dropdown-item text-danger">
                 <LogOut size={18} />
                 <span>Keluar</span>
@@ -85,6 +155,40 @@ const Topbar = () => {
           )}
         </div>
       </div>
+      
+      {/* Modal Upload Photo */}
+      <AnimatePresence>
+        {showPhotoModal && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="modal-content glass-card" style={{ maxWidth: '400px' }}>
+              <div className="modal-header">
+                <h2>Ubah Foto Profil</h2>
+                <button onClick={() => setShowPhotoModal(false)} className="btn-close"><X /></button>
+              </div>
+              <div className="p-6 text-center">
+                <div style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 1.5rem', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {userData?.photoURL ? (
+                    <img src={userData.photoURL} alt="Current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <UserCircle size={64} style={{ color: 'var(--primary)' }} />
+                  )}
+                </div>
+                
+                <label className="btn-primary-filled" style={{ display: 'inline-flex', cursor: 'pointer', background: 'var(--primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold' }}>
+                  {uploading ? 'Memproses...' : (
+                    <>
+                      <Upload size={18} style={{ marginRight: '8px' }} />
+                      Pilih Foto Baru
+                    </>
+                  )}
+                  <input type="file" accept="image/png, image/jpeg" style={{ display: 'none' }} onChange={handleFileChange} disabled={uploading} />
+                </label>
+                <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Maksimal ukuran otomatis disesuaikan. Mendukung JPG & PNG.</p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
