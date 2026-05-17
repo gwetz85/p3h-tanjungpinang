@@ -53,7 +53,7 @@ const InputPekerjaan = () => {
     try {
       await push(ref(rtdb, 'pekerjaan'), {
         ...formData,
-        status: 'Proses',
+        status: 'Pending',
         tanggalInput: Date.now(), // or serverTimestamp() if preferred
         progress: 0,
         keterangan: ''

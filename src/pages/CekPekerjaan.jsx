@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,13 +49,15 @@ const CekPekerjaan = () => {
   useEffect(() => {
     // Separate queries to avoid fetching all jobs (which contain heavy base64 images)
     const qProses = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Proses'));
+    const qPending = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Pending'));
     const qReturned = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Returned'));
 
     let prosesData = {};
+    let pendingData = {};
     let returnedData = {};
 
     const updateJobsList = () => {
-      const combined = [...Object.values(prosesData), ...Object.values(returnedData)];
+      const combined = [...Object.values(prosesData), ...Object.values(pendingData), ...Object.values(returnedData)];
       setJobs(combined);
       setLoading(false);
     };
@@ -70,6 +72,24 @@ const CekPekerjaan = () => {
           }, {});
         } else {
           prosesData = {};
+        }
+        updateJobsList();
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    });
+
+    const unsubPending = onValue(qPending, (snapshot) => {
+      try {
+        const data = snapshot.val();
+        if (data) {
+          pendingData = Object.keys(data).reduce((acc, key) => {
+            acc[key] = { id: key, ...data[key] };
+            return acc;
+          }, {});
+        } else {
+          pendingData = {};
         }
         updateJobsList();
       } catch (err) {
@@ -98,6 +118,7 @@ const CekPekerjaan = () => {
 
     return () => {
       unsubProses();
+      unsubPending();
       unsubReturned();
     };
   }, [role]);
@@ -169,6 +190,19 @@ const CekPekerjaan = () => {
         console.error(err);
         alert('Gagal menghapus jadwal');
       }
+    }
+  };
+
+  const handleToggleStatus = async (job) => {
+    try {
+      const newStatus = job.status === 'Proses' ? 'Pending' : 'Proses';
+      await update(ref(rtdb, `pekerjaan/${job.id}`), {
+        status: newStatus
+      });
+      alert(`Status pekerjaan diubah menjadi: ${newStatus}`);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal mengubah status pekerjaan');
     }
   };
   const Countdown = ({ targetDate }) => {
@@ -314,12 +348,19 @@ const CekPekerjaan = () => {
                         </div>
                       </td>
                       <td>
-                        <span className={`status-pill ${job.status === 'Returned' ? 'returned' : 'proses'}`}>
+                        <span className={`status-pill ${job.status === 'Returned' ? 'returned' : job.status === 'Pending' ? 'pending' : 'proses'}`}>
                           {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
                         </span>
                       </td>
                       <td>
                         <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
+                            title={job.status === 'Proses' ? 'Tandai Pending (Menunggu)' : 'Mulai Kerjakan (Proses)'}
+                            onClick={() => handleToggleStatus(job)}
+                          >
+                            {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
+                          </button>
                           <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                             <Calendar size={16} />
                           </button>
@@ -366,9 +407,16 @@ const CekPekerjaan = () => {
                     </div>
                   </div>
                   <div className="visit-actions" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-end', marginTop: '10px' }}>
-                    <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : 'urgent'}`} style={{ marginRight: 'auto', alignSelf: 'center' }}>
-                      {job.status === 'Returned' ? 'Perlu Perbaikan' : 'PROSES'}
+                    <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : job.status === 'Pending' ? 'pending' : 'urgent'}`} style={{ marginRight: 'auto', alignSelf: 'center' }}>
+                      {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.status ? job.status.toUpperCase() : 'PENDING')}
                     </div>
+                    <button 
+                      className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
+                      title={job.status === 'Proses' ? 'Tandai Pending' : 'Mulai Kerjakan'}
+                      onClick={(e) => { e.stopPropagation(); handleToggleStatus(job); }}
+                    >
+                      {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
+                    </button>
                     <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                       <Calendar size={16} />
                     </button>

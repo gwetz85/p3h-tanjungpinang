@@ -1187,6 +1187,12 @@ select option {
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
+.visit-badge.pending {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 .visit-badge.danger {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
@@ -1438,6 +1444,7 @@ select option {
 }
 
 .status-pill.proses { background: rgba(245, 158, 11, 0.1); color: var(--secondary); border: 1px solid rgba(245, 158, 11, 0.2); }
+.status-pill.pending { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
 .status-pill.returned { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
 
 /* Table Actions */

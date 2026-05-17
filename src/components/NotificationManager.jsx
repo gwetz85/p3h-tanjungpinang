@@ -21,10 +21,20 @@ const NotificationManager = () => {
     if (role !== 'Petugas' || !currentUser) return;
 
     const qProses = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Proses'));
-    const unsubscribe = onValue(qProses, (snapshot) => {
+    const qPending = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Pending'));
+
+    let prosesList = [];
+    let pendingList = [];
+
+    const updateList = () => {
+      const combined = [...prosesList, ...pendingList];
+      setJobs(combined);
+    };
+
+    const unsubProses = onValue(qProses, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const list = Object.keys(data).reduce((acc, key) => {
+        prosesList = Object.keys(data).reduce((acc, key) => {
           const job = data[key];
           // Filter only jobs assigned to current Petugas
           if (job.petugasId === currentUser.uid || job.petugas === currentUser.email) {
@@ -32,13 +42,33 @@ const NotificationManager = () => {
           }
           return acc;
         }, []);
-        setJobs(list);
       } else {
-        setJobs([]);
+        prosesList = [];
       }
+      updateList();
     });
 
-    return () => unsubscribe();
+    const unsubPending = onValue(qPending, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        pendingList = Object.keys(data).reduce((acc, key) => {
+          const job = data[key];
+          // Filter only jobs assigned to current Petugas
+          if (job.petugasId === currentUser.uid || job.petugas === currentUser.email) {
+            acc.push({ id: key, ...job });
+          }
+          return acc;
+        }, []);
+      } else {
+        pendingList = [];
+      }
+      updateList();
+    });
+
+    return () => {
+      unsubProses();
+      unsubPending();
+    };
   }, [currentUser, role]);
 
   // 3. Monitor schedules every minute
