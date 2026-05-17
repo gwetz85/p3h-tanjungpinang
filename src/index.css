@@ -1726,7 +1726,7 @@ select option {
 .running-text-content {
   display: inline-block;
   white-space: nowrap;
-  animation: marquee 15s linear infinite;
+  animation: marquee 30s linear infinite;
   padding-left: 100%;
 }
 
