@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserCircle, LogOut, Camera, X, Upload } from 'lucide-react';
 import { auth, rtdb } from '../firebase';
-import { ref, update } from 'firebase/database';
+import { ref, update, onValue } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Topbar = () => {
@@ -14,6 +14,25 @@ const Topbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [koordinatorPhoto, setKoordinatorPhoto] = useState(null);
+
+  useEffect(() => {
+    if (userData?.nama) {
+      const coordRef = ref(rtdb, 'koordinators');
+      const unsubscribe = onValue(coordRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const matchedCoord = Object.values(data).find(c => c.nama === userData.nama);
+          if (matchedCoord && matchedCoord.photoURL) {
+            setKoordinatorPhoto(matchedCoord.photoURL);
+          } else {
+            setKoordinatorPhoto(null);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [userData?.nama]);
 
   const handleLogout = () => {
     auth.signOut();
@@ -111,6 +130,7 @@ const Topbar = () => {
   };
 
   const displayName = userData?.nama || currentUser?.email?.split('@')[0] || 'User';
+  const displayPhoto = userData?.photoURL || koordinatorPhoto;
 
   return (
     <div className="topbar glass-card">
@@ -131,8 +151,8 @@ const Topbar = () => {
             <span className="user-role">{role || 'Pending'}</span>
           </div>
           <div className="user-icon" style={{ overflow: 'hidden', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {userData?.photoURL ? (
-              <img src={userData.photoURL} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {displayPhoto ? (
+              <img src={displayPhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <UserCircle size={36} strokeWidth={1.5} />
             )}
@@ -167,8 +187,8 @@ const Topbar = () => {
               </div>
               <div className="p-6 text-center">
                 <div style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 1.5rem', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {userData?.photoURL ? (
-                    <img src={userData.photoURL} alt="Current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {displayPhoto ? (
+                    <img src={displayPhoto} alt="Current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <UserCircle size={64} style={{ color: 'var(--primary)' }} />
                   )}
