@@ -9,7 +9,7 @@ const RunningTextSettings = () => {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const textRef = ref(rtdb, 'settings/runningText');
+    const textRef = ref(rtdb, 'runningText');
     const unsub = onValue(textRef, (snapshot) => {
       if (snapshot.exists()) {
         setText(snapshot.val());
@@ -25,7 +25,7 @@ const RunningTextSettings = () => {
     setSaving(true);
     setSuccess(false);
     try {
-      await set(ref(rtdb, 'settings/runningText'), text.toUpperCase());
+      await set(ref(rtdb, 'runningText'), text.toUpperCase());
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
