@@ -14,7 +14,7 @@ const RunningTextSettings = () => {
       if (snapshot.exists()) {
         setText(snapshot.val());
       } else {
-        setText("INFORMASI MANAJEMEN PELAKU USAHA | APLIKASI MANAJEMEN DATA YANG DIKEMBANGKAN SECARA MANDIRI OLEH TEAM PENDATAAN GUNA MENGOPTIMALKAN EFISIENSI KERJA PETUGAS DI LAPANGAN | DIDUKUNG PENUH OLEH SISTEM REALTIME DATA");
+        setText('');
       }
     });
     return () => unsub();
