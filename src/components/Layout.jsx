@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import NotificationManager from './NotificationManager';
 
 import { Menu, X } from 'lucide-react';
 
@@ -23,6 +24,7 @@ const Layout = () => {
       <main className="main-content" onClick={() => setIsMobileMenuOpen(false)}>
         <Topbar />
         <div className="layout-content-wrapper">
+          <NotificationManager />
           <Outlet />
         </div>
       </main>
