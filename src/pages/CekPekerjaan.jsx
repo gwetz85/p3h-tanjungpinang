@@ -451,10 +451,18 @@ const CekPekerjaan = () => {
               </div>
               {!editMode ? (
                 <div className="job-detail-modern">
-                  <div className="detail-header-section">
-                    <h2 className="title-gradient">{selectedJob.nama}</h2>
-                    <span className="badge-type-large">{selectedJob.jenisPekerjaan}</span>
+                  <div className="detail-header-section left-align">
+                    <h2 className="title-gradient" style={{ margin: 0 }}>{selectedJob.nama}</h2>
+                    <span className="badge-type-large left-align">{selectedJob.jenisPekerjaan}</span>
+                    <div className="detail-progress-container">
+                      <span className="detail-progress-label">Progres Pekerjaan: {selectedJob.progress}%</span>
+                      <div className="detail-progress-bar-bg">
+                        <div className="detail-progress-bar-fill" style={{ width: `${selectedJob.progress}%` }}></div>
+                      </div>
+                    </div>
                   </div>
+
+                  <hr className="detail-divider" />
 
                   {selectedJob.adminNote && (
                     <div className="admin-note-box glass-card mb-6" style={{ background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #ef4444', padding: '1rem' }}>
