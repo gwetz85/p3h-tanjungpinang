@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
 import { ref, onValue } from 'firebase/database';
-import { motion } from 'framer-motion';
-import { Briefcase, CheckCircle, Clock, Users, Calendar, MapPin, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Briefcase, CheckCircle, Clock, Users, Calendar, MapPin, User, X, MessageSquare, Timer } from 'lucide-react';
 
 const CountdownTimer = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState('');
@@ -43,6 +43,7 @@ const Dashboard = () => {
   const { currentUser, role } = useAuth();
   const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, koordinator: 0 });
   const [upcomingVisits, setUpcomingVisits] = useState([]);
+  const [selectedVisit, setSelectedVisit] = useState(null);
 
   useEffect(() => {
     // Count Jobs
@@ -113,7 +114,12 @@ const Dashboard = () => {
             <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>Tidak ada kunjungan terjadwal dalam waktu dekat.</p>
           ) : (
             upcomingVisits.map((visit, idx) => (
-              <div key={idx} className="visit-card-compact">
+              <div 
+                key={idx} 
+                className="visit-card-compact" 
+                onClick={() => setSelectedVisit(visit)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="visit-time">
                   <span className="date">{new Date(visit.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
                   <span className="hour">{new Date(visit.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -139,6 +145,130 @@ const Dashboard = () => {
           )}
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {selectedVisit && (
+          <div className="modal-overlay" onClick={() => setSelectedVisit(null)}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.9 }} 
+              className="modal-content glass-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header" style={{ alignItems: 'center', gap: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1 }}>
+                  <h2 style={{ margin: 0 }}>Detail Pelaku Usaha</h2>
+                </div>
+                <button 
+                  onClick={() => setSelectedVisit(null)} 
+                  className="btn-close" 
+                  style={{ background: 'transparent', border: 'none', color: 'rgba(255, 255, 255, 0.6)', cursor: 'pointer', transition: 'color 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}
+                >
+                  <X />
+                </button>
+              </div>
+
+              <div className="job-detail-modern">
+                <div className="detail-header-section left-align">
+                  <h2 className="title-gradient" style={{ margin: 0 }}>{selectedVisit.nama}</h2>
+                  <span className="badge-type-large left-align">{selectedVisit.jenisPekerjaan}</span>
+                </div>
+
+                <hr className="detail-divider" />
+
+                <div className="detail-info-grid">
+                  <div className="info-item">
+                    <label>Nama Pelaku Usaha</label>
+                    <p style={{ color: 'white', fontWeight: 600 }}>{selectedVisit.nama}</p>
+                  </div>
+                  
+                  <div className="info-item">
+                    <label>Kontak (WhatsApp)</label>
+                    <div className="contact-actions" style={{ marginTop: '4px' }}>
+                      <p>{selectedVisit.wa || '-'}</p>
+                      {selectedVisit.wa && (
+                        <div className="action-buttons">
+                          <a 
+                            href={`https://wa.me/${selectedVisit.wa.replace(/\D/g, '')}`} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="action-btn wa-btn"
+                          >
+                            <MessageSquare size={16} />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="info-item full">
+                    <label>Alamat Lengkap (Domisili)</label>
+                    <p>{selectedVisit.alamat || '-'}</p>
+                  </div>
+
+                  {selectedVisit.alamatUsaha && (
+                    <div className="info-item full">
+                      <label>Alamat Usaha / Lokasi Produksi</label>
+                      <p>{selectedVisit.alamatUsaha || '-'}</p>
+                    </div>
+                  )}
+
+                  <div className="info-item">
+                    <label>Jadwal Kunjungan</label>
+                    <p className="text-accent font-bold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Calendar size={16} />
+                      {new Date(selectedVisit.jadwalKunjungan).toLocaleString('id-ID', { 
+                        weekday: 'long', 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="info-item">
+                    <label>Countdown</label>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div className="countdown-badge urgent-glow" style={{ position: 'static', display: 'inline-flex', alignItems: 'center', gap: '6px', margin: 0, padding: '6px 14px', borderRadius: '30px' }}>
+                        <Timer size={14} />
+                        <CountdownTimer targetDate={selectedVisit.jadwalKunjungan} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="info-item full">
+                    <label>Tanggal Input Data</label>
+                    <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Clock size={16} className="text-muted" />
+                      {selectedVisit.tanggalInput 
+                        ? new Date(selectedVisit.tanggalInput).toLocaleString('id-ID', { 
+                            weekday: 'long',
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) 
+                        : '-'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="modal-footer-actions" style={{ marginTop: '1.5rem' }}>
+                  <button onClick={() => setSelectedVisit(null)} className="btn-primary-filled">
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
