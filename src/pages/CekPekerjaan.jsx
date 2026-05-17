@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
-import { ref, onValue, update, remove } from 'firebase/database';
+import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
@@ -47,27 +47,60 @@ const CekPekerjaan = () => {
 
 
   useEffect(() => {
-    const jobsRef = ref(rtdb, 'pekerjaan');
-    const unsubscribe = onValue(jobsRef, (snapshot) => {
+    // Separate queries to avoid fetching all jobs (which contain heavy base64 images)
+    const qProses = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Proses'));
+    const qReturned = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Returned'));
+
+    let prosesData = {};
+    let returnedData = {};
+
+    const updateJobsList = () => {
+      const combined = [...Object.values(prosesData), ...Object.values(returnedData)];
+      setJobs(combined);
+      setLoading(false);
+    };
+
+    const unsubProses = onValue(qProses, (snapshot) => {
       try {
         const data = snapshot.val();
         if (data) {
-          const list = Object.keys(data)
-            .map(key => ({ id: key, ...data[key] }))
-            .filter(job => job.status === 'Proses' || job.status === 'Returned');
-          setJobs(list);
+          prosesData = Object.keys(data).reduce((acc, key) => {
+            acc[key] = { id: key, ...data[key] };
+            return acc;
+          }, {});
         } else {
-          setJobs([]);
+          prosesData = {};
         }
+        updateJobsList();
       } catch (err) {
-        console.error("Error processing jobs:", err);
-      } finally {
+        console.error(err);
         setLoading(false);
       }
     });
 
-    return () => unsubscribe();
-  }, []);
+    const unsubReturned = onValue(qReturned, (snapshot) => {
+      try {
+        const data = snapshot.val();
+        if (data) {
+          returnedData = Object.keys(data).reduce((acc, key) => {
+            acc[key] = { id: key, ...data[key] };
+            return acc;
+          }, {});
+        } else {
+          returnedData = {};
+        }
+        updateJobsList();
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      unsubProses();
+      unsubReturned();
+    };
+  }, [currentUser, role]);
 
   const handleDeleteJob = async (id) => {
     if (window.confirm('Hapus seluruh data pekerjaan ini secara permanen?')) {

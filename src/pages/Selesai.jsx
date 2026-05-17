@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
-import { ref, onValue, update } from 'firebase/database';
+import { ref, onValue, update, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { Search, CheckCircle2, Calendar, User, Briefcase, RotateCcw, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -13,13 +13,16 @@ const Selesai = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const jobsRef = ref(rtdb, 'pekerjaan');
+    // Only fetch jobs that are 'Selesai' and limit to the most recent 100 to significantly improve loading speed
+    const jobsRef = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Selesai'), limitToLast(100));
     const unsubscribe = onValue(jobsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const list = Object.keys(data)
-          .map(key => ({ id: key, ...data[key] }))
-          .filter(job => job.status === 'Selesai');
+          .map(key => ({ id: key, ...data[key] }));
+        
+        // Sort newest first
+        list.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
         setCompletedJobs(list);
       } else {
         setCompletedJobs([]);

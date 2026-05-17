@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
-import { ref, onValue, update } from 'firebase/database';
+import { ref, onValue, update, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, ExternalLink, PlayCircle } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
@@ -37,20 +37,49 @@ const PendaftaranSihalal = () => {
   const [adminNote, setAdminNote] = useState('');
 
   useEffect(() => {
-    const jobsRef = ref(rtdb, 'pekerjaan');
-    const unsubscribe = onValue(jobsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.keys(data)
-          .map(key => ({ id: key, ...data[key] }))
-          .filter(job => job.status === 'Review' || job.status === 'AdminProcessing');
-        setJobs(list);
-      } else {
-        setJobs([]);
-      }
+    // Optimization: query only relevant statuses to avoid downloading the entire jobs collection (and their images)
+    const qReview = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Review'));
+    const qProcessing = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('AdminProcessing'));
+
+    let reviewData = {};
+    let processingData = {};
+
+    const updateJobsList = () => {
+      const combined = [...Object.values(reviewData), ...Object.values(processingData)];
+      setJobs(combined);
       setLoading(false);
+    };
+
+    const unsubReview = onValue(qReview, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        reviewData = Object.keys(data).reduce((acc, key) => {
+          acc[key] = { id: key, ...data[key] };
+          return acc;
+        }, {});
+      } else {
+        reviewData = {};
+      }
+      updateJobsList();
     });
-    return () => unsubscribe();
+
+    const unsubProcessing = onValue(qProcessing, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        processingData = Object.keys(data).reduce((acc, key) => {
+          acc[key] = { id: key, ...data[key] };
+          return acc;
+        }, {});
+      } else {
+        processingData = {};
+      }
+      updateJobsList();
+    });
+
+    return () => {
+      unsubReview();
+      unsubProcessing();
+    };
   }, []);
 
   const handleStartProcess = async (jobId) => {
