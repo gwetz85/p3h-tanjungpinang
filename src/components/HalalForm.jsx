@@ -12,6 +12,7 @@ const HalalForm = ({ job, onClose }) => {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
     tatacara: '',
     photo: '',
+    photoKTP: '',
     surveyDriveLink: '',
     location: null,
     siHalalEmail: '',
@@ -37,7 +38,7 @@ const HalalForm = ({ job, onClose }) => {
   });
 
   const calculateProgress = (data) => {
-    let totalFields = 16; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 Drive + 1 Location + 2 siHalal
+    let totalFields = 17; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal
     let filledFields = 0;
 
     if (data.nib) filledFields++;
@@ -52,6 +53,7 @@ const HalalForm = ({ job, onClose }) => {
     if (data.kemasan.some(k => k.merk)) filledFields++;
     if (data.tatacara) filledFields++;
     if (data.photo) filledFields++;
+    if (data.photoKTP) filledFields++;
     if (data.surveyDriveLink) filledFields++;
     if (data.location) filledFields++;
     if (data.siHalalEmail) filledFields++;
@@ -142,6 +144,15 @@ const HalalForm = ({ job, onClose }) => {
     }
   };
 
+  const handleKTPUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData({ ...formData, photoKTP: reader.result });
+      reader.readAsDataURL(file);
+    }
+  };
+
   const generatePDF = async () => {
     setLoading(true);
     // Create a hidden formal element for PDF
@@ -217,6 +228,13 @@ const HalalForm = ({ job, onClose }) => {
         <h3 style="background: #f3f4f6; padding: 10px;">V. FOTO PRODUK</h3>
         <div style="text-align: center; margin-top: 20px;">
           <img src="${formData.photo}" style="max-width: 400px; border: 1px solid #ddd; padding: 5px;" />
+        </div>
+      ` : ''}
+
+      ${formData.photoKTP ? `
+        <h3 style="background: #f3f4f6; padding: 10px; margin-top: 20px;">VI. FOTO KTP PELAKU USAHA</h3>
+        <div style="text-align: center; margin-top: 20px;">
+          <img src="${formData.photoKTP}" style="max-width: 400px; border: 1px solid #ddd; padding: 5px;" />
         </div>
       ` : ''}
 
@@ -384,6 +402,16 @@ const HalalForm = ({ job, onClose }) => {
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Photo Produk</p></div>
             )}
             <input type="file" accept="image/*" onChange={handleImageUpload} />
+          </div>
+
+          <div className="section-title mt-4">Foto KTP Pelaku Usaha</div>
+          <div className="photo-upload glass-card mb-4">
+            {formData.photoKTP ? (
+              <img src={formData.photoKTP} alt="KTP" className="preview-img" />
+            ) : (
+              <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto KTP</p></div>
+            )}
+            <input type="file" accept="image/*" onChange={handleKTPUpload} />
           </div>
 
           <div className="input-group glass-card p-4 mb-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
