@@ -100,7 +100,7 @@ const CekPekerjaan = () => {
       unsubProses();
       unsubReturned();
     };
-  }, [currentUser, role]);
+  }, [role]);
 
   const handleDeleteJob = async (id) => {
     if (window.confirm('Hapus seluruh data pekerjaan ini secara permanen?')) {
