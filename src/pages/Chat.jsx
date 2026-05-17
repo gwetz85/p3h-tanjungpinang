@@ -15,6 +15,7 @@ const Chat = () => {
   const [currentUserData, setCurrentUserData] = useState(null);
   const [lastMessages, setLastMessages] = useState({});
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [koordinators, setKoordinators] = useState([]);
   const [isMobileListOpen, setIsMobileListOpen] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -48,6 +49,17 @@ const Chat = () => {
     });
     return () => unsub();
   }, [currentUser]);
+
+  // Fetch koordinators for fallback photos
+  useEffect(() => {
+    const coordRef = ref(rtdb, 'koordinators');
+    const unsub = onValue(coordRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setKoordinators(Object.values(snapshot.val()));
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // Listen for last messages and unread counts for all user conversations
   useEffect(() => {
@@ -203,6 +215,15 @@ const Chat = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  const getUserPhoto = (user) => {
+    if (user.photoURL) return user.photoURL;
+    if (user.nama) {
+      const coord = koordinators.find(c => c.nama === user.nama);
+      if (coord && coord.photoURL) return coord.photoURL;
+    }
+    return null;
+  };
+
   const getRoleColor = (role) => {
     switch (role) {
       case 'Admin': return '#ef4444';
@@ -263,7 +284,11 @@ const Chat = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className="contact-avatar" style={{ background: `linear-gradient(135deg, ${getRoleColor(user.role)}, ${getRoleColor(user.role)}88)` }}>
-                    {getInitials(user.nama)}
+                    {getUserPhoto(user) ? (
+                      <img src={getUserPhoto(user)} alt={user.nama} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      getInitials(user.nama)
+                    )}
                   </div>
                   <div className="contact-info">
                     <div className="contact-name-row">
@@ -300,7 +325,11 @@ const Chat = () => {
                   <ArrowLeft size={20} />
                 </button>
                 <div className="contact-avatar small" style={{ background: `linear-gradient(135deg, ${getRoleColor(selectedUser.role)}, ${getRoleColor(selectedUser.role)}88)` }}>
-                  {getInitials(selectedUser.nama)}
+                  {getUserPhoto(selectedUser) ? (
+                    <img src={getUserPhoto(selectedUser)} alt={selectedUser.nama} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    getInitials(selectedUser.nama)
+                  )}
                 </div>
                 <div className="header-info">
                   <h3>{selectedUser.nama || selectedUser.email}</h3>
