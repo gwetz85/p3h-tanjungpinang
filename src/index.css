@@ -269,6 +269,16 @@ select option {
   max-width: 1200px;
 }
 
+@media (min-width: 769px) {
+  .mobile-only { display: none !important; }
+}
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block; }
+  .mobile-job-cards { display: flex; flex-direction: column; gap: 1rem; }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
   .sidebar {
@@ -1175,6 +1185,12 @@ select option {
   background: rgba(16, 185, 129, 0.1);
   color: var(--primary);
   border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.visit-badge.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 @media (max-width: 640px) {

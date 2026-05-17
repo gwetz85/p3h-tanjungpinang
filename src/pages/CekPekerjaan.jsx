@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2 } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -230,85 +230,130 @@ const CekPekerjaan = () => {
         ) : sortedJobs.length === 0 ? (
           <div className="empty-state">Tidak ada pekerjaan aktif yang ditemukan.</div>
         ) : (
-          <div className="table-container">
-            <table className="verification-table">
-              <thead>
-                <tr>
-                  <th>Jadwal Kunjungan</th>
-                  <th>Informasi Pemohon</th>
-                  <th>Kelurahan</th>
-                  <th>Jenis & Progres</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedJobs.map((job) => (
-                  <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row">
-                    <td>
-                      {job.jadwalKunjungan ? (
-                        <div className="schedule-cell">
-                          <div className="date-time">
-                            <span className="date">
-                              {new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
-                            </span>
-                            <span className="time">
-                              {new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+          <>
+            <div className="table-container desktop-only">
+              <table className="verification-table">
+                <thead>
+                  <tr>
+                    <th>Jadwal Kunjungan</th>
+                    <th>Informasi Pemohon</th>
+                    <th>Kelurahan</th>
+                    <th>Jenis & Progres</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedJobs.map((job) => (
+                    <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row">
+                      <td>
+                        {job.jadwalKunjungan ? (
+                          <div className="schedule-cell">
+                            <div className="date-time">
+                              <span className="date">
+                                {new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
+                              </span>
+                              <span className="time">
+                                {new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted italic">Belum diset</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className="applicant-cell">
+                          <span className="name">{job.nama}</span>
+                          <span className="address"><MapPin size={10} /> {job.alamat}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="kelurahan-badge">{job.kelurahan || '-'}</span>
+                      </td>
+                      <td>
+                        <div className="type-progress-cell">
+                          <span className="job-type-small">{job.jenisPekerjaan}</span>
+                          <div className="mini-progress">
+                            <div className="mini-bar-bg"><div className="mini-bar-fill" style={{ width: `${job.progress}%` }}></div></div>
+                            <span className="percent">{job.progress}%</span>
                           </div>
                         </div>
-                      ) : (
-                        <span className="text-muted italic">Belum diset</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="applicant-cell">
-                        <span className="name">{job.nama}</span>
-                        <span className="address"><MapPin size={10} /> {job.alamat}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="kelurahan-badge">{job.kelurahan || '-'}</span>
-                    </td>
-                    <td>
-                      <div className="type-progress-cell">
-                        <span className="job-type-small">{job.jenisPekerjaan}</span>
-                        <div className="mini-progress">
-                          <div className="mini-bar-bg"><div className="mini-bar-fill" style={{ width: `${job.progress}%` }}></div></div>
-                          <span className="percent">{job.progress}%</span>
+                      </td>
+                      <td>
+                        <span className={`status-pill ${job.status === 'Returned' ? 'returned' : 'proses'}`}>
+                          {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                          <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                            <Calendar size={16} />
+                          </button>
+                          {job.jadwalKunjungan && (
+                            <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
+                              <CalendarX size={16} />
+                            </button>
+                          )}
+                          {job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                            <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={() => { setSelectedJob(job); setShowHalal(true); }}>
+                              <FileText size={16} />
+                            </button>
+                          )}
+                          <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
+                            <Info size={16} />
+                          </button>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status-pill ${job.status === 'Returned' ? 'returned' : 'proses'}`}>
-                        {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="table-actions" onClick={(e) => e.stopPropagation()}>
-                        <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
-                          <Calendar size={16} />
-                        </button>
-                        {job.jadwalKunjungan && (
-                          <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
-                            <CalendarX size={16} />
-                          </button>
-                        )}
-                        {job.jenisPekerjaan === 'Sertifikasi Halal' && (
-                          <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={() => { setSelectedJob(job); setShowHalal(true); }}>
-                            <FileText size={16} />
-                          </button>
-                        )}
-                        <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
-                          <Info size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card Layout */}
+            <div className="mobile-job-cards mobile-only">
+              {sortedJobs.map((job) => (
+                <div key={job.id} className="visit-card-compact" onClick={() => setSelectedJob(job)}>
+                  <div className="visit-time">
+                    {job.jadwalKunjungan ? (
+                      <>
+                        <span className="date">{new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                        <span className="hour">{new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                      </>
+                    ) : (
+                      <span className="date text-muted" style={{ fontStyle: 'italic', opacity: 0.6, fontSize: '0.8rem' }}>Belum<br/>diset</span>
+                    )}
+                  </div>
+                  <div className="visit-details" style={{ width: '100%' }}>
+                    <h4>{job.nama}</h4>
+                    <div className="visit-meta" style={{ flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> {job.jenisPekerjaan} ({job.progress}%)</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} /> {job.kelurahan || '-'}</span>
+                    </div>
+                  </div>
+                  <div className="visit-actions" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-end', marginTop: '10px' }}>
+                    <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : 'urgent'}`} style={{ marginRight: 'auto', alignSelf: 'center' }}>
+                      {job.status === 'Returned' ? 'Perlu Perbaikan' : 'PROSES'}
+                    </div>
+                    <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                      <Calendar size={16} />
+                    </button>
+                    {job.jadwalKunjungan && (
+                      <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(job.id); }}>
+                        <CalendarX size={16} />
+                      </button>
+                    )}
+                    {job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                      <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowHalal(true); }}>
+                        <FileText size={16} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
