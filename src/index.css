@@ -379,10 +379,11 @@ select option {
 .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .input-group label {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: #000000;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 600;
 }
 .error-message, .success-alert {
   padding: 0.8rem;
@@ -679,7 +680,7 @@ select option {
 .detail-progress-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: #000000;
 }
 
 .detail-progress-bar-bg {
@@ -699,7 +700,7 @@ select option {
 .detail-divider {
   border: none;
   height: 1px;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  background: rgba(15, 23, 42, 0.1);
   margin: 0.5rem 0;
 }
 
@@ -721,15 +722,16 @@ select option {
 
 .info-item label {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #000000;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: 600;
 }
 
 .info-item p {
   font-size: 1rem;
   font-weight: 500;
-  color: #fff;
+  color: #000000;
 }
 
 .contact-actions {
