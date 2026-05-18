@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
-import { ref, update } from 'firebase/database';
+import { ref, update, onValue } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink, MapPin, Send } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -45,6 +45,21 @@ const HalalForm = ({ job, onClose }) => {
     kemasan: (job.halalData?.kemasan || defaultData.kemasan)
   });
 
+  useEffect(() => {
+    // Lazily fetch photos from separate path
+    const photosRef = ref(rtdb, `pekerjaan_photos/${job.id}`);
+    onValue(photosRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const val = snapshot.val();
+        setFormData(prev => ({
+          ...prev,
+          photo: val.photo || prev.photo,
+          photoKTP: val.photoKTP || prev.photoKTP
+        }));
+      }
+    }, { onlyOnce: true });
+  }, [job.id]);
+
   const calculateProgress = (data) => {
     let totalFields = 17; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal
     let filledFields = 0;
@@ -83,13 +98,14 @@ const HalalForm = ({ job, onClose }) => {
         sub: (p.sub || []).filter(s => s && s.trim() !== '')
       }));
       
+      const { photo, photoKTP, ...restFormData } = formData;
       const dataToSave = {
-        ...formData,
+        ...restFormData,
         bahan: cleanedBahan,
         pembersih: cleanedPembersih
       };
 
-      const progress = calculateProgress(dataToSave);
+      const progress = calculateProgress(formData);
       
       let newStatus = job.status; // Default keep current status
       if (isFinal) {
@@ -108,6 +124,14 @@ const HalalForm = ({ job, onClose }) => {
       };
       
       await update(ref(rtdb, `pekerjaan/${job.id}`), updates);
+
+      const photoUpdates = {};
+      if (photo) photoUpdates.photo = photo;
+      if (photoKTP) photoUpdates.photoKTP = photoKTP;
+
+      if (Object.keys(photoUpdates).length > 0) {
+        await update(ref(rtdb, `pekerjaan_photos/${job.id}`), photoUpdates);
+      }
       
       if (isFinal) {
         alert('Data BERHASIL DIKIRIM ke Admin untuk Verifikasi!');

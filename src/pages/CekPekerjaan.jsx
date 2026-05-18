@@ -38,10 +38,23 @@ const CekPekerjaan = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJobPhoto, setSelectedJobPhoto] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [showHalal, setShowHalal] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
+
+  useEffect(() => {
+    if (selectedJob && selectedJob.id) {
+      setSelectedJobPhoto('');
+      const photoRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoPengajuan`);
+      onValue(photoRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setSelectedJobPhoto(snapshot.val());
+        }
+      }, { onlyOnce: true });
+    }
+  }, [selectedJob]);
 
 
 
@@ -521,10 +534,10 @@ const CekPekerjaan = () => {
                           <label>Alamat Usaha</label>
                           <p>{selectedJob.alamatUsaha}</p>
                         </div>
-                        {selectedJob.photoPengajuan && (
+                        {(selectedJobPhoto || selectedJob.photoPengajuan) && (
                           <div className="info-item full">
                             <label>Foto Pengajuan</label>
-                            <img src={selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" />
+                            <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" />
                           </div>
                         )}
 

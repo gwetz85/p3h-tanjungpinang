@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { rtdb } from '../firebase';
-import { ref, push, serverTimestamp } from 'firebase/database';
+import { ref, push, update, serverTimestamp } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { Send, User, MapPin, CreditCard, Phone, Briefcase } from 'lucide-react';
 
@@ -51,13 +51,24 @@ const InputPekerjaan = () => {
     setLoading(true);
     
     try {
-      await push(ref(rtdb, 'pekerjaan'), {
-        ...formData,
+      const newJobRef = push(ref(rtdb, 'pekerjaan'));
+      const jobId = newJobRef.key;
+      
+      const { photoPengajuan, ...jobData } = formData;
+      
+      await update(ref(rtdb, `pekerjaan/${jobId}`), {
+        ...jobData,
         status: 'Pending',
-        tanggalInput: Date.now(), // or serverTimestamp() if preferred
+        tanggalInput: Date.now(),
         progress: 0,
         keterangan: ''
       });
+      
+      if (photoPengajuan) {
+        await update(ref(rtdb, `pekerjaan_photos/${jobId}`), {
+          photoPengajuan
+        });
+      }
       
       setSuccess(true);
       setFormData({
