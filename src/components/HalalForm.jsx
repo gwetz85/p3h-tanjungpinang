@@ -17,7 +17,7 @@ const HalalForm = ({ job, onClose }) => {
     location: null,
     siHalalEmail: '',
     siHalalPassword: '',
-    bahan: Array(40).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
+    bahan: Array(40).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', expired: '', sub: [''] })),
     pembersih: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     kemasan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '' }))
   };
@@ -30,10 +30,11 @@ const HalalForm = ({ job, onClose }) => {
       const existing = job.halalData?.bahan || defaultData.bahan;
       const padded = [...existing];
       while (padded.length < 40) {
-        padded.push({ merk: '', produsen: '', sertifikat: '', sub: [''] });
+        padded.push({ merk: '', produsen: '', sertifikat: '', expired: '', sub: [''] });
       }
       return padded.map(b => ({
         ...b,
+        expired: b.expired || '',
         sub: b.sub || ['']
       }));
     })(),
@@ -197,7 +198,7 @@ const HalalForm = ({ job, onClose }) => {
         <ul style="margin: 5px 0 0 20px; padding: 0;">
           ${formData.bahan.filter(b => b.merk).map(b => `
             <li style="margin-bottom: 5px;">
-              ${b.merk} (${b.produsen}) - Sertifikat: ${b.sertifikat || '-'}
+              ${b.merk} (${b.produsen}) - Sertifikat: ${b.sertifikat || '-'} ${b.expired ? `(Exp: ${b.expired})` : ''}
               ${b.sub.some(s => s) ? `<br><small style="color: #666;"><i>Pengganti: ${b.sub.filter(s => s).join(', ')}</i></small>` : ''}
             </li>
           `).join('') || '<li>-</li>'}
@@ -344,6 +345,10 @@ const HalalForm = ({ job, onClose }) => {
                   }} />
                   <input placeholder="Sertifikat Halal" value={b.sertifikat} onChange={e => {
                     const newBahan = [...formData.bahan]; newBahan[i] = {...b, sertifikat: e.target.value};
+                    setFormData({...formData, bahan: newBahan});
+                  }} />
+                  <input placeholder="Tgl Expired" value={b.expired || ''} onChange={e => {
+                    const newBahan = [...formData.bahan]; newBahan[i] = {...b, expired: e.target.value};
                     setFormData({...formData, bahan: newBahan});
                   }} />
                 </div>
