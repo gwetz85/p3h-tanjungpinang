@@ -17,7 +17,7 @@ const HalalForm = ({ job, onClose }) => {
     location: null,
     siHalalEmail: '',
     siHalalPassword: '',
-    bahan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
+    bahan: Array(40).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     pembersih: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     kemasan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '' }))
   };
@@ -26,10 +26,17 @@ const HalalForm = ({ job, onClose }) => {
     ...defaultData,
     ...(job.halalData || {}),
     // Deeply ensure arrays and sub-properties exist
-    bahan: (job.halalData?.bahan || defaultData.bahan).map(b => ({
-      ...b,
-      sub: b.sub || ['']
-    })),
+    bahan: (() => {
+      const existing = job.halalData?.bahan || defaultData.bahan;
+      const padded = [...existing];
+      while (padded.length < 40) {
+        padded.push({ merk: '', produsen: '', sertifikat: '', sub: [''] });
+      }
+      return padded.map(b => ({
+        ...b,
+        sub: b.sub || ['']
+      }));
+    })(),
     pembersih: (job.halalData?.pembersih || defaultData.pembersih).map(p => ({
       ...p,
       sub: p.sub || ['']
@@ -322,7 +329,7 @@ const HalalForm = ({ job, onClose }) => {
             <div className="input-group"><label>Pendapatan</label><input type="text" value={formData.pendapatan} onChange={e => setFormData({...formData, pendapatan: e.target.value})} /></div>
           </div>
 
-          <div className="section-title mt-4">1. Bahan Pembuatan Produk (10 Item)</div>
+          <div className="section-title mt-4">1. Bahan Pembuatan Produk (40 Item)</div>
           <div className="bahan-list">
             {formData.bahan.map((b, i) => (
               <div key={i} className="bahan-item glass-card mb-2">
