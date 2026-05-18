@@ -139,8 +139,8 @@ const Topbar = () => {
         <h2 className="topbar-title">{getPageTitle(location.pathname)}</h2>
       </div>
 
-      <div className="topbar-center" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span className="topbar-datetime" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500', background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '20px', border: '1px solid var(--surface-border)' }}>
+      <div className="topbar-center">
+        <span className="topbar-datetime">
           {formatDateTime(time)}
         </span>
       </div>

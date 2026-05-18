@@ -84,7 +84,7 @@ const Sparkline = ({ points, color }) => {
 };
 
 const Dashboard = () => {
-  const { currentUser, role } = useAuth();
+  const { currentUser, role, userData } = useAuth();
   const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, returned: 0, koordinator: 0 });
   const [upcomingVisits, setUpcomingVisits] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
@@ -318,7 +318,7 @@ const Dashboard = () => {
       {/* Welcome Bar */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="welcome-banner">
         <div className="welcome-text">
-          <h1>Selamat Datang Kembali, {currentUser?.displayName || 'Petugas'}!</h1>
+          <h1>Selamat Datang Kembali, {userData?.nama || currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Petugas'}!</h1>
           <p>Berikut adalah ringkasan perkembangan sertifikasi halal di Kota Tanjungpinang hari ini.</p>
         </div>
       </motion.div>
@@ -594,22 +594,22 @@ const Dashboard = () => {
                   <span className="badge-type-large" style={{ background: '#eff6ff', color: '#2563eb', padding: '6px 12px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600, display: 'inline-block' }}>{selectedVisit.jenisPekerjaan}</span>
                 </div>
 
-                <div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', textAlign: 'left' }}>
+                <div className="detail-info-grid" style={{ textAlign: 'left' }}>
                   <div className="info-item">
-                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Nama Pelaku Usaha</label>
-                    <p style={{ color: '#0f172a', fontWeight: 600, margin: 0 }}>{selectedVisit.nama}</p>
+                    <label>Nama Pelaku Usaha</label>
+                    <p>{selectedVisit.nama}</p>
                   </div>
                   
                   <div className="info-item">
-                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Kontak WhatsApp</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <p style={{ margin: 0, color: '#0f172a' }}>{selectedVisit.wa || '-'}</p>
+                    <label>Kontak WhatsApp</label>
+                    <div className="whatsapp-link-container">
+                      <p>{selectedVisit.wa || '-'}</p>
                       {selectedVisit.wa && (
                         <a 
                           href={`https://wa.me/${selectedVisit.wa.replace(/\D/g, '')}`} 
                           target="_blank" 
                           rel="noreferrer" 
-                          style={{ color: '#10b981', display: 'inline-flex', padding: '4px', background: '#f0fdf4', borderRadius: '50%' }}
+                          className="wa-btn"
                         >
                           <MessageSquare size={14} />
                         </a>
@@ -617,21 +617,21 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Alamat Domisili</label>
-                    <p style={{ margin: 0, color: '#475569' }}>{selectedVisit.alamat || '-'}</p>
+                  <div className="info-item full">
+                    <label>Alamat Domisili</label>
+                    <p>{selectedVisit.alamat || '-'}</p>
                   </div>
 
                   {selectedVisit.alamatUsaha && (
-                    <div className="info-item" style={{ gridColumn: 'span 2' }}>
-                      <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Alamat Usaha / Lokasi Produksi</label>
-                      <p style={{ margin: 0, color: '#475569' }}>{selectedVisit.alamatUsaha || '-'}</p>
+                    <div className="info-item full">
+                      <label>Alamat Usaha / Lokasi Produksi</label>
+                      <p>{selectedVisit.alamatUsaha || '-'}</p>
                     </div>
                   )}
 
-                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Jadwal Kunjungan Lapangan</label>
-                    <p style={{ margin: 0, color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div className="info-item full">
+                    <label>Jadwal Kunjungan Lapangan</label>
+                    <p className="primary-text">
                       <Calendar size={15} />
                       {new Date(selectedVisit.jadwalKunjungan).toLocaleString('id-ID', { 
                         weekday: 'long', 
@@ -645,16 +645,16 @@ const Dashboard = () => {
                   </div>
 
                   <div className="info-item">
-                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Sisa Waktu Kunjungan</label>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#fef2f2', color: '#ef4444', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 600 }}>
+                    <label>Sisa Waktu Kunjungan</label>
+                    <div className="countdown-badge">
                       <Timer size={13} />
                       <CountdownTimer targetDate={selectedVisit.jadwalKunjungan} />
                     </div>
                   </div>
 
-                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Tanggal Registrasi</label>
-                    <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
+                  <div className="info-item">
+                    <label>Tanggal Registrasi</label>
+                    <p>
                       {selectedVisit.tanggalInput 
                         ? new Date(selectedVisit.tanggalInput).toLocaleString('id-ID', { 
                             day: 'numeric', 
