@@ -2339,3 +2339,40 @@ select option {
   background-color: #e2e8f0 !important;
   border-radius: 8px;
 }
+
+/* Modal specific utilities for Dashboard */
+.whatsapp-link-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wa-btn {
+  color: #10b981;
+  display: inline-flex;
+  padding: 4px;
+  background: #f0fdf4;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+.wa-btn:hover {
+  background: #dcfce7;
+}
+.primary-text {
+  margin: 0;
+  color: var(--primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
