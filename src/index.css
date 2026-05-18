@@ -2414,36 +2414,24 @@ select option {
 }
 
 .simpu-logo-circle {
-  width: 240px;
-  height: 240px;
-  background: radial-gradient(circle, rgba(255,255,255,1) 45%, rgba(255,255,255,0) 75%);
+  width: 160px;
+  height: 160px;
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
-  overflow: visible;
-  animation: logoFloatPulse 3s infinite alternate ease-in-out;
-}
-
-@keyframes logoFloatPulse {
-  0% {
-    transform: scale(0.96);
-    opacity: 0.85;
-  }
-  100% {
-    transform: scale(1.04);
-    opacity: 1;
-  }
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
 .simpu-logo-circle img {
-  width: 65%;
-  height: 65%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   object-position: center;
-  mix-blend-mode: multiply;
-  transform: none; /* Reset translation, centering is automatic now */
+  transform: scale(1.13) translate(2px, 3px);
 }
 
 .simpu-title {
