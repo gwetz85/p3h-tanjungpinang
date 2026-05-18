@@ -35,10 +35,10 @@ const NotificationManager = () => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         prosesList = Object.keys(data).reduce((acc, key) => {
-          const job = data[key];
+          const { halalData, ...rest } = data[key];
           // Filter only jobs assigned to current Petugas
-          if (job.petugasId === currentUser.uid || job.petugas === currentUser.email) {
-            acc.push({ id: key, ...job });
+          if (rest.petugasId === currentUser.uid || rest.petugas === currentUser.email) {
+            acc.push({ id: key, ...rest });
           }
           return acc;
         }, []);
@@ -52,10 +52,10 @@ const NotificationManager = () => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         pendingList = Object.keys(data).reduce((acc, key) => {
-          const job = data[key];
+          const { halalData, ...rest } = data[key];
           // Filter only jobs assigned to current Petugas
-          if (job.petugasId === currentUser.uid || job.petugas === currentUser.email) {
-            acc.push({ id: key, ...job });
+          if (rest.petugasId === currentUser.uid || rest.petugas === currentUser.email) {
+            acc.push({ id: key, ...rest });
           }
           return acc;
         }, []);
