@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserCircle, LogOut, Camera, X, Upload } from 'lucide-react';
+import { LogOut, Camera, X, Upload, Bell, ChevronDown } from 'lucide-react';
 import { auth, rtdb } from '../firebase';
 import { ref, update, onValue } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -131,44 +131,48 @@ const Topbar = () => {
 
   const displayName = userData?.nama || currentUser?.email?.split('@')[0] || 'User';
   const displayPhoto = userData?.photoURL || koordinatorPhoto;
+  const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AD';
 
   return (
-    <div className="topbar glass-card">
+    <div className="topbar">
       <div className="topbar-left">
         <h2 className="topbar-title">{getPageTitle(location.pathname)}</h2>
       </div>
       
-      <div className="topbar-center">
-        <div className="topbar-datetime">
-          {formatDateTime(time)}
-        </div>
-      </div>
-      
       <div className="topbar-right">
-        <div className="user-info" onClick={() => setShowDropdown(!showDropdown)}>
-          <div className="user-details">
-            <span className="user-name">{displayName}</span>
-            <span className="user-role">{role || 'Pending'}</span>
-          </div>
-          <div className="user-icon" style={{ overflow: 'hidden', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Bell Icon Notification */}
+        <button className="topbar-icon-btn" title="Notifikasi">
+          <Bell size={18} />
+          <span className="notification-badge-dot"></span>
+        </button>
+
+        <div className="user-profile-trigger" onClick={() => setShowDropdown(!showDropdown)}>
+          <div className="avatar-circle">
             {displayPhoto ? (
               <img src={displayPhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <UserCircle size={36} strokeWidth={1.5} />
+              <span className="avatar-initials">{initials}</span>
             )}
           </div>
           
+          <div className="user-profile-details">
+            <span className="user-profile-name">{displayName}</span>
+            <span className="user-profile-role">{role || 'Pending'}</span>
+          </div>
+
+          <ChevronDown size={14} className="chevron-down-icon" />
+          
           {showDropdown && (
-            <div className="user-dropdown glass-card">
+            <div className="user-dropdown-menu">
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowPhotoModal(true); setShowDropdown(false); }} 
-                className="btn-dropdown-item"
+                className="dropdown-menu-item"
               >
-                <Camera size={18} />
+                <Camera size={16} />
                 <span>Ubah Foto Profil</span>
               </button>
-              <button onClick={handleLogout} className="btn-dropdown-item text-danger">
-                <LogOut size={18} />
+              <button onClick={handleLogout} className="dropdown-menu-item logout-item">
+                <LogOut size={16} />
                 <span>Keluar</span>
               </button>
             </div>

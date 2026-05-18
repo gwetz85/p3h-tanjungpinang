@@ -10,6 +10,7 @@ const DataKoordinator = () => {
   const [coordinators, setCoordinators] = useState([]);
   const [formData, setFormData] = useState({ nama: '', phone: '', wilayah: '' });
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [compressing, setCompressing] = useState(false);
@@ -24,6 +25,10 @@ const DataKoordinator = () => {
       } else {
         setCoordinators([]);
       }
+      setInitialLoading(false);
+    }, (error) => {
+      console.error(error);
+      setInitialLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -125,7 +130,21 @@ const DataKoordinator = () => {
             </tr>
           </thead>
           <tbody>
-            {coordinators.length === 0 ? (
+            {initialLoading ? (
+              [1, 2, 3].map(n => (
+                <tr key={n} className="skeleton-pulse">
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div className="skeleton" style={{ width: '36px', height: '36px', borderRadius: '50%' }}></div>
+                      <div className="skeleton" style={{ width: '120px', height: '14px' }}></div>
+                    </div>
+                  </td>
+                  <td><div className="skeleton" style={{ width: '100px', height: '14px' }}></div></td>
+                  <td><div className="skeleton" style={{ width: '150px', height: '14px' }}></div></td>
+                  {['Admin', 'superadmin'].includes(role) && <td><div className="skeleton" style={{ width: '80px', height: '14px', margin: '0 auto' }}></div></td>}
+                </tr>
+              ))
+            ) : coordinators.length === 0 ? (
               <tr>
                 <td colSpan={['Admin', 'superadmin'].includes(role) ? 4 : 3} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
                   Belum ada data petugas lapangan.
@@ -173,7 +192,20 @@ const DataKoordinator = () => {
 
       {/* Mobile Card Layout */}
       <div className="mobile-job-cards mobile-only">
-        {coordinators.length === 0 ? (
+        {initialLoading ? (
+          [1, 2, 3].map(n => (
+            <div key={n} className="visit-card-compact glass-card skeleton-pulse" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div className="skeleton" style={{ width: '50px', height: '50px', borderRadius: '50%' }}></div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="skeleton" style={{ width: '120px', height: '16px' }}></div>
+                  <div className="skeleton" style={{ width: '90px', height: '12px' }}></div>
+                  <div className="skeleton" style={{ width: '140px', height: '12px' }}></div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : coordinators.length === 0 ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>
             Belum ada data petugas lapangan.
           </div>

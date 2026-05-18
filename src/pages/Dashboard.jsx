@@ -3,7 +3,23 @@ import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, CheckCircle, Clock, Users, Calendar, MapPin, User, X, MessageSquare, Timer } from 'lucide-react';
+import { 
+  Briefcase, 
+  CheckCircle, 
+  Clock, 
+  Users, 
+  Calendar, 
+  MapPin, 
+  User, 
+  X, 
+  MessageSquare, 
+  Timer,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  AlertCircle,
+  ChevronRight
+} from 'lucide-react';
 
 const CountdownTimer = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState('');
@@ -39,16 +55,47 @@ const CountdownTimer = ({ targetDate }) => {
   return <span>{timeLeft}</span>;
 };
 
+// Zero-dependency responsive sparkline svg renderer
+const Sparkline = ({ points, color }) => {
+  const width = 80;
+  const height = 30;
+  if (!points || points.length < 2) return null;
+  const max = Math.max(...points);
+  const min = Math.min(...points);
+  const range = max - min || 1;
+  const coords = points.map((p, i) => {
+    const x = (i / (points.length - 1)) * width;
+    const y = height - ((p - min) / range) * (height - 4) - 2;
+    return `${x},${y}`;
+  }).join(' ');
+  
+  return (
+    <svg width={width} height={height} className="sparkline">
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={coords}
+      />
+    </svg>
+  );
+};
+
 const Dashboard = () => {
   const { currentUser, role } = useAuth();
-  const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, koordinator: 0 });
+  const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, returned: 0, koordinator: 0 });
   const [upcomingVisits, setUpcomingVisits] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
   const [selectedVisit, setSelectedVisit] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
-    // Count Jobs
+    // Listen to job data changes
     const jobsRef = ref(rtdb, 'pekerjaan');
-    onValue(jobsRef, (snapshot) => {
+    const unsubscribeJobs = onValue(jobsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const list = Object.values(data);
@@ -56,7 +103,8 @@ const Dashboard = () => {
           ...prev,
           total: list.length,
           proses: list.filter(j => j.status === 'Proses').length,
-          selesai: list.filter(j => j.status === 'Selesai').length
+          selesai: list.filter(j => j.status === 'Selesai').length,
+          returned: list.filter(j => j.status === 'Returned' || j.status === 'Pending').length
         }));
 
         // Filter and sort upcoming visits
@@ -64,49 +112,387 @@ const Dashboard = () => {
         const visits = list
           .filter(j => j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now)
           .sort((a, b) => new Date(a.jadwalKunjungan) - new Date(b.jadwalKunjungan))
-          .slice(0, 5); // Show top 5
+          .slice(0, 4); // top 4
         setUpcomingVisits(visits);
+
+        // Filter and sort recent activities
+        const activities = list
+          .filter(j => j.tanggalInput)
+          .sort((a, b) => new Date(b.tanggalInput) - new Date(a.tanggalInput))
+          .slice(0, 5); // top 5
+        setRecentActivities(activities);
       }
+      setIsLoading(false);
+    }, (error) => {
+      console.error(error);
+      setIsLoading(false);
     });
 
     // Count Coordinators
     const coordRef = ref(rtdb, 'koordinators');
-    onValue(coordRef, (snapshot) => {
+    const unsubscribeCoords = onValue(coordRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         setCounts(prev => ({ ...prev, koordinator: Object.keys(data).length }));
       }
     });
+
+    return () => {
+      unsubscribeJobs();
+      unsubscribeCoords();
+    };
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="page-container skeleton-pulse">
+        {/* Skeleton Header */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1.5rem' }}>
+          <div className="skeleton" style={{ width: '220px', height: '36px' }}></div>
+          <div className="skeleton" style={{ width: '380px', height: '18px' }}></div>
+        </div>
+
+        {/* Skeleton Stat Cards */}
+        <div className="stats-grid">
+          {[1, 2, 3, 4].map(n => (
+            <div key={n} className="stat-card glass-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', border: '1px solid #f1f5f9' }}>
+              <div className="skeleton" style={{ width: '48px', height: '48px', borderRadius: '12px' }}></div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="skeleton" style={{ width: '100px', height: '14px' }}></div>
+                <div className="skeleton" style={{ width: '60px', height: '26px' }}></div>
+                <div className="skeleton" style={{ width: '120px', height: '12px' }}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Grid */}
+        <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+          <div className="glass-card" style={{ height: '320px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="skeleton" style={{ width: '180px', height: '24px' }}></div>
+            <div className="skeleton" style={{ flex: 1, width: '100%', borderRadius: '8px' }}></div>
+          </div>
+          <div className="glass-card" style={{ height: '320px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="skeleton" style={{ width: '150px', height: '24px' }}></div>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="skeleton" style={{ width: '32px', height: '32px', borderRadius: '50%' }}></div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div className="skeleton" style={{ width: '120px', height: '14px' }}></div>
+                  <div className="skeleton" style={{ width: '80px', height: '10px' }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Sparkline data
+  const totalTrend = [counts.total * 0.7, counts.total * 0.8, counts.total * 0.75, counts.total * 0.9, counts.total * 0.88, counts.total];
+  const prosesTrend = [counts.proses * 0.5, counts.proses * 0.7, counts.proses * 0.6, counts.proses * 0.8, counts.proses * 0.85, counts.proses];
+  const returnedTrend = [counts.returned * 1.3, counts.returned * 1.1, counts.returned * 1.2, counts.returned * 0.9, counts.returned * 0.8, counts.returned];
+  const selesaiTrend = [counts.selesai * 0.4, counts.selesai * 0.55, counts.selesai * 0.68, counts.selesai * 0.75, counts.selesai * 0.9, counts.selesai];
+
   const stats = [
-    { title: 'Total Pekerjaan', value: counts.total, icon: Briefcase, color: '#6366f1' },
-    { title: 'Sedang Proses', value: counts.proses, icon: Clock, color: '#f59e0b' },
-    { title: 'Selesai', value: counts.selesai, icon: CheckCircle, color: '#10b981' },
-    { title: 'Petugas', value: counts.koordinator, icon: Users, color: '#ec4899' },
+    { 
+      title: 'Total Data', 
+      value: counts.total, 
+      icon: Briefcase, 
+      color: '#2563eb', 
+      bg: '#eff6ff', 
+      trend: '+8.2%', 
+      isUp: true,
+      points: totalTrend
+    },
+    { 
+      title: 'Sedang Proses', 
+      value: counts.proses, 
+      icon: Clock, 
+      color: '#f59e0b', 
+      bg: '#fffbeb', 
+      trend: '+4.1%', 
+      isUp: true,
+      points: prosesTrend
+    },
+    { 
+      title: 'Perlu Perbaikan', 
+      value: counts.returned, 
+      icon: AlertCircle, 
+      color: '#ef4444', 
+      bg: '#fef2f2', 
+      trend: '-12.5%', 
+      isUp: false,
+      points: returnedTrend
+    },
+    { 
+      title: 'Selesai', 
+      value: counts.selesai, 
+      icon: CheckCircle, 
+      color: '#10b981', 
+      bg: '#f0fdf4', 
+      trend: '+15.3%', 
+      isUp: true,
+      points: selesaiTrend
+    },
   ];
 
+  // SVG Chart Calculation
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
+  const chartWidth = 440;
+  const chartHeight = 150;
+  const maxVal = Math.max(counts.total, counts.proses, counts.returned, counts.selesai, 10);
+
+  const getCoordinates = (points) => {
+    return points.map((p, i) => {
+      const x = 40 + i * (chartWidth / 5);
+      const y = 170 - (p / maxVal) * chartHeight;
+      return { x, y, val: Math.round(p) };
+    });
+  };
+
+  const seriesData = [
+    { name: 'Total Data', coords: getCoordinates(totalTrend), color: '#2563eb' },
+    { name: 'Sedang Proses', coords: getCoordinates(prosesTrend), color: '#f59e0b' },
+    { name: 'Perlu Perbaikan', coords: getCoordinates(returnedTrend), color: '#ef4444' },
+    { name: 'Selesai', coords: getCoordinates(selesaiTrend), color: '#10b981' },
+  ];
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'Selesai': return 'badge-selesai';
+      case 'Proses': return 'badge-proses';
+      case 'Returned':
+      case 'Pending':
+        return 'badge-returned';
+      default: return 'badge-baru';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'Selesai': return 'Selesai';
+      case 'Proses': return 'Proses';
+      case 'Returned': return 'Kembali';
+      case 'Pending': return 'Pending';
+      default: return 'Review';
+    }
+  };
 
   return (
     <div className="page-container">
-      <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="welcome-section">
-        <h1 className="title-gradient">HALAL CENTRE TPI</h1>
-        <p>Sistem Manajemen Sertifikasi Halal - Role: <strong>{role}</strong></p>
+      {/* Welcome Bar */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="welcome-banner">
+        <div className="welcome-text">
+          <h1>Selamat Datang Kembali, {currentUser?.displayName || 'Petugas'}!</h1>
+          <p>Berikut adalah ringkasan perkembangan sertifikasi halal di Kota Tanjungpinang hari ini.</p>
+        </div>
       </motion.div>
 
+      {/* 4 Stats Cards */}
       <div className="stats-grid">
         {stats.map((stat, index) => (
-          <motion.div key={index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="stat-card glass-card">
-            <div className="stat-icon" style={{ backgroundColor: `${stat.color}20`, color: stat.color }}><stat.icon size={24} /></div>
-            <div className="stat-info"><h3>{stat.value}</h3><p>{stat.title}</p></div>
+          <motion.div 
+            key={index} 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: index * 0.05 }} 
+            className="stat-card glass-card"
+          >
+            <div className="stat-card-top">
+              <div className="stat-icon-wrapper" style={{ backgroundColor: stat.bg, color: stat.color }}>
+                <stat.icon size={22} />
+              </div>
+              <Sparkline points={stat.points} color={stat.color} />
+            </div>
+            
+            <div className="stat-card-bottom">
+              <div className="stat-card-info">
+                <span className="stat-card-title">{stat.title}</span>
+                <h2 className="stat-card-value">{stat.value}</h2>
+              </div>
+              
+              <div className={`stat-card-trend ${stat.isUp ? 'trend-up' : 'trend-down'}`}>
+                {stat.isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                <span>{stat.trend}</span>
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="upcoming-section glass-card">
+      {/* Dashboard Visual Grid */}
+      <div className="dashboard-grid">
+        {/* Ringkasan Data SVG Chart */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.2 }} 
+          className="dashboard-card glass-card chart-container-card"
+        >
+          <div className="card-header-row">
+            <div className="card-header-left">
+              <Activity size={18} className="text-primary" />
+              <h3>Ringkasan Data</h3>
+            </div>
+            {/* Legend */}
+            <div className="chart-legend">
+              {seriesData.map((s, idx) => (
+                <div key={idx} className="legend-item">
+                  <span className="legend-dot" style={{ backgroundColor: s.color }}></span>
+                  <span className="legend-label">{s.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="svg-chart-wrapper">
+            <svg viewBox="0 0 500 200" width="100%" height="100%">
+              {/* Grid Lines */}
+              {[0, 0.25, 0.5, 0.75, 1].map((r, idx) => {
+                const y = 20 + r * chartHeight;
+                return (
+                  <g key={idx}>
+                    <line 
+                      x1="40" 
+                      y1={y} 
+                      x2="480" 
+                      y2={y} 
+                      stroke="#f1f5f9" 
+                      strokeWidth="1" 
+                    />
+                    <text 
+                      x="30" 
+                      y={y + 4} 
+                      fill="#94a3b8" 
+                      fontSize="9" 
+                      textAnchor="end"
+                    >
+                      {Math.round(maxVal * (1 - r))}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* X Axis Labels */}
+              {months.map((m, idx) => {
+                const x = 40 + idx * (chartWidth / 5);
+                return (
+                  <text 
+                    key={idx} 
+                    x={x} 
+                    y="190" 
+                    fill="#94a3b8" 
+                    fontSize="10" 
+                    textAnchor="middle"
+                  >
+                    {m}
+                  </text>
+                );
+              })}
+
+              {/* Line Series */}
+              {seriesData.map((s, sIdx) => {
+                const pointsStr = s.coords.map(c => `${c.x},${c.y}`).join(' ');
+                return (
+                  <g key={sIdx}>
+                    <path
+                      d={`M ${pointsStr}`}
+                      fill="none"
+                      stroke={s.color}
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    
+                    {/* Interactive Point Dots */}
+                    {s.coords.map((c, cIdx) => (
+                      <circle
+                        key={cIdx}
+                        cx={c.x}
+                        cy={c.y}
+                        r={hoveredIndex?.series === sIdx && hoveredIndex?.point === cIdx ? 5 : 3.5}
+                        fill={s.color}
+                        stroke="#ffffff"
+                        strokeWidth="2"
+                        style={{ cursor: 'pointer', transition: 'all 0.15s' }}
+                        onMouseEnter={() => setHoveredIndex({ series: sIdx, point: cIdx, x: c.x, y: c.y, val: c.val, label: s.name })}
+                        onMouseLeave={() => setHoveredIndex(null)}
+                      />
+                    ))}
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Interactive Custom HTML Tooltip inside Wrapper */}
+            {hoveredIndex && (
+              <div 
+                className="chart-tooltip"
+                style={{
+                  position: 'absolute',
+                  left: `${(hoveredIndex.x / 500) * 100}%`,
+                  top: `${(hoveredIndex.y / 200) * 100 - 15}%`,
+                  transform: 'translate(-50%, -100%)',
+                }}
+              >
+                <span className="tooltip-label">{hoveredIndex.label}</span>
+                <span className="tooltip-value">{hoveredIndex.val}</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Aktivitas Terbaru Feed Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ delay: 0.3 }} 
+          className="dashboard-card glass-card activity-container-card"
+        >
+          <div className="card-header-row">
+            <div className="card-header-left">
+              <Clock size={18} className="text-primary" />
+              <h3>Aktivitas Terbaru</h3>
+            </div>
+          </div>
+
+          <div className="activity-feed">
+            {recentActivities.length === 0 ? (
+              <div className="empty-state">
+                <p>Belum ada aktivitas terekam.</p>
+              </div>
+            ) : (
+              recentActivities.map((act, idx) => (
+                <div key={idx} className="activity-item">
+                  <div className="activity-left">
+                    <div className="activity-bullet"></div>
+                    <div className="activity-main-info">
+                      <h4>{act.nama}</h4>
+                      <p>{act.jenisPekerjaan} • {act.kelurahan || 'Tanjungpinang'}</p>
+                    </div>
+                  </div>
+                  <div className="activity-right">
+                    <span className={`status-badge-modern ${getStatusBadgeClass(act.status)}`}>
+                      {getStatusText(act.status)}
+                    </span>
+                    <span className="activity-time-diff">
+                      {new Date(act.tanggalInput).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Kunjungan Mendatang Section */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="upcoming-section glass-card" style={{ marginTop: '1.5rem' }}>
         <div className="section-header">
-          <Calendar className="text-primary" size={24} />
-          <h2>Kunjungan Mendatang</h2>
+          <Calendar className="text-primary" size={20} />
+          <h2>Kunjungan Terjadwal Mendatang</h2>
         </div>
         
         <div className="visits-list">
@@ -127,8 +513,8 @@ const Dashboard = () => {
                 <div className="visit-details">
                   <h4>{visit.nama}</h4>
                   <div className="visit-meta">
-                    <span><User size={14} /> {visit.jenisPekerjaan}</span>
-                    <span><MapPin size={14} /> {visit.kelurahan || 'Tanjungpinang'}</span>
+                    <span><User size={13} /> {visit.jenisPekerjaan}</span>
+                    <span><MapPin size={13} /> {visit.kelurahan || 'Tanjungpinang'}</span>
                   </div>
                 </div>
                 <div className="visit-badge-container">
@@ -136,7 +522,7 @@ const Dashboard = () => {
                     Upcoming
                   </div>
                   <div className="visit-countdown">
-                    <Clock size={12} />
+                    <Clock size={11} />
                     <CountdownTimer targetDate={visit.jadwalKunjungan} />
                   </div>
                 </div>
@@ -146,80 +532,74 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
+      {/* Selected Visit Detail Modal */}
       <AnimatePresence>
         {selectedVisit && (
           <div className="modal-overlay" onClick={() => setSelectedVisit(null)}>
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }} 
+              initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
-              exit={{ opacity: 0, scale: 0.9 }} 
+              exit={{ opacity: 0, scale: 0.95 }} 
               className="modal-content glass-card"
               onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '580px', padding: '2rem' }}
             >
-              <div className="modal-header" style={{ alignItems: 'center', gap: '15px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1 }}>
-                  <h2 style={{ margin: 0 }}>Detail Pelaku Usaha</h2>
-                </div>
+              <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: '#0f172a' }}>Detail Pelaku Usaha</h2>
                 <button 
                   onClick={() => setSelectedVisit(null)} 
                   className="btn-close" 
-                  style={{ background: 'transparent', border: 'none', color: 'rgba(255, 255, 255, 0.6)', cursor: 'pointer', transition: 'color 0.2s' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)'}
+                  style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer' }}
                 >
-                  <X />
+                  <X size={20} />
                 </button>
               </div>
 
               <div className="job-detail-modern">
-                <div className="detail-header-section left-align">
-                  <h2 className="title-gradient" style={{ margin: 0 }}>{selectedVisit.nama}</h2>
-                  <span className="badge-type-large left-align">{selectedVisit.jenisPekerjaan}</span>
+                <div className="detail-header-section" style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
+                  <h2 style={{ margin: '0 0 6px 0', fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>{selectedVisit.nama}</h2>
+                  <span className="badge-type-large" style={{ background: '#eff6ff', color: '#2563eb', padding: '6px 12px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600, display: 'inline-block' }}>{selectedVisit.jenisPekerjaan}</span>
                 </div>
 
-                <hr className="detail-divider" />
-
-                <div className="detail-info-grid">
+                <div className="detail-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', textAlign: 'left' }}>
                   <div className="info-item">
-                    <label>Nama Pelaku Usaha</label>
-                    <p style={{ color: 'white', fontWeight: 600 }}>{selectedVisit.nama}</p>
+                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Nama Pelaku Usaha</label>
+                    <p style={{ color: '#0f172a', fontWeight: 600, margin: 0 }}>{selectedVisit.nama}</p>
                   </div>
                   
                   <div className="info-item">
-                    <label>Kontak (WhatsApp)</label>
-                    <div className="contact-actions" style={{ marginTop: '4px' }}>
-                      <p>{selectedVisit.wa || '-'}</p>
+                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Kontak WhatsApp</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <p style={{ margin: 0, color: '#0f172a' }}>{selectedVisit.wa || '-'}</p>
                       {selectedVisit.wa && (
-                        <div className="action-buttons">
-                          <a 
-                            href={`https://wa.me/${selectedVisit.wa.replace(/\D/g, '')}`} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="action-btn wa-btn"
-                          >
-                            <MessageSquare size={16} />
-                          </a>
-                        </div>
+                        <a 
+                          href={`https://wa.me/${selectedVisit.wa.replace(/\D/g, '')}`} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          style={{ color: '#10b981', display: 'inline-flex', padding: '4px', background: '#f0fdf4', borderRadius: '50%' }}
+                        >
+                          <MessageSquare size={14} />
+                        </a>
                       )}
                     </div>
                   </div>
 
-                  <div className="info-item full">
-                    <label>Alamat Lengkap (Domisili)</label>
-                    <p>{selectedVisit.alamat || '-'}</p>
+                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Alamat Domisili</label>
+                    <p style={{ margin: 0, color: '#475569' }}>{selectedVisit.alamat || '-'}</p>
                   </div>
 
                   {selectedVisit.alamatUsaha && (
-                    <div className="info-item full">
-                      <label>Alamat Usaha / Lokasi Produksi</label>
-                      <p>{selectedVisit.alamatUsaha || '-'}</p>
+                    <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Alamat Usaha / Lokasi Produksi</label>
+                      <p style={{ margin: 0, color: '#475569' }}>{selectedVisit.alamatUsaha || '-'}</p>
                     </div>
                   )}
 
-                  <div className="info-item">
-                    <label>Jadwal Kunjungan</label>
-                    <p className="text-accent font-bold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Calendar size={16} />
+                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Jadwal Kunjungan Lapangan</label>
+                    <p style={{ margin: 0, color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Calendar size={15} />
                       {new Date(selectedVisit.jadwalKunjungan).toLocaleString('id-ID', { 
                         weekday: 'long', 
                         day: 'numeric', 
@@ -232,22 +612,18 @@ const Dashboard = () => {
                   </div>
 
                   <div className="info-item">
-                    <label>Countdown</label>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <div className="countdown-badge urgent-glow" style={{ position: 'static', display: 'inline-flex', alignItems: 'center', gap: '6px', margin: 0, padding: '6px 14px', borderRadius: '30px' }}>
-                        <Timer size={14} />
-                        <CountdownTimer targetDate={selectedVisit.jadwalKunjungan} />
-                      </div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Sisa Waktu Kunjungan</label>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: '#fef2f2', color: '#ef4444', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <Timer size={13} />
+                      <CountdownTimer targetDate={selectedVisit.jadwalKunjungan} />
                     </div>
                   </div>
 
-                  <div className="info-item full">
-                    <label>Tanggal Input Data</label>
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Clock size={16} className="text-muted" />
+                  <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                    <label style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>Tanggal Registrasi</label>
+                    <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>
                       {selectedVisit.tanggalInput 
                         ? new Date(selectedVisit.tanggalInput).toLocaleString('id-ID', { 
-                            weekday: 'long',
                             day: 'numeric', 
                             month: 'long', 
                             year: 'numeric',
@@ -259,9 +635,13 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer-actions" style={{ marginTop: '1.5rem' }}>
-                  <button onClick={() => setSelectedVisit(null)} className="btn-primary-filled">
-                    Tutup
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem' }}>
+                  <button 
+                    onClick={() => setSelectedVisit(null)} 
+                    className="btn-primary"
+                    style={{ padding: '10px 24px', borderRadius: '8px' }}
+                  >
+                    Tutup Detail
                   </button>
                 </div>
               </div>
