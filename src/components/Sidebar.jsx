@@ -40,7 +40,6 @@ const Sidebar = ({ isOpen, onClose }) => {
   return (
     <div className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-brand">
-        <img src="/logo-p3h.png" alt="P3H Logo" style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '4px' }} />
         <h2 style={{ color: 'white', fontWeight: 700, margin: 0, fontSize: '1.35rem', letterSpacing: '-0.5px' }}>P3H TPI</h2>
         <button onClick={onClose} className="mobile-close-btn" style={{ display: 'none', marginLeft: 'auto', background: 'none', border: 'none', color: 'white' }}>
           <X size={24} />
