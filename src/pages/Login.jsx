@@ -89,7 +89,7 @@ const Login = () => {
       {/* Center Logo Area */}
       <div className="simpu-logo-container">
         <div className="simpu-logo-circle">
-          <img src="/logo-p3h.png" alt="P3H Logo" />
+          <img src="/logo-p3h-transparent.png" alt="P3H Logo" />
         </div>
         <h1 className="simpu-title">P3H TPI</h1>
       </div>
