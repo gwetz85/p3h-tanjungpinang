@@ -82,133 +82,161 @@ const Login = () => {
   };
 
   return (
-    <div className="login-page-container">
-      <div className="mesh-background"></div>
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="login-card-modern glass-card"
-      >
-        <div className="login-header-modern">
-          <img src="/logo-p3h.png" alt="P3H Tanjungpinang" className="app-logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
-          <h1 className="brand-name">P3H TANJUNGPINANG</h1>
-          <p className="brand-tagline">Petugas Pendampingan Produk Halal</p>
+    <div className="login-fullscreen">
+      {/* Background Image is handled by CSS, but we can add an overlay here if needed */}
+      <div className="simpu-overlay"></div>
+
+      {/* Top Right Info Panel */}
+      <div className="simpu-info-panel">
+        <div className="info-header">
+          <Award size={14} /> PENGINPUTAN DATA SERTIFIKASI HALAL
         </div>
+        <div className="info-stats">
+          <div className="stat-box">
+            <span className="stat-val">14</span>
+            <span className="stat-lbl">HARI</span>
+          </div>
+          <div className="stat-box">
+            <span className="stat-val">19</span>
+            <span className="stat-lbl">JAM</span>
+          </div>
+          <div className="stat-box">
+            <span className="stat-val">29</span>
+            <span className="stat-lbl">MENIT</span>
+          </div>
+          <div className="stat-box">
+            <span className="stat-val">51</span>
+            <span className="stat-lbl">DETIK</span>
+          </div>
+        </div>
+        <div className="info-footer">
+          <span className="footer-icon"><Lock size={12} /> STATUS PENDAFTARAN</span>
+          <span className="footer-status">DIBUKA</span>
+        </div>
+      </div>
 
-        <div className="form-container-modern">
-          <AnimatePresence mode="wait">
-            {!isRegister ? (
-              <motion.form 
-                key="login"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                onSubmit={handleLogin} 
-                className="modern-form"
-              >
-                <div className="input-modern">
-                  <input 
-                    type="email" 
-                    placeholder="Alamat Email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+      {/* Center Logo Area */}
+      <div className="simpu-logo-container">
+        <div className="simpu-logo-circle">
+          <img src="/logo-p3h.png" alt="P3H Logo" />
+        </div>
+        <h1 className="simpu-title">P3H</h1>
+        <p className="simpu-subtitle">( PETUGAS PENDAMPINGAN PRODUK HALAL - TANJUNGPINANG )</p>
+      </div>
+
+      {/* Bottom Left Form Area */}
+      <div className="simpu-form-container">
+        <AnimatePresence mode="wait">
+          {!isRegister ? (
+            <motion.form 
+              key="login"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              onSubmit={handleLogin}
+            >
+              <div className="simpu-input-wrapper">
+                <div className="simpu-input-icon">
+                  <User size={18} />
                 </div>
+                <input 
+                  type="email" 
+                  placeholder="Email pengguna" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-                <div className="input-modern">
-                  <input 
-                    type="password" 
-                    placeholder="Kata Sandi" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+              <div className="simpu-input-wrapper">
+                <div className="simpu-input-icon">
+                  <Lock size={18} />
                 </div>
-
-                {error && <div className="error-modern">{error}</div>}
-                {success && <div className="success-modern">{success}</div>}
-
-                <button type="submit" className="btn-login-modern" disabled={loading}>
-                  {loading ? '...' : 'Masuk'}
+                <input 
+                  type="password" 
+                  placeholder="Kata sandi" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button type="submit" className="simpu-submit-btn" disabled={loading}>
+                  {loading ? '...' : '→'}
                 </button>
+              </div>
 
-                <div className="forgot-password">
-                  <span>Lupa kata sandi?</span>
+              {error && <div className="simpu-error">{error}</div>}
+              {success && <div className="simpu-success">{success}</div>}
+
+              <div className="simpu-form-footer">
+                <div className="footer-link" onClick={() => { setIsRegister(true); setError(''); setSuccess(''); }}>
+                  BELUM PUNYA AKUN?<br/>DAFTAR
                 </div>
-
-                <div className="divider-modern">
-                  <span>atau</span>
+                <div className="footer-link">
+                  CEK DATA<br/>PUBLIK
                 </div>
-
-                <div className="create-account-container">
-                  <button type="button" className="btn-register-modern" onClick={() => { setIsRegister(true); setError(''); setSuccess(''); }}>
-                    Buat Akun Baru
-                  </button>
+              </div>
+            </motion.form>
+          ) : (
+            <motion.form 
+              key="register"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              onSubmit={handleRegister}
+            >
+              <div className="simpu-input-wrapper">
+                <div className="simpu-input-icon">
+                  <UserPlus size={18} />
                 </div>
-              </motion.form>
-            ) : (
-              <motion.form 
-                key="register"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                onSubmit={handleRegister} 
-                className="modern-form"
-              >
-                <div className="register-header">
-                  <h2>Daftar Akun</h2>
-                  <p>Cepat dan mudah.</p>
+                <input 
+                  type="text" 
+                  placeholder="Nama Lengkap" 
+                  value={nama}
+                  onChange={(e) => setNama(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="simpu-input-wrapper">
+                <div className="simpu-input-icon">
+                  <Mail size={18} />
                 </div>
+                <input 
+                  type="email" 
+                  placeholder="Alamat Email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-                <div className="input-modern">
-                  <input 
-                    type="text" 
-                    placeholder="Nama Lengkap" 
-                    value={nama}
-                    onChange={(e) => setNama(e.target.value)}
-                    required
-                  />
+              <div className="simpu-input-wrapper">
+                <div className="simpu-input-icon">
+                  <Lock size={18} />
                 </div>
-
-                <div className="input-modern">
-                  <input 
-                    type="email" 
-                    placeholder="Alamat Email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="input-modern">
-                  <input 
-                    type="password" 
-                    placeholder="Kata Sandi Baru" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                {error && <div className="error-modern">{error}</div>}
-
-                <button type="submit" className="btn-register-submit" disabled={loading}>
-                  {loading ? '...' : 'Daftar'}
+                <input 
+                  type="password" 
+                  placeholder="Kata Sandi Baru" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button type="submit" className="simpu-submit-btn" disabled={loading}>
+                  {loading ? '...' : '→'}
                 </button>
+              </div>
 
-                <div className="back-to-login">
-                  <span onClick={() => { setIsRegister(false); setError(''); }}>Sudah punya akun?</span>
+              {error && <div className="simpu-error">{error}</div>}
+
+              <div className="simpu-form-footer">
+                <div className="footer-link" onClick={() => { setIsRegister(false); setError(''); }}>
+                  SUDAH PUNYA AKUN?<br/>MASUK
                 </div>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="login-footer-modern">
-          <p>© 2026 TarunaBangsa Team</p>
-        </div>
-      </motion.div>
+              </div>
+            </motion.form>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

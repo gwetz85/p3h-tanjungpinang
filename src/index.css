@@ -2376,3 +2376,323 @@ select option {
   font-size: 0.8rem;
   font-weight: 600;
 }
+
+/* --- SIMPU STYLE LOGIN REDESIGN --- */
+.login-fullscreen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: url('/halal-bg.png') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.simpu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
+  z-index: 1;
+}
+
+/* Center Logo Area */
+.simpu-logo-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.simpu-logo-circle {
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(255,255,255,0.3);
+  margin-bottom: 1.5rem;
+  border: 4px solid rgba(255,255,255,0.5);
+  backdrop-filter: blur(10px);
+}
+
+.simpu-logo-circle img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.simpu-title {
+  color: #fff;
+  font-size: 4.5rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 2px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.simpu-subtitle {
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  margin-top: 8px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* Top Right Info Panel */
+.simpu-info-panel {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  color: #fff;
+  width: 320px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.info-header {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+  color: #e2e8f0;
+  text-transform: uppercase;
+}
+
+.info-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #0f172a;
+  min-width: 60px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.stat-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 4px;
+  color: #64748b;
+}
+
+.info-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 16px;
+  border-radius: 30px;
+  color: #0f172a;
+}
+
+.footer-icon {
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-status {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ef4444;
+}
+
+/* Bottom Left Form Area */
+.simpu-form-container {
+  position: absolute;
+  bottom: 3rem;
+  left: 3rem;
+  z-index: 2;
+  width: 400px;
+}
+
+.simpu-input-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.simpu-input-icon {
+  position: absolute;
+  left: 20px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.simpu-input-wrapper input {
+  width: 100%;
+  padding: 18px 24px 18px 56px;
+  border-radius: 30px;
+  border: none;
+  background: rgba(248, 250, 252, 0.95);
+  font-size: 1rem;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.simpu-input-wrapper input:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+.simpu-submit-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  bottom: 6px;
+  width: 44px;
+  border-radius: 24px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.simpu-submit-btn:hover {
+  background: #1d4ed8;
+  transform: scale(1.05);
+}
+
+.simpu-form-footer {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding-left: 1rem;
+}
+
+.footer-link {
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1.4;
+}
+
+.footer-link:hover {
+  color: #fff;
+}
+
+.simpu-error, .simpu-success {
+  background: rgba(0,0,0,0.6);
+  color: #ef4444;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.simpu-success {
+  color: #10b981;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .simpu-logo-container {
+    top: 40%;
+  }
+  .simpu-title {
+    font-size: 3rem;
+  }
+  .simpu-subtitle {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+  }
+  .simpu-info-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .simpu-overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.9) 100%);
+  }
+  
+  .simpu-logo-container {
+    top: 30%;
+  }
+
+  .simpu-logo-circle {
+    width: 120px;
+    height: 120px;
+  }
+
+  .simpu-logo-circle img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .simpu-title {
+    font-size: 2.5rem;
+  }
+
+  .simpu-subtitle {
+    display: none;
+  }
+
+  .simpu-form-container {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 2rem;
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .simpu-form-footer {
+    justify-content: center;
+    text-align: center;
+    padding-left: 0;
+  }
+}
