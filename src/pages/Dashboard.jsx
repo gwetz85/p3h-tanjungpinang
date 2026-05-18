@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Briefcase, 
@@ -93,42 +93,77 @@ const Dashboard = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
-    // Listen to job data changes
-    const jobsRef = ref(rtdb, 'pekerjaan');
-    const unsubscribeJobs = onValue(jobsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.values(data);
-        setCounts(prev => ({
-          ...prev,
-          total: list.length,
-          proses: list.filter(j => j.status === 'Proses').length,
-          selesai: list.filter(j => j.status === 'Selesai').length,
-          returned: list.filter(j => j.status === 'Returned' || j.status === 'Pending').length
-        }));
+    // --- Lightweight parallel queries: only count records by status ---
+    // Instead of fetching the ENTIRE pekerjaan node (with heavy halalData),
+    // we fire separate small queries for each status.
 
-        // Filter and sort upcoming visits
-        const now = new Date();
-        const visits = list
-          .filter(j => j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now)
-          .sort((a, b) => new Date(a.jadwalKunjungan) - new Date(b.jadwalKunjungan))
-          .slice(0, 4); // top 4
-        setUpcomingVisits(visits);
+    const unsubscribers = [];
 
-        // Filter and sort recent activities
-        const activities = list
-          .filter(j => j.tanggalInput)
-          .sort((a, b) => new Date(b.tanggalInput) - new Date(a.tanggalInput))
-          .slice(0, 5); // top 5
-        setRecentActivities(activities);
-      }
+    // Helper: lightweight count listener for a specific status
+    const listenStatus = (status, callback) => {
+      const q = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo(status));
+      const unsub = onValue(q, (snapshot) => {
+        const data = snapshot.val();
+        const list = data ? Object.keys(data).map(k => ({ id: k, ...data[k] })) : [];
+        // Strip heavy halalData from memory immediately — we only need metadata here
+        const lightList = list.map(({ halalData, ...rest }) => rest);
+        callback(lightList);
+      }, (err) => { console.error(err); callback([]); });
+      unsubscribers.push(unsub);
+    };
+
+    let prosesJobs = [];
+    let pendingJobs = [];
+    let returnedJobs = [];
+    let selesaiCount = 0;
+    let reviewJobs = [];
+    let adminProcJobs = [];
+
+    const refreshCounts = () => {
+      const activeJobs = [...prosesJobs, ...pendingJobs, ...returnedJobs, ...reviewJobs, ...adminProcJobs];
+      const total = activeJobs.length + selesaiCount;
+      setCounts({
+        total,
+        proses: prosesJobs.length,
+        selesai: selesaiCount,
+        returned: returnedJobs.length + pendingJobs.length,
+        koordinator: counts.koordinator
+      });
+
+      // Upcoming visits from active jobs (they are lightweight already)
+      const now = new Date();
+      const visits = activeJobs
+        .filter(j => j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now)
+        .sort((a, b) => new Date(a.jadwalKunjungan) - new Date(b.jadwalKunjungan))
+        .slice(0, 4);
+      setUpcomingVisits(visits);
+
+      // Recent activities from active jobs
+      const activities = activeJobs
+        .filter(j => j.tanggalInput)
+        .sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0))
+        .slice(0, 5);
+      setRecentActivities(activities);
+
       setIsLoading(false);
-    }, (error) => {
-      console.error(error);
-      setIsLoading(false);
-    });
+    };
 
-    // Count Coordinators
+    listenStatus('Proses', (list) => { prosesJobs = list; refreshCounts(); });
+    listenStatus('Pending', (list) => { pendingJobs = list; refreshCounts(); });
+    listenStatus('Returned', (list) => { returnedJobs = list; refreshCounts(); });
+    listenStatus('Review', (list) => { reviewJobs = list; refreshCounts(); });
+    listenStatus('AdminProcessing', (list) => { adminProcJobs = list; refreshCounts(); });
+
+    // For "Selesai", we only need the count — use limitToLast(1) just to check existence,
+    // but to get accurate count we listen to the full selesai set (metadata only, no halalData needed in display)
+    const qSelesai = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Selesai'));
+    const unsubSelesai = onValue(qSelesai, (snapshot) => {
+      selesaiCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+      refreshCounts();
+    }, (err) => { console.error(err); });
+    unsubscribers.push(unsubSelesai);
+
+    // Count Coordinators (already lightweight)
     const coordRef = ref(rtdb, 'koordinators');
     const unsubscribeCoords = onValue(coordRef, (snapshot) => {
       const data = snapshot.val();
@@ -136,11 +171,9 @@ const Dashboard = () => {
         setCounts(prev => ({ ...prev, koordinator: Object.keys(data).length }));
       }
     });
+    unsubscribers.push(unsubscribeCoords);
 
-    return () => {
-      unsubscribeJobs();
-      unsubscribeCoords();
-    };
+    return () => unsubscribers.forEach(fn => fn());
   }, []);
 
   if (isLoading) {

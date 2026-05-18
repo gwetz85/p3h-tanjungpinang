@@ -54,7 +54,9 @@ const PendaftaranSihalal = () => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         reviewData = Object.keys(data).reduce((acc, key) => {
-          acc[key] = { id: key, ...data[key] };
+          // Strip heavy halalData from list — will be lazy-loaded when detail is opened
+          const { halalData, ...rest } = data[key];
+          acc[key] = { id: key, ...rest };
           return acc;
         }, {});
       } else {
@@ -67,7 +69,8 @@ const PendaftaranSihalal = () => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         processingData = Object.keys(data).reduce((acc, key) => {
-          acc[key] = { id: key, ...data[key] };
+          const { halalData, ...rest } = data[key];
+          acc[key] = { id: key, ...rest };
           return acc;
         }, {});
       } else {
@@ -81,6 +84,18 @@ const PendaftaranSihalal = () => {
       unsubProcessing();
     };
   }, []);
+
+  // Lazy-load halalData when a job is selected (stripped from list for performance)
+  useEffect(() => {
+    if (selectedJob && selectedJob.id && !selectedJob.halalData) {
+      const halalRef = ref(rtdb, `pekerjaan/${selectedJob.id}/halalData`);
+      onValue(halalRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setSelectedJob(prev => prev && prev.id === selectedJob.id ? { ...prev, halalData: snapshot.val() } : prev);
+        }
+      }, { onlyOnce: true });
+    }
+  }, [selectedJob?.id]);
 
   const handleStartProcess = async (jobId) => {
     try {

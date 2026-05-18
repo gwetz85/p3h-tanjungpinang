@@ -47,14 +47,25 @@ const CekPekerjaan = () => {
   useEffect(() => {
     if (selectedJob && selectedJob.id) {
       setSelectedJobPhoto('');
+      // Lazy-load photo from separate node
       const photoRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoPengajuan`);
       onValue(photoRef, (snapshot) => {
         if (snapshot.exists()) {
           setSelectedJobPhoto(snapshot.val());
         }
       }, { onlyOnce: true });
+
+      // Lazy-load halalData if not already present (stripped from list for performance)
+      if (!selectedJob.halalData) {
+        const halalRef = ref(rtdb, `pekerjaan/${selectedJob.id}/halalData`);
+        onValue(halalRef, (snapshot) => {
+          if (snapshot.exists()) {
+            setSelectedJob(prev => prev && prev.id === selectedJob.id ? { ...prev, halalData: snapshot.val() } : prev);
+          }
+        }, { onlyOnce: true });
+      }
     }
-  }, [selectedJob]);
+  }, [selectedJob?.id]);
 
 
 
@@ -70,7 +81,10 @@ const CekPekerjaan = () => {
     let returnedData = {};
 
     const updateJobsList = () => {
-      const combined = [...Object.values(prosesData), ...Object.values(pendingData), ...Object.values(returnedData)];
+      // Strip heavy halalData from list items — it's only needed in the detail modal
+      // and will be loaded lazily from the separate path when needed
+      const stripHeavy = (obj) => Object.values(obj).map(({ halalData, ...rest }) => rest);
+      const combined = [...stripHeavy(prosesData), ...stripHeavy(pendingData), ...stripHeavy(returnedData)];
       setJobs(combined);
       setLoading(false);
     };

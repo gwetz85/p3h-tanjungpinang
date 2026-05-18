@@ -19,7 +19,10 @@ const Selesai = () => {
       const data = snapshot.val();
       if (data) {
         const list = Object.keys(data)
-          .map(key => ({ id: key, ...data[key] }));
+          .map(key => {
+            const { halalData, ...rest } = data[key];
+            return { id: key, ...rest };
+          });
         
         // Sort newest first
         list.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
