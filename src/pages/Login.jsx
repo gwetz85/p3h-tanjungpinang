@@ -86,42 +86,12 @@ const Login = () => {
       {/* Background Image is handled by CSS, but we can add an overlay here if needed */}
       <div className="simpu-overlay"></div>
 
-      {/* Top Right Info Panel */}
-      <div className="simpu-info-panel">
-        <div className="info-header">
-          <Award size={14} /> PENGINPUTAN DATA SERTIFIKASI HALAL
-        </div>
-        <div className="info-stats">
-          <div className="stat-box">
-            <span className="stat-val">14</span>
-            <span className="stat-lbl">HARI</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-val">19</span>
-            <span className="stat-lbl">JAM</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-val">29</span>
-            <span className="stat-lbl">MENIT</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-val">51</span>
-            <span className="stat-lbl">DETIK</span>
-          </div>
-        </div>
-        <div className="info-footer">
-          <span className="footer-icon"><Lock size={12} /> STATUS PENDAFTARAN</span>
-          <span className="footer-status">DIBUKA</span>
-        </div>
-      </div>
-
       {/* Center Logo Area */}
       <div className="simpu-logo-container">
         <div className="simpu-logo-circle">
           <img src="/logo-p3h.png" alt="P3H Logo" />
         </div>
-        <h1 className="simpu-title">P3H</h1>
-        <p className="simpu-subtitle">( PETUGAS PENDAMPINGAN PRODUK HALAL - TANJUNGPINANG )</p>
+        <h1 className="simpu-title">P3H TPI</h1>
       </div>
 
       {/* Bottom Left Form Area */}
@@ -171,11 +141,9 @@ const Login = () => {
                 <div className="footer-link" onClick={() => { setIsRegister(true); setError(''); setSuccess(''); }}>
                   BELUM PUNYA AKUN?<br/>DAFTAR
                 </div>
-                <div className="footer-link">
-                  CEK DATA<br/>PUBLIK
-                </div>
               </div>
             </motion.form>
+
           ) : (
             <motion.form 
               key="register"
