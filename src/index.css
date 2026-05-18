@@ -113,7 +113,7 @@ select option {
 }
 
 .title-gradient {
-  background: linear-gradient(to right, #fff, var(--primary));
+  background: linear-gradient(to right, var(--text), var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 700;
@@ -1451,7 +1451,7 @@ select option {
 
 .date-time .date {
   font-weight: 700;
-  color: white;
+  color: var(--text);
 }
 
 .date-time .time {
@@ -1467,7 +1467,7 @@ select option {
 
 .applicant-cell .name {
   font-weight: 700;
-  color: white;
+  color: var(--text);
   font-size: 1rem;
 }
 
@@ -1527,7 +1527,7 @@ select option {
 .mini-progress .percent {
   font-size: 0.75rem;
   font-weight: 600;
-  color: white;
+  color: var(--text-muted);
 }
 
 /* Status Pill */
@@ -1557,17 +1557,27 @@ select option {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  color: white;
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid var(--surface-border);
+  color: var(--text-muted);
   cursor: pointer;
   transition: var(--transition);
 }
 
 .btn-table-icon:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.1);
+  color: var(--primary);
   transform: translateY(-2px);
 }
+
+/* Color Utilities */
+.text-primary { color: var(--primary) !important; }
+.text-secondary { color: var(--secondary) !important; }
+.text-accent { color: var(--accent) !important; }
+.text-success { color: var(--accent) !important; }
+.text-warning { color: var(--secondary) !important; }
+.text-danger { color: #ef4444 !important; }
+.text-muted { color: var(--text-muted) !important; }
 
 .italic { font-style: italic; }
 
@@ -1882,7 +1892,7 @@ select option {
   left: 0;
   width: 100%;
   height: 40px;
-  background: #004d40; /* Dark teal background */
+  background: #111827; /* Match dark slate sidebar background */
   color: white;
   display: flex;
   align-items: center;

@@ -482,7 +482,7 @@ const CekPekerjaan = () => {
                       <h4 style={{ color: '#ef4444', marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Info size={16} /> Catatan Perbaikan Admin:
                       </h4>
-                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'white' }}>{selectedJob.adminNote}</p>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#dc2626' }}>{selectedJob.adminNote}</p>
                     </div>
                   )}
 
@@ -555,12 +555,12 @@ const CekPekerjaan = () => {
 
                     {selectedJob.halalData?.surveyDriveLink && (
                       <div className="info-item full glass-card p-4 mt-2" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                        <label style={{ color: '#60a5fa', marginBottom: '8px', display: 'block' }}>Link Foto Survey Lapangan</label>
+                        <label style={{ color: 'var(--primary)', marginBottom: '8px', display: 'block' }}>Link Foto Survey Lapangan</label>
                         <a 
                           href={selectedJob.halalData.surveyDriveLink} 
                           target="_blank" 
                           rel="noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'white', textDecoration: 'none', fontWeight: '600' }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}
                         >
                           <ExternalLink size={18} /> Buka Google Drive Survey
                         </a>
