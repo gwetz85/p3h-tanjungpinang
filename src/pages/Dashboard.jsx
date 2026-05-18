@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
-import { ref, onValue, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
+import { ref, onValue, query, orderByChild, equalTo, limitToLast, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Briefcase, 
@@ -148,8 +148,30 @@ const Dashboard = () => {
       setIsLoading(false);
     };
 
+    const checkAndAutoUpdatePendingJobs = (pendingList) => {
+      if (!['superadmin', 'Admin'].includes(role)) return; // Only let admins trigger the auto-update to avoid multiple clients racing
+      
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const today = `${year}-${month}-${day}`;
+
+      pendingList.forEach(job => {
+        if (job.jadwalKunjungan && job.jadwalKunjungan <= today) {
+          update(ref(rtdb, `pekerjaan/${job.id}`), {
+            status: 'Proses'
+          }).catch(console.error);
+        }
+      });
+    };
+
     listenStatus('Proses', (list) => { prosesJobs = list; refreshCounts(); });
-    listenStatus('Pending', (list) => { pendingJobs = list; refreshCounts(); });
+    listenStatus('Pending', (list) => { 
+      pendingJobs = list; 
+      refreshCounts(); 
+      checkAndAutoUpdatePendingJobs(list);
+    });
     listenStatus('Returned', (list) => { returnedJobs = list; refreshCounts(); });
     listenStatus('Review', (list) => { reviewJobs = list; refreshCounts(); });
     listenStatus('AdminProcessing', (list) => { adminProcJobs = list; refreshCounts(); });
@@ -230,7 +252,7 @@ const Dashboard = () => {
 
   const stats = [
     { 
-      title: 'Total Data', 
+      title: 'Total Pekerjaan', 
       value: counts.total, 
       icon: Briefcase, 
       color: '#2563eb', 
@@ -240,17 +262,7 @@ const Dashboard = () => {
       points: totalTrend
     },
     { 
-      title: 'Sedang Proses', 
-      value: counts.proses, 
-      icon: Clock, 
-      color: '#f59e0b', 
-      bg: '#fffbeb', 
-      trend: '+4.1%', 
-      isUp: true,
-      points: prosesTrend
-    },
-    { 
-      title: 'Perlu Perbaikan', 
+      title: 'PENDING', 
       value: counts.returned, 
       icon: AlertCircle, 
       color: '#ef4444', 
@@ -258,6 +270,16 @@ const Dashboard = () => {
       trend: '-12.5%', 
       isUp: false,
       points: returnedTrend
+    },
+    { 
+      title: 'Proses', 
+      value: counts.proses, 
+      icon: Clock, 
+      color: '#f59e0b', 
+      bg: '#fffbeb', 
+      trend: '+4.1%', 
+      isUp: true,
+      points: prosesTrend
     },
     { 
       title: 'Selesai', 
