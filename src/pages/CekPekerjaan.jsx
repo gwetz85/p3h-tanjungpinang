@@ -43,6 +43,9 @@ const CekPekerjaan = () => {
   const [showHalal, setShowHalal] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [jobToCancel, setJobToCancel] = useState(null);
 
   useEffect(() => {
     if (selectedJob && selectedJob.id) {
@@ -233,18 +236,33 @@ const CekPekerjaan = () => {
     }
   };
 
-  const handleCancelJob = async (jobId) => {
-    if (window.confirm('Apakah Anda yakin ingin membatalkan pekerjaan ini?')) {
-      try {
-        await update(ref(rtdb, `pekerjaan/${jobId}`), {
-          status: 'Batal',
-          cancelledAt: Date.now()
-        });
-        alert('Pekerjaan berhasil dibatalkan.');
-      } catch (err) {
-        console.error(err);
-        alert('Gagal membatalkan pekerjaan.');
-      }
+  const handleCancelClick = (job) => {
+    setJobToCancel(job);
+    setCancelReason('');
+    setShowCancelModal(true);
+  };
+
+  const handleSubmitCancel = async (e) => {
+    e.preventDefault();
+    if (!cancelReason.trim()) {
+      alert('Harap isi alasan pembatalan');
+      return;
+    }
+    try {
+      await update(ref(rtdb, `pekerjaan/${jobToCancel.id}`), {
+        status: 'Selesai',
+        isCancelled: true,
+        cancelReason: cancelReason,
+        keterangan: `DIBATALKAN: ${cancelReason}`,
+        verifiedAt: Date.now()
+      });
+      alert('Pekerjaan berhasil dibatalkan dan dipindahkan ke Riwayat Selesai.');
+      setShowCancelModal(false);
+      setJobToCancel(null);
+      setCancelReason('');
+    } catch (err) {
+      console.error(err);
+      alert('Gagal memproses pembatalan.');
     }
   };
   const Countdown = ({ targetDate }) => {
@@ -422,7 +440,7 @@ const CekPekerjaan = () => {
                           <button 
                             className="btn-table-icon text-danger" 
                             title="Batalkan Pekerjaan" 
-                            onClick={() => handleCancelJob(job.id)}
+                            onClick={() => handleCancelClick(job)}
                           >
                             <X size={16} />
                           </button>
@@ -482,7 +500,7 @@ const CekPekerjaan = () => {
                     <button 
                       className="btn-table-icon text-danger" 
                       title="Batalkan Pekerjaan" 
-                      onClick={(e) => { e.stopPropagation(); handleCancelJob(job.id); }}
+                      onClick={(e) => { e.stopPropagation(); handleCancelClick(job); }}
                     >
                       <X size={16} />
                     </button>
@@ -621,7 +639,7 @@ const CekPekerjaan = () => {
                       <Edit3 size={18} /> {role === 'Admin' ? 'Edit Data' : 'Update Progres'}
                     </button>
                     <button 
-                      onClick={() => { handleCancelJob(selectedJob.id); setSelectedJob(null); }} 
+                      onClick={() => { handleCancelClick(selectedJob); setSelectedJob(null); }} 
                       className="btn-danger-outline"
                     >
                       <X size={18} /> Batalkan Pekerjaan
@@ -713,6 +731,33 @@ const CekPekerjaan = () => {
                 <div className="modal-actions">
                   <button type="button" onClick={() => { setShowSchedule(false); setSelectedJob(null); }} className="btn-secondary">Batal</button>
                   <button type="submit" className="btn-primary">Simpan Jadwal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {showCancelModal && jobToCancel && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="modal-content glass-card" style={{ maxWidth: '400px' }}>
+              <div className="modal-header">
+                <h2>Batalkan Pekerjaan</h2>
+                <button onClick={() => { setShowCancelModal(false); setJobToCancel(null); }} className="btn-close"><X /></button>
+              </div>
+              <form onSubmit={handleSubmitCancel} className="edit-form">
+                <div className="input-group">
+                  <label>Alasan Pembatalan</label>
+                  <textarea 
+                    rows="3" 
+                    placeholder="Masukkan alasan pembatalan pekerjaan..." 
+                    value={cancelReason} 
+                    onChange={(e) => setCancelReason(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" onClick={() => { setShowCancelModal(false); setJobToCancel(null); }} className="btn-secondary">Batal</button>
+                  <button type="submit" className="btn-primary" style={{ backgroundColor: '#ef4444' }}>Simpan & Selesaikan</button>
                 </div>
               </form>
             </motion.div>
