@@ -113,7 +113,11 @@ function App() {
               </ProtectedRoute>
             } />
             
-            <Route path="cek" element={<CekPekerjaan />} />
+            <Route path="cek" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'Petugas']}>
+                <CekPekerjaan />
+              </ProtectedRoute>
+            } />
             <Route path="selesai" element={<Selesai />} />
             <Route path="chat" element={<Chat />} />
           </Route>

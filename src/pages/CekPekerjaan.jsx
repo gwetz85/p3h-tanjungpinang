@@ -232,6 +232,21 @@ const CekPekerjaan = () => {
       alert('Gagal mengubah status pekerjaan');
     }
   };
+
+  const handleCancelJob = async (jobId) => {
+    if (window.confirm('Apakah Anda yakin ingin membatalkan pekerjaan ini?')) {
+      try {
+        await update(ref(rtdb, `pekerjaan/${jobId}`), {
+          status: 'Batal',
+          cancelledAt: Date.now()
+        });
+        alert('Pekerjaan berhasil dibatalkan.');
+      } catch (err) {
+        console.error(err);
+        alert('Gagal membatalkan pekerjaan.');
+      }
+    }
+  };
   const Countdown = ({ targetDate }) => {
     const [timeLeft, setTimeLeft] = useState('');
 
@@ -404,6 +419,13 @@ const CekPekerjaan = () => {
                           <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
                             <Info size={16} />
                           </button>
+                          <button 
+                            className="btn-table-icon text-danger" 
+                            title="Batalkan Pekerjaan" 
+                            onClick={() => handleCancelJob(job.id)}
+                          >
+                            <X size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -457,6 +479,13 @@ const CekPekerjaan = () => {
                         <FileText size={16} />
                       </button>
                     )}
+                    <button 
+                      className="btn-table-icon text-danger" 
+                      title="Batalkan Pekerjaan" 
+                      onClick={(e) => { e.stopPropagation(); handleCancelJob(job.id); }}
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -590,6 +619,12 @@ const CekPekerjaan = () => {
                     )}
                     <button onClick={() => setEditMode(true)} className="btn-primary-filled">
                       <Edit3 size={18} /> {role === 'Admin' ? 'Edit Data' : 'Update Progres'}
+                    </button>
+                    <button 
+                      onClick={() => { handleCancelJob(selectedJob.id); setSelectedJob(null); }} 
+                      className="btn-danger-outline"
+                    >
+                      <X size={18} /> Batalkan Pekerjaan
                     </button>
                     {role === 'Admin' && (
                       <button onClick={() => handleDeleteJob(selectedJob.id)} className="btn-danger-outline">

@@ -28,7 +28,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Input Pekerjaan', path: '/input', icon: PlusSquare, roles: ['superadmin', 'Admin'] },
-    { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['superadmin', 'Petugas'] },
     { name: 'Pendaftaran SIHALAL', path: '/pendaftaran', icon: FileSearch, roles: ['superadmin', 'Admin'] },
     { name: 'Riwayat Selesai', path: '/selesai', icon: History, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
