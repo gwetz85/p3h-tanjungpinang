@@ -17,7 +17,7 @@ const HalalForm = ({ job, onClose }) => {
     location: null,
     siHalalEmail: '',
     siHalalPassword: '',
-    bahan: Array(40).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', expired: '', sub: [''] })),
+    bahan: Array(40).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', expired: '', supplier: '', namaSwalayan: '', sub: [''] })),
     pembersih: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     kemasan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '' }))
   };
@@ -30,11 +30,13 @@ const HalalForm = ({ job, onClose }) => {
       const existing = job.halalData?.bahan || defaultData.bahan;
       const padded = [...existing];
       while (padded.length < 40) {
-        padded.push({ merk: '', produsen: '', sertifikat: '', expired: '', sub: [''] });
+        padded.push({ merk: '', produsen: '', sertifikat: '', expired: '', supplier: '', namaSwalayan: '', sub: [''] });
       }
       return padded.map(b => ({
         ...b,
         expired: b.expired || '',
+        supplier: b.supplier || '',
+        namaSwalayan: b.namaSwalayan || '',
         sub: b.sub || ['']
       }));
     })(),
@@ -223,6 +225,7 @@ const HalalForm = ({ job, onClose }) => {
           ${formData.bahan.filter(b => b.merk).map(b => `
             <li style="margin-bottom: 5px;">
               ${b.merk} (${b.produsen}) - Sertifikat: ${b.sertifikat || '-'} ${b.expired ? `(Exp: ${b.expired})` : ''}
+              ${b.supplier ? `<br><small style="color: #4b5563;">Supplier: ${b.supplier}${b.supplier === 'Swalayan' && b.namaSwalayan ? ` (${b.namaSwalayan})` : ''}</small>` : ''}
               ${b.sub.some(s => s) ? `<br><small style="color: #666;"><i>Pengganti: ${b.sub.filter(s => s).join(', ')}</i></small>` : ''}
             </li>
           `).join('') || '<li>-</li>'}
@@ -359,22 +362,68 @@ const HalalForm = ({ job, onClose }) => {
             {formData.bahan.map((b, i) => (
               <div key={i} className="bahan-item glass-card mb-2">
                 <div className="bahan-main">
-                  <input placeholder="Merk" value={b.merk} onChange={e => {
-                    const newBahan = [...formData.bahan]; newBahan[i] = {...b, merk: e.target.value};
-                    setFormData({...formData, bahan: newBahan});
-                  }} />
-                  <input placeholder="Produsen" value={b.produsen} onChange={e => {
-                    const newBahan = [...formData.bahan]; newBahan[i] = {...b, produsen: e.target.value};
-                    setFormData({...formData, bahan: newBahan});
-                  }} />
-                  <input placeholder="Sertifikat Halal" value={b.sertifikat} onChange={e => {
-                    const newBahan = [...formData.bahan]; newBahan[i] = {...b, sertifikat: e.target.value};
-                    setFormData({...formData, bahan: newBahan});
-                  }} />
-                  <input placeholder="Tgl Expired" value={b.expired || ''} onChange={e => {
-                    const newBahan = [...formData.bahan]; newBahan[i] = {...b, expired: e.target.value};
-                    setFormData({...formData, bahan: newBahan});
-                  }} />
+                  <div className="input-group">
+                    <label>Merk</label>
+                    <input placeholder="Merk" value={b.merk} onChange={e => {
+                      const newBahan = [...formData.bahan]; newBahan[i] = {...b, merk: e.target.value};
+                      setFormData({...formData, bahan: newBahan});
+                    }} />
+                  </div>
+                  <div className="input-group">
+                    <label>Produsen</label>
+                    <input placeholder="Produsen" value={b.produsen} onChange={e => {
+                      const newBahan = [...formData.bahan]; newBahan[i] = {...b, produsen: e.target.value};
+                      setFormData({...formData, bahan: newBahan});
+                    }} />
+                  </div>
+                  <div className="input-group">
+                    <label>Sertifikat Halal</label>
+                    <input placeholder="Sertifikat Halal" value={b.sertifikat} onChange={e => {
+                      const newBahan = [...formData.bahan]; newBahan[i] = {...b, sertifikat: e.target.value};
+                      setFormData({...formData, bahan: newBahan});
+                    }} />
+                  </div>
+                  <div className="input-group">
+                    <label>Tgl Expired</label>
+                    <input placeholder="Tgl Expired" value={b.expired || ''} onChange={e => {
+                      const newBahan = [...formData.bahan]; newBahan[i] = {...b, expired: e.target.value};
+                      setFormData({...formData, bahan: newBahan});
+                    }} />
+                  </div>
+                  <div className="input-group">
+                    <label>Supplier</label>
+                    <select 
+                      value={b.supplier || ''} 
+                      onChange={e => {
+                        const newBahan = [...formData.bahan]; 
+                        newBahan[i] = {
+                          ...b, 
+                          supplier: e.target.value,
+                          namaSwalayan: e.target.value === 'Swalayan' ? (b.namaSwalayan || '') : ''
+                        };
+                        setFormData({...formData, bahan: newBahan});
+                      }}
+                    >
+                      <option value="">Pilih Supplier</option>
+                      <option value="Pasar">Pasar</option>
+                      <option value="Swalayan">Swalayan</option>
+                      <option value="Kedai Kelontong">Kedai Kelontong</option>
+                    </select>
+                  </div>
+                  {b.supplier === 'Swalayan' && (
+                    <div className="input-group">
+                      <label>Nama Swalayan</label>
+                      <input 
+                        placeholder="Nama Swalayan" 
+                        value={b.namaSwalayan || ''} 
+                        onChange={e => {
+                          const newBahan = [...formData.bahan]; 
+                          newBahan[i] = {...b, namaSwalayan: e.target.value};
+                          setFormData({...formData, bahan: newBahan});
+                        }} 
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="sub-data">
                   <p>Sub Data Pengganti:</p>
