@@ -192,12 +192,6 @@ const CekPekerjaan = () => {
       alert('Harap pilih tanggal kunjungan.');
       return;
     }
-    const dateObj = new Date(scheduleDate);
-    const day = dateObj.getDay(); // 0 = Minggu, 5 = Jumat, 6 = Sabtu
-    if (day !== 5 && day !== 6 && day !== 0) {
-      alert('Jadwal kunjungan hanya bisa diatur pada hari Jumat, Sabtu, dan Minggu.');
-      return;
-    }
     try {
       await update(ref(rtdb, `pekerjaan/${selectedJob.id}`), {
         jadwalKunjungan: scheduleDate
