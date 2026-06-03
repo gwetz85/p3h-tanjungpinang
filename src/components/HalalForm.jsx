@@ -726,7 +726,17 @@ const HalalForm = ({ job, onClose }) => {
             </label>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <div style={{ flex: 1, background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', fontSize: '0.85rem', color: formData.location ? 'white' : 'rgba(255,255,255,0.3)' }}>
-                {formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : 'Lokasi Belum Diambil'}
+                {formData.location ? (
+                  <a 
+                    href={`https://www.google.com/maps?q=${formData.location.lat},${formData.location.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#60a5fa', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}
+                    title="Buka di Google Maps"
+                  >
+                    <ExternalLink size={14} /> {`${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}`}
+                  </a>
+                ) : 'Lokasi Belum Diambil'}
               </div>
               <button 
                 type="button" 
