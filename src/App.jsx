@@ -114,7 +114,7 @@ function App() {
             } />
             
             <Route path="cek" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Petugas']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
                 <CekPekerjaan />
               </ProtectedRoute>
             } />

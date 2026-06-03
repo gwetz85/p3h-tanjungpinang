@@ -129,22 +129,55 @@ const DataUser = () => {
                         <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{user.email}</div>
                       </td>
                       <td>
-                        <select 
-                          value={user.role} 
-                          onChange={(e) => handleUpdateRole(user.id, e.target.value)}
-                          style={{ 
-                            padding: '4px 8px', 
-                            fontSize: '0.8rem',
-                            backgroundColor: user.role === 'Pending' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                            color: user.role === 'Pending' ? '#f59e0b' : 'white',
-                            border: user.role === 'Pending' ? '1px solid #f59e0b' : '1px solid var(--glass-border)'
-                          }}
-                        >
-                          <option value="Pending">Pending Approval</option>
-                          <option value="Admin">Admin</option>
-                          <option value="Petugas">Petugas</option>
-                          <option value="Monitoring">Monitoring</option>
-                        </select>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '3px 10px',
+                            borderRadius: '20px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.3px',
+                            textTransform: 'uppercase',
+                            backgroundColor:
+                              user.role === 'Admin' ? '#eff6ff' :
+                              user.role === 'Petugas' ? '#f0fdf4' :
+                              user.role === 'Monitoring' ? '#fefce8' :
+                              '#fef2f2',
+                            color:
+                              user.role === 'Admin' ? '#2563eb' :
+                              user.role === 'Petugas' ? '#16a34a' :
+                              user.role === 'Monitoring' ? '#ca8a04' :
+                              '#ef4444',
+                            border: `1px solid ${
+                              user.role === 'Admin' ? '#bfdbfe' :
+                              user.role === 'Petugas' ? '#bbf7d0' :
+                              user.role === 'Monitoring' ? '#fde68a' :
+                              '#fecaca'
+                            }`
+                          }}>
+                            {user.role === 'Pending' ? 'Pending' : user.role}
+                          </span>
+                          <select 
+                            value={user.role} 
+                            onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                            style={{ 
+                              padding: '3px 6px', 
+                              fontSize: '0.75rem',
+                              backgroundColor: '#f8fafc',
+                              color: '#374151',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              width: '100%'
+                            }}
+                          >
+                            <option value="Pending">Pending Approval</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Petugas">Petugas</option>
+                            <option value="Monitoring">Monitoring</option>
+                          </select>
+                        </div>
                       </td>
                       <td>
                         <button onClick={() => handleDelete(user.id)} className="text-danger" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>

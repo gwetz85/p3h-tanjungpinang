@@ -325,6 +325,27 @@ const CekPekerjaan = () => {
         <h1 className="title-gradient">Proses & Verifikasi</h1>
       </div>
 
+      {/* View-only banner for Admin */}
+      {role === 'Admin' && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderLeft: '4px solid #2563eb',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginBottom: '1rem',
+          fontSize: '0.88rem',
+          color: '#1d4ed8',
+          fontWeight: 500
+        }}>
+          <Info size={16} style={{ flexShrink: 0 }} />
+          <span>Anda login sebagai <strong>Admin</strong> — halaman ini hanya dapat dilihat. Untuk mengubah data, gunakan akun Petugas atau Superadmin.</span>
+        </div>
+      )}
+
       <div className="stats-summary-grid">
         <div className="stat-summary-card glass-card">
           <div className="stat-summary-info">
@@ -371,7 +392,7 @@ const CekPekerjaan = () => {
                     <th>Kelurahan</th>
                     <th>Jenis & Progres</th>
                     <th>Status</th>
-                    <th>Aksi</th>
+                    {role !== 'Admin' && <th>Aksi</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -417,38 +438,46 @@ const CekPekerjaan = () => {
                         </span>
                       </td>
                       <td>
-                        <div className="table-actions" onClick={(e) => e.stopPropagation()}>
-                          <button 
-                            className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
-                            title={job.status === 'Proses' ? 'Tandai Pending (Menunggu)' : 'Mulai Kerjakan (Proses)'}
-                            onClick={() => handleToggleStatus(job)}
-                          >
-                            {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
-                          </button>
-                          <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
-                            <Calendar size={16} />
-                          </button>
-                          {job.jadwalKunjungan && (
-                            <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
-                              <CalendarX size={16} />
+                        {role !== 'Admin' ? (
+                          <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                            <button 
+                              className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
+                              title={job.status === 'Proses' ? 'Tandai Pending (Menunggu)' : 'Mulai Kerjakan (Proses)'}
+                              onClick={() => handleToggleStatus(job)}
+                            >
+                              {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
                             </button>
-                          )}
-                          {job.jenisPekerjaan === 'Sertifikasi Halal' && (
-                            <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={() => { setSelectedJob(job); setShowHalal(true); }}>
-                              <FileText size={16} />
+                            <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                              <Calendar size={16} />
                             </button>
-                          )}
-                          <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
-                            <Info size={16} />
-                          </button>
-                          <button 
-                            className="btn-table-icon text-danger" 
-                            title="Batalkan Pekerjaan" 
-                            onClick={() => handleCancelClick(job)}
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
+                            {job.jadwalKunjungan && (
+                              <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
+                                <CalendarX size={16} />
+                              </button>
+                            )}
+                            {job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                              <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={() => { setSelectedJob(job); setShowHalal(true); }}>
+                                <FileText size={16} />
+                              </button>
+                            )}
+                            <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
+                              <Info size={16} />
+                            </button>
+                            <button 
+                              className="btn-table-icon text-danger" 
+                              title="Batalkan Pekerjaan" 
+                              onClick={() => handleCancelClick(job)}
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                            <button className="btn-table-icon" title="Lihat Detail" onClick={() => setSelectedJob(job)}>
+                              <Info size={16} />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -481,33 +510,37 @@ const CekPekerjaan = () => {
                     <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : job.status === 'Pending' ? 'pending' : 'urgent'}`} style={{ marginRight: 'auto', alignSelf: 'center' }}>
                       {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.status ? job.status.toUpperCase() : 'PENDING')}
                     </div>
-                    <button 
-                      className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
-                      title={job.status === 'Proses' ? 'Tandai Pending' : 'Mulai Kerjakan'}
-                      onClick={(e) => { e.stopPropagation(); handleToggleStatus(job); }}
-                    >
-                      {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
-                    </button>
-                    <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
-                      <Calendar size={16} />
-                    </button>
-                    {job.jadwalKunjungan && (
-                      <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(job.id); }}>
-                        <CalendarX size={16} />
-                      </button>
+                    {role !== 'Admin' && (
+                      <>
+                        <button 
+                          className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
+                          title={job.status === 'Proses' ? 'Tandai Pending' : 'Mulai Kerjakan'}
+                          onClick={(e) => { e.stopPropagation(); handleToggleStatus(job); }}
+                        >
+                          {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
+                        </button>
+                        <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                          <Calendar size={16} />
+                        </button>
+                        {job.jadwalKunjungan && (
+                          <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(job.id); }}>
+                            <CalendarX size={16} />
+                          </button>
+                        )}
+                        {job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                          <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowHalal(true); }}>
+                            <FileText size={16} />
+                          </button>
+                        )}
+                        <button 
+                          className="btn-table-icon text-danger" 
+                          title="Batalkan Pekerjaan" 
+                          onClick={(e) => { e.stopPropagation(); handleCancelClick(job); }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
                     )}
-                    {job.jenisPekerjaan === 'Sertifikasi Halal' && (
-                      <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowHalal(true); }}>
-                        <FileText size={16} />
-                      </button>
-                    )}
-                    <button 
-                      className="btn-table-icon text-danger" 
-                      title="Batalkan Pekerjaan" 
-                      onClick={(e) => { e.stopPropagation(); handleCancelClick(job); }}
-                    >
-                      <X size={16} />
-                    </button>
                   </div>
                 </div>
               ))}
@@ -634,25 +667,49 @@ const CekPekerjaan = () => {
                   </div>
 
                   <div className="modal-footer-actions">
-                    {selectedJob.jenisPekerjaan === 'Sertifikasi Halal' && (
-                      <button onClick={() => setShowHalal(true)} className="btn-primary-outline">
-                        <FileText size={18} /> Isi Form Halal
-                      </button>
+                    {role !== 'Admin' && (
+                      <>
+                        {selectedJob.jenisPekerjaan === 'Sertifikasi Halal' && (
+                          <button onClick={() => setShowHalal(true)} className="btn-primary-outline">
+                            <FileText size={18} /> Isi Form Halal
+                          </button>
+                        )}
+                        <button onClick={() => setEditMode(true)} className="btn-primary-filled">
+                          <Edit3 size={18} /> Update Progres
+                        </button>
+                        <button 
+                          onClick={() => { handleCancelClick(selectedJob); setSelectedJob(null); }} 
+                          className="btn-danger-outline"
+                        >
+                          <X size={18} /> Batalkan Pekerjaan
+                        </button>
+                      </>
                     )}
-                    <button onClick={() => setEditMode(true)} className="btn-primary-filled">
-                      <Edit3 size={18} /> {role === 'Admin' ? 'Edit Data' : 'Update Progres'}
-                    </button>
-                    <button 
-                      onClick={() => { handleCancelClick(selectedJob); setSelectedJob(null); }} 
-                      className="btn-danger-outline"
-                    >
-                      <X size={18} /> Batalkan Pekerjaan
-                    </button>
                     {role === 'Admin' && (
-                      <button onClick={() => handleDeleteJob(selectedJob.id)} className="btn-danger-outline">
-                        <Trash2 size={18} /> Hapus
-                      </button>
+                      <div style={{
+                        gridColumn: '1 / -1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 14px',
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '8px',
+                        fontSize: '0.82rem',
+                        color: '#1d4ed8',
+                        fontWeight: 500
+                      }}>
+                        <Info size={14} />
+                        <span>Mode tampilan saja — Admin tidak dapat mengubah data ini.</span>
+                      </div>
                     )}
+                    <button 
+                      onClick={() => setSelectedJob(null)} 
+                      className="btn-secondary"
+                      style={{ marginLeft: role === 'Admin' ? '0' : 'auto' }}
+                    >
+                      Tutup
+                    </button>
                   </div>
                 </div>
               ) : (

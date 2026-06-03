@@ -18,7 +18,8 @@ import {
   TrendingDown,
   Activity,
   AlertCircle,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 
 const CountdownTimer = ({ targetDate }) => {
@@ -85,7 +86,7 @@ const Sparkline = ({ points, color }) => {
 
 const Dashboard = () => {
   const { currentUser, role, userData } = useAuth();
-  const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, returned: 0, koordinator: 0 });
+  const [counts, setCounts] = useState({ total: 0, proses: 0, selesai: 0, returned: 0, sihalal: 0, koordinator: 0 });
   const [upcomingVisits, setUpcomingVisits] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
   const [selectedVisit, setSelectedVisit] = useState(null);
@@ -122,13 +123,14 @@ const Dashboard = () => {
     const refreshCounts = () => {
       const activeJobs = [...prosesJobs, ...pendingJobs, ...returnedJobs, ...reviewJobs, ...adminProcJobs];
       const total = activeJobs.length + selesaiCount;
-      setCounts({
+      setCounts(prev => ({
         total,
         proses: prosesJobs.length,
         selesai: selesaiCount,
         returned: returnedJobs.length + pendingJobs.length,
-        koordinator: counts.koordinator
-      });
+        sihalal: reviewJobs.length + adminProcJobs.length,
+        koordinator: prev.koordinator
+      }));
 
       // Upcoming visits from active jobs (they are lightweight already)
       const now = new Date();
@@ -209,7 +211,7 @@ const Dashboard = () => {
 
         {/* Skeleton Stat Cards */}
         <div className="stats-grid">
-          {[1, 2, 3, 4].map(n => (
+          {[1, 2, 3, 4, 5].map(n => (
             <div key={n} className="stat-card glass-card" style={{ display: 'flex', alignItems: 'center', gap: '16px', border: '1px solid #f1f5f9' }}>
               <div className="skeleton" style={{ width: '48px', height: '48px', borderRadius: '12px' }}></div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -248,6 +250,7 @@ const Dashboard = () => {
   const totalTrend = [counts.total * 0.7, counts.total * 0.8, counts.total * 0.75, counts.total * 0.9, counts.total * 0.88, counts.total];
   const prosesTrend = [counts.proses * 0.5, counts.proses * 0.7, counts.proses * 0.6, counts.proses * 0.8, counts.proses * 0.85, counts.proses];
   const returnedTrend = [counts.returned * 1.3, counts.returned * 1.1, counts.returned * 1.2, counts.returned * 0.9, counts.returned * 0.8, counts.returned];
+  const sihalalTrend = [counts.sihalal * 0.6, counts.sihalal * 0.7, counts.sihalal * 0.65, counts.sihalal * 0.8, counts.sihalal * 0.9, counts.sihalal];
   const selesaiTrend = [counts.selesai * 0.4, counts.selesai * 0.55, counts.selesai * 0.68, counts.selesai * 0.75, counts.selesai * 0.9, counts.selesai];
 
   const stats = [
@@ -280,6 +283,16 @@ const Dashboard = () => {
       trend: '+4.1%', 
       isUp: true,
       points: prosesTrend
+    },
+    { 
+      title: 'Sihalal', 
+      value: counts.sihalal, 
+      icon: Shield, 
+      color: '#7c3aed', 
+      bg: '#f5f3ff', 
+      trend: '+6.8%', 
+      isUp: true,
+      points: sihalalTrend
     },
     { 
       title: 'Selesai', 
@@ -525,6 +538,9 @@ const Dashboard = () => {
                     <div className="activity-bullet"></div>
                     <div className="activity-main-info">
                       <h4>{act.nama}</h4>
+                      {act.namaUsaha && (
+                        <span style={{ fontSize: '0.74rem', color: '#2563eb', fontWeight: 600 }}>🏪 {act.namaUsaha}</span>
+                      )}
                       <p>{act.jenisPekerjaan} • {act.kelurahan || 'Tanjungpinang'}</p>
                     </div>
                   </div>
@@ -567,6 +583,11 @@ const Dashboard = () => {
                 </div>
                 <div className="visit-details">
                   <h4>{visit.nama}</h4>
+                  {visit.namaUsaha && (
+                    <p style={{ margin: '2px 0 4px', fontSize: '0.78rem', color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      🏪 {visit.namaUsaha}
+                    </p>
+                  )}
                   <div className="visit-meta">
                     <span><User size={13} /> {visit.jenisPekerjaan}</span>
                     <span><MapPin size={13} /> {visit.kelurahan || 'Tanjungpinang'}</span>
