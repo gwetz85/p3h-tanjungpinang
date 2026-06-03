@@ -1259,9 +1259,10 @@ select option {
 }
 
 .visit-details h4 {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   margin-bottom: 4px;
-  color: white;
+  color: #0f172a;
 }
 
 .visit-meta {
