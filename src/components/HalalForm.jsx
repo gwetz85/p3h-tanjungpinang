@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update, onValue } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Plus, Trash2, Image as ImageIcon, Download, ExternalLink, MapPin, Send } from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send } from 'lucide-react';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -187,149 +185,326 @@ const HalalForm = ({ job, onClose }) => {
     }
   };
 
-  const generatePDF = async () => {
-    setLoading(true);
-    // Create a hidden formal element for PDF
-    const printEl = document.createElement('div');
-    printEl.style.position = 'absolute';
-    printEl.style.top = '0';
-    printEl.style.left = '-9999px';
-    printEl.style.width = '800px';
-    printEl.style.padding = '40px';
-    printEl.style.backgroundColor = '#fff';
-    printEl.style.color = '#000';
-    printEl.style.fontFamily = 'Arial, sans-serif';
+  const generatePDF = () => {
+    const bahanFilled = formData.bahan.filter(b => b.merk);
+    const pembersihFilled = formData.pembersih.filter(p => p.merk);
+    const kemasanFilled = formData.kemasan.filter(k => k.merk);
 
-    printEl.innerHTML = `
-      <div style="text-align: center; border-bottom: 2px solid #10b981; padding-bottom: 20px; margin-bottom: 30px;">
-        <h1 style="margin: 0; color: #10b981;">HALAL CENTRE TPI</h1>
-        <p style="margin: 5px 0;">Sertifikasi Halal - Formulir Pengajuan Dokumen</p>
-      </div>
-      
-      <h3 style="background: #f3f4f6; padding: 10px;">I. DATA USAHA</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-        <tr><td style="padding: 8px; font-weight: bold; width: 30%;">Nomor NIB</td><td>: ${formData.nib || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">KBLI</td><td>: ${formData.kbli || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Usaha Di NIB</td><td>: ${formData.usahaNib || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Nama Usaha</td><td>: ${formData.namaUsaha || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Modal Usaha</td><td>: ${formData.modalUsaha || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Lokasi Usaha</td><td>: ${formData.lokasiUsaha || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Titik Koordinat (GPS)</td><td>: ${formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Pendapatan</td><td>: ${formData.pendapatan || '-'}</td></tr>
-      </table>
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      alert('Popup diblokir browser. Izinkan popup untuk mencetak PDF.');
+      return;
+    }
 
-      <h3 style="background: #f3f4f6; padding: 10px;">II. DAFTAR BAHAN & PROSES</h3>
-      <div style="margin-bottom: 15px;">
-        <strong>1. Bahan Pembuatan:</strong><br>
-        <ul style="margin: 5px 0 0 20px; padding: 0;">
-          ${formData.bahan.filter(b => b.merk).map(b => `
-            <li style="margin-bottom: 5px;">
-              ${b.merk} (${b.produsen}) - Sertifikat: ${b.sertifikat || '-'} ${b.expired ? `(Exp: ${b.expired})` : ''}
-              ${b.supplier ? `<br><small style="color: #4b5563;">Supplier: ${b.supplier}${b.supplier === 'Swalayan' && b.namaSwalayan ? ` (${b.namaSwalayan})` : ''}</small>` : ''}
-              ${b.sub.some(s => s) ? `<br><small style="color: #666;"><i>Pengganti: ${b.sub.filter(s => s).join(', ')}</i></small>` : ''}
-            </li>
-          `).join('') || '<li>-</li>'}
-        </ul>
-      </div>
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Halal TPI - ${formData.namaUsaha || 'Dokumen'}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-      <div style="margin-bottom: 15px;">
-        <strong>2. Bahan Pembersih:</strong><br>
-        <ul style="margin: 5px 0 0 20px; padding: 0;">
-          ${formData.pembersih.filter(p => p.merk).map(p => `
-            <li style="margin-bottom: 5px;">
-              ${p.merk}
-              ${p.sub.some(s => s) ? `<br><small style="color: #666;"><i>Pengganti: ${p.sub.filter(s => s).join(', ')}</i></small>` : ''}
-            </li>
-          `).join('') || '<li>-</li>'}
-        </ul>
-      </div>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      color: #111;
+      background: #fff;
+      padding: 0;
+    }
 
-      <div style="margin-bottom: 20px;">
-        <strong>3. Kemasan:</strong><br>
-        <ul style="margin: 5px 0 0 20px; padding: 0;">
-          ${formData.kemasan.filter(k => k.merk).map(k => `<li style="margin-bottom: 5px;">${k.merk}</li>`).join('') || '<li>-</li>'}
-        </ul>
-      </div>
+    /* ── Page setup ── */
+    @page {
+      size: A4 portrait;
+      margin: 18mm 15mm 18mm 15mm;
+    }
 
+    /* ── Section blocks — never split across pages ── */
+    .section {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin-bottom: 18px;
+    }
 
-      <h3 style="background: #f3f4f6; padding: 10px;">III. AKUN SIHALAL (RESMI)</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-        <tr><td style="padding: 8px; font-weight: bold; width: 30%;">Email siHalal</td><td>: ${formData.siHalalEmail || '-'}</td></tr>
-        <tr><td style="padding: 8px; font-weight: bold;">Kata Sandi</td><td>: ${formData.siHalalPassword || '-'}</td></tr>
-      </table>
+    /* ── Section heading ── */
+    .section-heading {
+      background: #e5e7eb;
+      padding: 7px 12px;
+      font-weight: bold;
+      font-size: 11pt;
+      border-left: 4px solid #10b981;
+      margin-bottom: 10px;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
 
-      <h3 style="background: #f3f4f6; padding: 10px;">IV. TATACARA PEMBUATAN</h3>
-      <p style="white-space: pre-wrap; line-height: 1.6;">${formData.tatacara || '-'}</p>
+    /* ── Data table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table td {
+      padding: 5px 8px;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    table td:first-child {
+      font-weight: bold;
+      width: 32%;
+      white-space: nowrap;
+    }
 
-      ${formData.photo ? `
-        <h3 style="background: #f3f4f6; padding: 10px;">V. FOTO PRODUK</h3>
-        <div style="text-align: center; margin-top: 20px;">
-          <img src="${formData.photo}" style="max-width: 400px; border: 1px solid #ddd; padding: 5px;" />
-        </div>
-      ` : ''}
+    /* ── Bahan list ── */
+    .bahan-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10pt;
+    }
+    .bahan-table th {
+      background: #f3f4f6;
+      padding: 5px 8px;
+      text-align: left;
+      border: 1px solid #d1d5db;
+      font-size: 10pt;
+    }
+    .bahan-table td {
+      padding: 5px 8px;
+      border: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+    .bahan-table tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
 
-      ${formData.photoKTP ? `
-        <h3 style="background: #f3f4f6; padding: 10px; margin-top: 20px;">VI. FOTO KTP PELAKU USAHA</h3>
-        <div style="text-align: center; margin-top: 20px;">
-          <img src="${formData.photoKTP}" style="max-width: 400px; border: 1px solid #ddd; padding: 5px;" />
-        </div>
-      ` : ''}
+    /* ── Images — fit inside one page, never split ── */
+    .img-section {
+      page-break-inside: avoid;
+      break-inside: avoid;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .img-section img {
+      max-width: 100%;
+      max-height: 220mm;
+      object-fit: contain;
+      border: 1px solid #d1d5db;
+      padding: 4px;
+      display: block;
+      margin: 0 auto;
+    }
 
-      <div style="margin-top: 50px; text-align: right;">
-        <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
-        <br><br><br>
-        <p>( __________________________ )</p>
-        <p>Petugas Halal Centre TPI</p>
-      </div>
-    `;
+    /* ── Header ── */
+    .doc-header {
+      text-align: center;
+      border-bottom: 2px solid #10b981;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .doc-header h1 { color: #10b981; font-size: 18pt; }
+    .doc-header p  { font-size: 10pt; color: #374151; margin-top: 4px; }
 
-    document.body.appendChild(printEl);
-    
-    try {
-      const canvas = await html2canvas(printEl, { 
-        scale: 2, 
-        useCORS: true,
-        windowHeight: printEl.scrollHeight
+    /* ── Identity block (pemohon) ── */
+    .identity-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .identity-box table td:first-child { width: 28%; }
+
+    /* ── Signature block ── */
+    .sign-block {
+      margin-top: 36px;
+      text-align: right;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .sign-block p { line-height: 1.8; font-size: 10pt; }
+    .sign-line {
+      display: inline-block;
+      border-bottom: 1px solid #111;
+      width: 200px;
+      margin-top: 48px;
+    }
+
+    /* ── Print-only: hide browser chrome ── */
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="doc-header">
+    <h1>HALAL CENTRE TPI</h1>
+    <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
+  </div>
+
+  <!-- IDENTITAS PEMOHON -->
+  <div class="identity-box">
+    <table>
+      <tr><td>Nama Pelaku Usaha</td><td>: <strong>${job.nama || '-'}</strong></td></tr>
+      <tr><td>NIK</td><td>: ${job.nik || '-'}</td></tr>
+      <tr><td>No. WhatsApp</td><td>: ${job.wa || '-'}</td></tr>
+      <tr><td>Kelurahan</td><td>: ${job.kelurahan || '-'}</td></tr>
+      <tr><td>Alamat Domisili</td><td>: ${job.alamat || '-'}</td></tr>
+    </table>
+  </div>
+
+  <!-- I. DATA USAHA -->
+  <div class="section">
+    <div class="section-heading">I. DATA USAHA</div>
+    <table>
+      <tr><td>Nomor NIB</td><td>: ${formData.nib || '-'}</td></tr>
+      <tr><td>KBLI</td><td>: ${formData.kbli || '-'}</td></tr>
+      <tr><td>Usaha Di NIB</td><td>: ${formData.usahaNib || '-'}</td></tr>
+      <tr><td>Nama Usaha</td><td>: ${formData.namaUsaha || '-'}</td></tr>
+      <tr><td>Modal Usaha</td><td>: ${formData.modalUsaha || '-'}</td></tr>
+      <tr><td>Lokasi Usaha</td><td>: ${formData.lokasiUsaha || '-'}</td></tr>
+      <tr><td>Titik Koordinat GPS</td><td>: ${formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : '-'}</td></tr>
+      <tr><td>Pendapatan</td><td>: ${formData.pendapatan || '-'}</td></tr>
+    </table>
+  </div>
+
+  <!-- II. AKUN SIHALAL -->
+  <div class="section">
+    <div class="section-heading">II. AKUN SIHALAL (RESMI)</div>
+    <table>
+      <tr><td>Email siHalal</td><td>: ${formData.siHalalEmail || '-'}</td></tr>
+      <tr><td>Kata Sandi siHalal</td><td>: ${formData.siHalalPassword || '-'}</td></tr>
+    </table>
+  </div>
+
+  <!-- III. DAFTAR BAHAN -->
+  <div class="section">
+    <div class="section-heading">III. DAFTAR BAHAN &amp; PROSES</div>
+
+    ${bahanFilled.length > 0 ? `
+    <p style="font-weight:bold; margin-bottom:6px;">A. Bahan Pembuatan Produk</p>
+    <table class="bahan-table">
+      <thead>
+        <tr>
+          <th>No</th><th>Merk / Nama Bahan</th><th>Produsen</th>
+          <th>Sertifikat Halal</th><th>Expired</th><th>Supplier</th><th>Bahan Pengganti</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bahanFilled.map((b, i) => `
+        <tr>
+          <td style="text-align:center">${i + 1}</td>
+          <td>${b.merk || '-'}</td>
+          <td>${b.produsen || '-'}</td>
+          <td>${b.sertifikat || '-'}</td>
+          <td>${b.expired || '-'}</td>
+          <td>${b.supplier || '-'}${b.supplier === 'Swalayan' && b.namaSwalayan ? `<br><small>(${b.namaSwalayan})</small>` : ''}</td>
+          <td>${(b.sub || []).filter(s => s).join(', ') || '-'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : '<p style="color:#6b7280; font-size:10pt;">Tidak ada bahan yang diisi.</p>'}
+
+    ${pembersihFilled.length > 0 ? `
+    <p style="font-weight:bold; margin:12px 0 6px;">B. Bahan Pembersih</p>
+    <table class="bahan-table">
+      <thead><tr><th>No</th><th>Item Pembersih</th><th>Bahan Pengganti</th></tr></thead>
+      <tbody>
+        ${pembersihFilled.map((p, i) => `
+        <tr>
+          <td style="text-align:center">${i + 1}</td>
+          <td>${p.merk || '-'}</td>
+          <td>${(p.sub || []).filter(s => s).join(', ') || '-'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : ''}
+
+    ${kemasanFilled.length > 0 ? `
+    <p style="font-weight:bold; margin:12px 0 6px;">C. Kemasan</p>
+    <table class="bahan-table">
+      <thead><tr><th>No</th><th>Jenis Kemasan</th></tr></thead>
+      <tbody>
+        ${kemasanFilled.map((k, i) => `
+        <tr>
+          <td style="text-align:center">${i + 1}</td>
+          <td>${k.merk || '-'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : ''}
+  </div>
+
+  <!-- IV. TATACARA -->
+  <div class="section">
+    <div class="section-heading">IV. TATACARA PEMBUATAN PRODUK</div>
+    <p style="white-space: pre-wrap; line-height: 1.7; font-size: 10.5pt;">${formData.tatacara || '-'}</p>
+  </div>
+
+  <!-- V. LINK SURVEY -->
+  ${formData.surveyDriveLink ? `
+  <div class="section">
+    <div class="section-heading">V. LINK FOTO SURVEY LAPANGAN</div>
+    <p style="word-break: break-all; color: #2563eb;">${formData.surveyDriveLink}</p>
+  </div>` : ''}
+
+  <!-- VI. FOTO PRODUK -->
+  ${formData.photo ? `
+  <div class="section">
+    <div class="section-heading">${formData.surveyDriveLink ? 'VI' : 'V'}. FOTO PRODUK</div>
+    <div class="img-section">
+      <img src="${formData.photo}" alt="Foto Produk" />
+    </div>
+  </div>` : ''}
+
+  <!-- VII. FOTO KTP -->
+  ${formData.photoKTP ? `
+  <div class="section">
+    <div class="section-heading">${formData.surveyDriveLink && formData.photo ? 'VII' : formData.surveyDriveLink || formData.photo ? 'VI' : 'V'}. FOTO KTP PELAKU USAHA</div>
+    <div class="img-section">
+      <img src="${formData.photoKTP}" alt="Foto KTP" />
+    </div>
+  </div>` : ''}
+
+  <!-- TANDA TANGAN -->
+  <div class="sign-block">
+    <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+    <p class="sign-line"></p>
+    <p>Petugas Halal Centre TPI</p>
+  </div>
+
+</body>
+</html>`);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    // Tunggu semua gambar selesai dimuat sebelum print
+    const images = printWindow.document.images;
+    let loaded = 0;
+    const total = images.length;
+
+    const doPrint = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 300);
+    };
+
+    if (total === 0) {
+      doPrint();
+    } else {
+      Array.from(images).forEach(img => {
+        if (img.complete) {
+          loaded++;
+          if (loaded === total) doPrint();
+        } else {
+          img.onload = img.onerror = () => {
+            loaded++;
+            if (loaded === total) doPrint();
+          };
+        }
       });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const margin = 15;
-      const pdfWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const contentHeightPerPage = pageHeight - (margin * 2);
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      let heightLeft = imgHeight;
-      let slice_start_y = 0;
-      
-      // Page 1
-      pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, imgHeight);
-      pdf.setFillColor(255, 255, 255);
-      pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), margin, 'F'); // Top margin mask
-      pdf.rect(0, pageHeight - margin, pdf.internal.pageSize.getWidth(), margin, 'F'); // Bottom margin mask
-      
-      heightLeft -= contentHeightPerPage;
-      slice_start_y += contentHeightPerPage;
-
-      while (heightLeft > 0) {
-        pdf.addPage();
-        let position_on_page = margin - slice_start_y;
-        pdf.addImage(imgData, 'PNG', margin, position_on_page, pdfWidth, imgHeight);
-        
-        pdf.setFillColor(255, 255, 255);
-        pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), margin, 'F'); // Top margin mask
-        pdf.rect(0, pageHeight - margin, pdf.internal.pageSize.getWidth(), margin, 'F'); // Bottom margin mask
-        
-        heightLeft -= contentHeightPerPage;
-        slice_start_y += contentHeightPerPage;
-      }
-      
-      pdf.save(`HALAL_TPI_${formData.namaUsaha || 'DOKUMEN'}.pdf`);
-    } catch (err) {
-      alert('Error PDF: ' + err.message);
-    } finally {
-      document.body.removeChild(printEl);
-      setLoading(false);
     }
   };
 
