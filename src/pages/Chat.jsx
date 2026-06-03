@@ -250,7 +250,7 @@ const Chat = () => {
   const totalUnread = Object.values(unreadCounts).reduce((sum, c) => sum + c, 0);
 
   return (
-    <div className="page-container" style={{ padding: '0', height: 'calc(100vh - 40px)', maxWidth: '100%' }}>
+    <div className="page-container" style={{ padding: '0', height: 'calc(100vh - 130px)', maxWidth: '100%' }}>
       <div className="chat-layout">
 
         {/* Contact List */}
