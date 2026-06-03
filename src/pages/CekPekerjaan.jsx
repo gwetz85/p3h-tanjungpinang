@@ -194,7 +194,8 @@ const CekPekerjaan = () => {
     }
     try {
       await update(ref(rtdb, `pekerjaan/${selectedJob.id}`), {
-        jadwalKunjungan: scheduleDate
+        jadwalKunjungan: scheduleDate,
+        status: 'Proses'
       });
       setShowSchedule(false);
       setSelectedJob(null);
