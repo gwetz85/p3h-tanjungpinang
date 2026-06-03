@@ -333,7 +333,7 @@ const Chat = () => {
                 </div>
                 <div className="header-info">
                   <h3>{selectedUser.nama || selectedUser.email}</h3>
-                  <span className="role-tag" style={{ color: getRoleColor(selectedUser.role) }}>{selectedUser.role}</span>
+                  <span className="role-tag">{selectedUser.role}</span>
                 </div>
                 <button 
                   onClick={handleClearChat} 
@@ -417,8 +417,9 @@ const Chat = () => {
           height: 100%;
           border-radius: 16px;
           overflow: hidden;
-          background: rgba(0,0,0,0.15);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: #ffffff;
+          border: 1px solid #e5e7eb;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         /* Sidebar */
@@ -427,21 +428,21 @@ const Chat = () => {
           min-width: 340px;
           display: flex;
           flex-direction: column;
-          border-right: 1px solid rgba(255,255,255,0.08);
-          background: rgba(0,0,0,0.1);
+          border-right: 1px solid #e5e7eb;
+          background: #f8fafc;
         }
         .chat-sidebar-header {
           padding: 1.2rem 1.2rem 0.8rem;
         }
         .chat-sidebar-header h2 {
-          color: white;
+          color: #000000;
           font-size: 1.2rem;
           display: flex;
           align-items: center;
           gap: 8px;
         }
         .total-badge {
-          background: #1877f2;
+          background: #ef4444;
           color: white;
           font-size: 0.7rem;
           padding: 2px 8px;
@@ -457,22 +458,22 @@ const Chat = () => {
           left: 1.8rem;
           top: 50%;
           transform: translateY(-70%);
-          color: rgba(255,255,255,0.3);
+          color: #94a3b8;
           pointer-events: none;
         }
         .chat-search input {
           width: 100%;
           padding: 10px 12px 10px 36px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
           border-radius: 10px;
-          color: white;
+          color: #0f172a;
           font-size: 0.85rem;
         }
         .chat-search input:focus {
-          border-color: #1877f2;
-          background: rgba(255,255,255,0.1);
-          box-shadow: none;
+          border-color: #3b82f6;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
 
         .chat-contacts {
@@ -486,7 +487,7 @@ const Chat = () => {
           align-items: center;
           justify-content: center;
           height: 200px;
-          color: rgba(255,255,255,0.3);
+          color: #94a3b8;
           gap: 8px;
           font-size: 0.85rem;
         }
@@ -501,11 +502,11 @@ const Chat = () => {
           transition: all 0.15s ease;
         }
         .contact-item:hover {
-          background: rgba(255,255,255,0.06);
+          background: #f1f5f9;
         }
         .contact-item.active {
-          background: rgba(24, 119, 242, 0.15);
-          border: 1px solid rgba(24, 119, 242, 0.2);
+          background: #eff6ff;
+          border: 1px solid #bfdbfe;
         }
         .contact-avatar {
           width: 44px;
@@ -536,7 +537,7 @@ const Chat = () => {
           margin-bottom: 3px;
         }
         .contact-name {
-          color: white;
+          color: #000000;
           font-weight: 600;
           font-size: 0.9rem;
           white-space: nowrap;
@@ -544,7 +545,7 @@ const Chat = () => {
           text-overflow: ellipsis;
         }
         .contact-time {
-          color: rgba(255,255,255,0.4);
+          color: #64748b;
           font-size: 0.7rem;
           white-space: nowrap;
           margin-left: 8px;
@@ -555,7 +556,7 @@ const Chat = () => {
           align-items: center;
         }
         .contact-preview {
-          color: rgba(255,255,255,0.45);
+          color: #475569;
           font-size: 0.8rem;
           white-space: nowrap;
           overflow: hidden;
@@ -563,7 +564,7 @@ const Chat = () => {
           flex: 1;
         }
         .unread-badge {
-          background: #1877f2;
+          background: #ef4444;
           color: white;
           font-size: 0.65rem;
           min-width: 18px;
@@ -583,39 +584,41 @@ const Chat = () => {
           display: flex;
           flex-direction: column;
           min-width: 0;
+          background: #ffffff;
         }
         .chat-main-header {
           display: flex;
           align-items: center;
           gap: 12px;
           padding: 12px 20px;
-          border-bottom: 1px solid rgba(255,255,255,0.08);
-          background: rgba(0,0,0,0.1);
+          border-bottom: 1px solid #e5e7eb;
+          background: #ffffff;
         }
         .back-btn-mobile {
           display: none;
           background: none;
           border: none;
-          color: white;
+          color: #0f172a;
           cursor: pointer;
           padding: 4px;
         }
         .header-info h3 {
-          color: white;
+          color: #000000;
           font-size: 0.95rem;
           margin: 0;
         }
         .role-tag {
-          font-size: 0.7rem;
+          font-size: 0.75rem;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          color: #2563eb;
         }
         .clear-chat-btn {
           margin-left: auto;
           background: none;
           border: none;
-          color: rgba(255,255,255,0.3);
+          color: #94a3b8;
           cursor: pointer;
           padding: 8px;
           border-radius: 8px;
@@ -625,7 +628,7 @@ const Chat = () => {
           justify-content: center;
         }
         .clear-chat-btn:hover {
-          background: rgba(239, 68, 68, 0.1);
+          background: #fee2e2;
           color: #ef4444;
         }
 
@@ -637,6 +640,7 @@ const Chat = () => {
           display: flex;
           flex-direction: column;
           gap: 4px;
+          background: #f8fafc;
         }
         .empty-chat {
           flex: 1;
@@ -644,7 +648,7 @@ const Chat = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          color: rgba(255,255,255,0.3);
+          color: #94a3b8;
           gap: 8px;
           text-align: center;
         }
@@ -652,10 +656,10 @@ const Chat = () => {
           font-size: 1rem;
           font-weight: 600;
           margin: 0;
+          color: #475569;
         }
         .empty-chat span {
           font-size: 0.8rem;
-          opacity: 0.6;
         }
 
         .date-divider {
@@ -664,11 +668,12 @@ const Chat = () => {
           margin: 16px 0 8px;
         }
         .date-divider span {
-          background: rgba(255,255,255,0.08);
-          color: rgba(255,255,255,0.5);
+          background: #e2e8f0;
+          color: #475569;
           font-size: 0.7rem;
           padding: 4px 14px;
           border-radius: 8px;
+          font-weight: 500;
         }
 
         .message-bubble {
@@ -677,36 +682,34 @@ const Chat = () => {
           border-radius: 16px;
           word-wrap: break-word;
           position: relative;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .message-bubble.sent {
           align-self: flex-end;
-          background: #1877f2;
-          color: white;
+          background: #e0f2fe;
           border-bottom-right-radius: 4px;
         }
         .message-bubble.received {
           align-self: flex-start;
-          background: rgba(255,255,255,0.1);
-          color: white;
+          background: #ffffff;
           border-bottom-left-radius: 4px;
+          border: 1px solid #e2e8f0;
         }
         .message-text {
           margin: 0;
           font-size: 0.9rem;
           line-height: 1.4;
+          color: #000000;
         }
         .message-time {
           display: block;
           font-size: 0.65rem;
-          opacity: 0.6;
+          color: #64748b;
           text-align: right;
           margin-top: 4px;
         }
         .read-status {
-          color: #60a5fa;
-        }
-        .message-bubble.sent .read-status {
-          color: rgba(255,255,255,0.7);
+          color: #3b82f6;
         }
 
         /* Input */
@@ -714,22 +717,23 @@ const Chat = () => {
           display: flex;
           gap: 8px;
           padding: 12px 16px;
-          border-top: 1px solid rgba(255,255,255,0.08);
-          background: rgba(0,0,0,0.1);
+          border-top: 1px solid #e5e7eb;
+          background: #ffffff;
         }
         .chat-input {
           flex: 1;
           padding: 12px 16px !important;
           border-radius: 24px !important;
-          background: rgba(255,255,255,0.08) !important;
-          border: 1px solid rgba(255,255,255,0.1) !important;
-          color: white;
+          background: #f1f5f9 !important;
+          border: 1px solid #e2e8f0 !important;
+          color: #000000;
           font-size: 0.9rem;
         }
         .chat-input:focus {
-          border-color: #1877f2 !important;
-          background: rgba(255,255,255,0.12) !important;
-          box-shadow: none !important;
+          border-color: #3b82f6 !important;
+          background: #ffffff !important;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+          outline: none;
         }
         .send-btn {
           width: 44px;
@@ -737,7 +741,7 @@ const Chat = () => {
           min-width: 44px;
           border-radius: 50%;
           border: none;
-          background: #1877f2;
+          background: #3b82f6;
           color: white;
           cursor: pointer;
           display: flex;
@@ -746,11 +750,11 @@ const Chat = () => {
           transition: all 0.15s;
         }
         .send-btn:hover:not(:disabled) {
-          background: #166fe5;
+          background: #2563eb;
           transform: scale(1.05);
         }
         .send-btn:disabled {
-          opacity: 0.4;
+          background: #cbd5e1;
           cursor: not-allowed;
         }
 
@@ -761,38 +765,44 @@ const Chat = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          color: rgba(255,255,255,0.25);
+          color: #94a3b8;
           gap: 12px;
+          background: #f8fafc;
         }
         .no-chat-icon {
           width: 100px;
           height: 100px;
           border-radius: 50%;
-          background: rgba(24, 119, 242, 0.08);
+          background: #eff6ff;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #1877f2;
+          color: #3b82f6;
         }
         .no-chat-selected h3 {
-          color: rgba(255,255,255,0.6);
+          color: #0f172a;
           font-size: 1.3rem;
           margin: 0;
+          font-weight: 600;
         }
         .no-chat-selected p {
           font-size: 0.85rem;
-          opacity: 0.5;
+          color: #64748b;
         }
 
         /* Scrollbar */
         .chat-messages::-webkit-scrollbar,
         .chat-contacts::-webkit-scrollbar {
-          width: 4px;
+          width: 5px;
         }
         .chat-messages::-webkit-scrollbar-thumb,
         .chat-contacts::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1);
+          background: #cbd5e1;
           border-radius: 4px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .chat-contacts::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
         }
 
         /* Mobile */
@@ -804,7 +814,7 @@ const Chat = () => {
             z-index: 10;
             height: 100%;
             display: none;
-            background: rgba(0,0,0,0.95);
+            background: #ffffff;
           }
           .chat-sidebar.mobile-show {
             display: flex;
