@@ -355,7 +355,21 @@ const CekPekerjaan = () => {
           </div>
           <div className="stat-summary-icon text-primary"><CheckCircle2 size={24} /></div>
         </div>
-        <div className="stat-summary-card glass-card">
+        <div className="stat-summary-card glass-card" style={{ borderLeftColor: '#f59e0b' }}>
+          <div className="stat-summary-info">
+            <span className="stat-summary-label">Proses</span>
+            <h2 className="stat-summary-value">{filteredJobs.filter(j => j.status === 'Proses').length}</h2>
+          </div>
+          <div className="stat-summary-icon" style={{ color: '#f59e0b' }}><Play size={24} /></div>
+        </div>
+        <div className="stat-summary-card glass-card" style={{ borderLeftColor: '#6b7280' }}>
+          <div className="stat-summary-info">
+            <span className="stat-summary-label">Pending</span>
+            <h2 className="stat-summary-value">{filteredJobs.filter(j => j.status === 'Pending').length}</h2>
+          </div>
+          <div className="stat-summary-icon" style={{ color: '#6b7280' }}><Clock size={24} /></div>
+        </div>
+        <div className="stat-summary-card glass-card" style={{ borderLeftColor: '#ef4444' }}>
           <div className="stat-summary-info">
             <span className="stat-summary-label">Perlu Perbaikan</span>
             <h2 className="stat-summary-value">{filteredJobs.filter(j => j.status === 'Returned').length}</h2>
