@@ -217,15 +217,17 @@ const GudangBahan = () => {
             ) : (
               filteredBahan.map((bahan) => (
                 <motion.tr key={bahan.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td><strong>{bahan.merek}</strong></td>
-                  <td>{bahan.produsen}</td>
+                  <td><strong>{bahan.merek || '-'}</strong></td>
+                  <td>{bahan.produsen || '-'}</td>
                   <td>
-                    <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>
-                      {bahan.sertifikatHalal}
-                    </span>
+                    {bahan.sertifikatHalal ? (
+                      <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                        {bahan.sertifikatHalal}
+                      </span>
+                    ) : '-'}
                   </td>
-                  <td>{bahan.expiredDate}</td>
-                  <td>{bahan.supplier}</td>
+                  <td>{bahan.expiredDate || '-'}</td>
+                  <td>{bahan.supplier || '-'}</td>
                   <td style={{ textAlign: 'center' }}>
                     <button onClick={() => handleEdit(bahan)} className="btn-icon text-accent" title="Edit" style={{ marginRight: '0.5rem' }}>
                       <Edit3 size={18} />
@@ -258,15 +260,19 @@ const GudangBahan = () => {
           filteredBahan.map((bahan) => (
             <div key={bahan.id} className="visit-card-compact glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <h4 style={{ margin: '0', fontSize: '1.1rem', color: 'white' }}>{bahan.merek}</h4>
-                <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
-                  {bahan.sertifikatHalal}
-                </span>
+                <h4 style={{ margin: '0', fontSize: '1.1rem', color: 'white' }}>{bahan.merek || '-'}</h4>
+                {bahan.sertifikatHalal ? (
+                  <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                    {bahan.sertifikatHalal}
+                  </span>
+                ) : (
+                  <span style={{ color: 'var(--text-muted)' }}>-</span>
+                )}
               </div>
               <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Factory size={14} /> {bahan.produsen}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Calendar size={14} /> Exp: {bahan.expiredDate}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Truck size={14} /> Sup: {bahan.supplier}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Factory size={14} /> {bahan.produsen || '-'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Calendar size={14} /> Exp: {bahan.expiredDate || '-'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Truck size={14} /> Sup: {bahan.supplier || '-'}</div>
               </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
                 <button onClick={() => handleEdit(bahan)} className="btn-primary-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
