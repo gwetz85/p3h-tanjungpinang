@@ -13,6 +13,7 @@ import DataUser from './pages/DataUser';
 import RunningTextSettings from './pages/RunningTextSettings';
 import Chat from './pages/Chat';
 import PendaftaranSihalal from './pages/PendaftaranSihalal';
+import GudangBahan from './pages/GudangBahan';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
@@ -110,6 +111,12 @@ function App() {
             <Route path="pendaftaran" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
                 <PendaftaranSihalal />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="gudang-bahan" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+                <GudangBahan />
               </ProtectedRoute>
             } />
             
