@@ -6,6 +6,7 @@ import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, 
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
+  const [gudangBahanList, setGudangBahanList] = useState([]);
   const defaultData = {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
     tatacara: '',
@@ -56,6 +57,29 @@ const HalalForm = ({ job, onClose }) => {
           photo: val.photo || prev.photo,
           photoKTP: val.photoKTP || prev.photoKTP
         }));
+      }
+    }, { onlyOnce: true });
+
+    // Fetch Gudang Bahan for auto-fill
+    const gudangRef = ref(rtdb, 'gudang_bahan');
+    onValue(gudangRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        
+        // Keep unique by merek
+        const uniqueList = [];
+        const seen = new Set();
+        list.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
+        
+        for (const item of list) {
+          const merekLower = (item.merek || '').toLowerCase().trim();
+          if (merekLower && !seen.has(merekLower)) {
+            seen.add(merekLower);
+            uniqueList.push(item);
+          }
+        }
+        setGudangBahanList(uniqueList);
       }
     }, { onlyOnce: true });
   }, [job.id]);
@@ -629,16 +653,61 @@ const HalalForm = ({ job, onClose }) => {
           </div>
 
           <div className="section-title mt-4">1. Bahan Pembuatan Produk (40 Item)</div>
+          
+          <datalist id="gudang-bahan-list">
+            {gudangBahanList.map((b, idx) => (
+              <option key={idx} value={b.merek} />
+            ))}
+          </datalist>
+
           <div className="bahan-list">
             {formData.bahan.map((b, i) => (
               <div key={i} className="bahan-item glass-card mb-2">
                 <div className="bahan-main">
                   <div className="input-group">
                     <label>Merk</label>
-                    <input placeholder="Merk" value={b.merk} onChange={e => {
-                      const newBahan = [...formData.bahan]; newBahan[i] = {...b, merk: e.target.value};
-                      setFormData({...formData, bahan: newBahan});
-                    }} />
+                    <input 
+                      list="gudang-bahan-list"
+                      placeholder="Merk" 
+                      value={b.merk} 
+                      onChange={e => {
+                        const value = e.target.value;
+                        const newBahan = [...formData.bahan]; 
+                        let currentBahan = {...b, merk: value};
+                        
+                        // Auto-fill logic
+                        if (value.trim().length > 2) {
+                          const matched = gudangBahanList.find(gb => 
+                            gb.merek && gb.merek.toLowerCase() === value.trim().toLowerCase()
+                          );
+                          if (matched) {
+                            if (!currentBahan.produsen) currentBahan.produsen = matched.produsen || '';
+                            if (!currentBahan.sertifikat) currentBahan.sertifikat = matched.sertifikatHalal || '';
+                            if (!currentBahan.expired) currentBahan.expired = matched.expiredDate || '';
+                            
+                            if (!currentBahan.supplier && matched.supplier) {
+                              let sup = matched.supplier;
+                              if (sup.includes('Swalayan')) {
+                                currentBahan.supplier = 'Swalayan';
+                                const matchSwalayan = sup.match(/\((.*?)\)/);
+                                if (matchSwalayan) {
+                                  currentBahan.namaSwalayan = matchSwalayan[1];
+                                }
+                              } else if (sup.includes('Pasar')) {
+                                currentBahan.supplier = 'Pasar';
+                              } else if (sup.includes('Kedai')) {
+                                currentBahan.supplier = 'Kedai Kelontong';
+                              } else {
+                                currentBahan.supplier = sup;
+                              }
+                            }
+                          }
+                        }
+                        
+                        newBahan[i] = currentBahan;
+                        setFormData({...formData, bahan: newBahan});
+                      }} 
+                    />
                   </div>
                   <div className="input-group">
                     <label>Produsen</label>
