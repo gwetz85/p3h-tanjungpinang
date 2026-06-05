@@ -678,7 +678,7 @@ const HalalForm = ({ job, onClose }) => {
                         const value = e.target.value.trim().toLowerCase();
                         if (value.length > 2) {
                           const matched = gudangBahanList.find(gb => 
-                            gb.merek && gb.merek.toLowerCase().trim().includes(value)
+                            gb.merek && gb.merek.toLowerCase().trim() === value
                           );
                           if (matched) {
                             const newBahan = [...formData.bahan];
