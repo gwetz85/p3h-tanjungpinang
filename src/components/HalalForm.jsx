@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
-import { ref, update, onValue } from 'firebase/database';
+import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send } from 'lucide-react';
 
@@ -134,6 +134,39 @@ const HalalForm = ({ job, onClose }) => {
       }
       
       if (isFinal) {
+        // Automatically add valid bahan to Gudang Bahan
+        const validBahan = cleanedBahan.filter(b => b.merk && b.merk.trim() !== '');
+        
+        for (const b of validBahan) {
+          const supplierName = b.supplier === 'Swalayan' && b.namaSwalayan ? `${b.supplier} (${b.namaSwalayan})` : (b.supplier || '');
+          const newBahanData = {
+            merek: b.merk || '',
+            produsen: b.produsen || '',
+            sertifikatHalal: b.sertifikat || '',
+            expiredDate: b.expired || '',
+            supplier: supplierName,
+            tanggalInput: Date.now()
+          };
+          
+          // Simple deduplication check: check if a material with same merk and produsen already exists
+          const gudangRef = ref(rtdb, 'gudang_bahan');
+          const snapshot = await get(gudangRef);
+          let exists = false;
+          
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const list = Object.values(data);
+            exists = list.some(item => 
+              item.merek && item.merek.toLowerCase() === newBahanData.merek.toLowerCase() &&
+              item.produsen && item.produsen.toLowerCase() === newBahanData.produsen.toLowerCase()
+            );
+          }
+          
+          if (!exists) {
+            await push(gudangRef, newBahanData);
+          }
+        }
+
         alert('Data BERHASIL DIKIRIM ke Admin untuk Verifikasi!');
         onClose();
       } else {
