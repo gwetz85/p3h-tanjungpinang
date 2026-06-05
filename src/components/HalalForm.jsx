@@ -161,103 +161,103 @@ const HalalForm = ({ job, onClose }) => {
         await update(ref(rtdb, `pekerjaan_photos/${job.id}`), photoUpdates);
       }
       
-      // Automatically add valid bahan to Gudang Bahan (on both Draft and Final)
-      const validBahan = cleanedBahan.filter(b => b.merk && b.merk.trim() !== '');
-      
-      for (const b of validBahan) {
-        const supplierName = b.supplier === 'Swalayan' && b.namaSwalayan ? `${b.supplier} (${b.namaSwalayan})` : (b.supplier || '');
-        const newBahanData = {
-          merek: b.merk || '',
-          produsen: b.produsen || '',
-          sertifikatHalal: b.sertifikat || '',
-          expiredDate: b.expired || '',
-          supplier: supplierName,
-          tanggalInput: Date.now()
-        };
+      if (isFinal) {
+        // Automatically add valid bahan to Gudang Bahan
+        const validBahan = cleanedBahan.filter(b => b.merk && b.merk.trim() !== '');
         
-        // Simple deduplication check: check if a material with same merk and produsen already exists
-        const gudangRef = ref(rtdb, 'gudang_bahan');
-        const snapshot = await get(gudangRef);
-        let exists = false;
-        
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-          
-          const getWords = (str) => {
-            return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !['merk', 'merek', 'cap', 'dan', 'pt', 'cv'].includes(w));
+        for (const b of validBahan) {
+          const supplierName = b.supplier === 'Swalayan' && b.namaSwalayan ? `${b.supplier} (${b.namaSwalayan})` : (b.supplier || '');
+          const newBahanData = {
+            merek: b.merk || '',
+            produsen: b.produsen || '',
+            sertifikatHalal: b.sertifikat || '',
+            expiredDate: b.expired || '',
+            supplier: supplierName,
+            tanggalInput: Date.now()
           };
+          
+          // Simple deduplication check: check if a material with same merk and produsen already exists
+          const gudangRef = ref(rtdb, 'gudang_bahan');
+          const snapshot = await get(gudangRef);
+          let exists = false;
+          
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+            
+            const getWords = (str) => {
+              return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !['merk', 'merek', 'cap', 'dan', 'pt', 'cv'].includes(w));
+            };
 
-          let matchingItem = null;
+            let matchingItem = null;
 
-          for (const item of list) {
-             if (item.sertifikatHalal && newBahanData.sertifikatHalal && item.sertifikatHalal === newBahanData.sertifikatHalal) {
-               matchingItem = item; break;
-             }
-             const wordsA = getWords(item.merek);
-             const wordsB = getWords(newBahanData.merek);
-             if (wordsA.length > 0 && wordsB.length > 0) {
-               const common = wordsA.filter(w => wordsB.includes(w));
-               if (common.length >= 2 || (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0])) {
+            for (const item of list) {
+               if (item.sertifikatHalal && newBahanData.sertifikatHalal && item.sertifikatHalal === newBahanData.sertifikatHalal) {
                  matchingItem = item; break;
                }
-             }
-             const normA = (item.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-             const normB = (newBahanData.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-             if (normA && normB && normA === normB) {
-               matchingItem = item; break;
-             }
-          }
+               const wordsA = getWords(item.merek);
+               const wordsB = getWords(newBahanData.merek);
+               if (wordsA.length > 0 && wordsB.length > 0) {
+                 const common = wordsA.filter(w => wordsB.includes(w));
+                 if (common.length >= 2 || (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0])) {
+                   matchingItem = item; break;
+                 }
+               }
+               const normA = (item.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+               const normB = (newBahanData.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+               if (normA && normB && normA === normB) {
+                 matchingItem = item; break;
+               }
+            }
 
-          if (matchingItem) {
-            exists = true;
-            
-            const getScore = (item) => {
-              let score = 0;
-              if (item.merek) score += 1;
-              if (item.produsen) score += 2;
-              if (item.sertifikatHalal) score += 3;
-              if (item.expiredDate) score += 1;
-              if (item.supplier) score += 1;
-              return score;
-            };
-            
-            const existingScore = getScore(matchingItem);
-            const newScore = getScore(newBahanData);
-            
-            let updates = {};
-            let shouldUpdate = false;
-            
-            if (newScore > existingScore) {
-              // If new data is better, overwrite most fields but preserve ID and original input date
-              updates = { 
-                merek: newBahanData.merek || matchingItem.merek,
-                produsen: newBahanData.produsen || matchingItem.produsen,
-                sertifikatHalal: newBahanData.sertifikatHalal || matchingItem.sertifikatHalal,
-                expiredDate: newBahanData.expiredDate || matchingItem.expiredDate,
-                supplier: newBahanData.supplier || matchingItem.supplier
+            if (matchingItem) {
+              exists = true;
+              
+              const getScore = (item) => {
+                let score = 0;
+                if (item.merek) score += 1;
+                if (item.produsen) score += 2;
+                if (item.sertifikatHalal) score += 3;
+                if (item.expiredDate) score += 1;
+                if (item.supplier) score += 1;
+                return score;
               };
-              shouldUpdate = true;
-            } else {
-              // Merge missing fields if the new score is lower or equal but has missing info
-              if (!matchingItem.produsen && newBahanData.produsen) { updates.produsen = newBahanData.produsen; shouldUpdate = true; }
-              if (!matchingItem.expiredDate && newBahanData.expiredDate) { updates.expiredDate = newBahanData.expiredDate; shouldUpdate = true; }
-              if (!matchingItem.supplier && newBahanData.supplier) { updates.supplier = newBahanData.supplier; shouldUpdate = true; }
-              if (!matchingItem.sertifikatHalal && newBahanData.sertifikatHalal) { updates.sertifikatHalal = newBahanData.sertifikatHalal; shouldUpdate = true; }
-            }
-            
-            if (shouldUpdate) {
-              await update(ref(rtdb, `gudang_bahan/${matchingItem.id}`), updates);
+              
+              const existingScore = getScore(matchingItem);
+              const newScore = getScore(newBahanData);
+              
+              let updates = {};
+              let shouldUpdate = false;
+              
+              if (newScore > existingScore) {
+                // If new data is better, overwrite most fields but preserve ID and original input date
+                updates = { 
+                  merek: newBahanData.merek || matchingItem.merek,
+                  produsen: newBahanData.produsen || matchingItem.produsen,
+                  sertifikatHalal: newBahanData.sertifikatHalal || matchingItem.sertifikatHalal,
+                  expiredDate: newBahanData.expiredDate || matchingItem.expiredDate,
+                  supplier: newBahanData.supplier || matchingItem.supplier
+                };
+                shouldUpdate = true;
+              } else {
+                // Merge missing fields if the new score is lower or equal but has missing info
+                if (!matchingItem.produsen && newBahanData.produsen) { updates.produsen = newBahanData.produsen; shouldUpdate = true; }
+                if (!matchingItem.expiredDate && newBahanData.expiredDate) { updates.expiredDate = newBahanData.expiredDate; shouldUpdate = true; }
+                if (!matchingItem.supplier && newBahanData.supplier) { updates.supplier = newBahanData.supplier; shouldUpdate = true; }
+                if (!matchingItem.sertifikatHalal && newBahanData.sertifikatHalal) { updates.sertifikatHalal = newBahanData.sertifikatHalal; shouldUpdate = true; }
+              }
+              
+              if (shouldUpdate) {
+                await update(ref(rtdb, `gudang_bahan/${matchingItem.id}`), updates);
+              }
             }
           }
+          
+          if (!exists) {
+            await push(gudangRef, newBahanData);
+          }
         }
-        
-        if (!exists) {
-          await push(gudangRef, newBahanData);
-        }
-      }
 
-      if (isFinal) {
         alert('Data BERHASIL DIKIRIM ke Admin untuk Verifikasi!');
         onClose();
       } else {
