@@ -193,7 +193,7 @@ const GudangBahan = () => {
               <th><FileText size={16} /> Sertifikat Halal</th>
               <th><Calendar size={16} /> Expired Date</th>
               <th><Truck size={16} /> Supplier</th>
-              <th style={{ textAlign: 'center' }}>Aksi</th>
+              {role === 'superadmin' && <th style={{ textAlign: 'center' }}>Aksi</th>}
             </tr>
           </thead>
           <tbody>
@@ -205,12 +205,12 @@ const GudangBahan = () => {
                   <td><div className="skeleton" style={{ width: '120px', height: '14px' }}></div></td>
                   <td><div className="skeleton" style={{ width: '80px', height: '14px' }}></div></td>
                   <td><div className="skeleton" style={{ width: '100px', height: '14px' }}></div></td>
-                  <td><div className="skeleton" style={{ width: '60px', height: '14px', margin: '0 auto' }}></div></td>
+                  {role === 'superadmin' && <td><div className="skeleton" style={{ width: '60px', height: '14px', margin: '0 auto' }}></div></td>}
                 </tr>
               ))
             ) : filteredBahan.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
+                <td colSpan={role === 'superadmin' ? 6 : 5} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
                   {searchTerm ? 'Tidak ada bahan yang cocok dengan pencarian.' : 'Belum ada data bahan.'}
                 </td>
               </tr>
@@ -228,14 +228,16 @@ const GudangBahan = () => {
                   </td>
                   <td>{bahan.expiredDate || '-'}</td>
                   <td>{bahan.supplier || '-'}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <button onClick={() => handleEdit(bahan)} className="btn-icon text-accent" title="Edit" style={{ marginRight: '0.5rem' }}>
-                      <Edit3 size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(bahan.id)} className="btn-delete" title="Hapus">
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
+                  {role === 'superadmin' && (
+                    <td style={{ textAlign: 'center' }}>
+                      <button onClick={() => handleEdit(bahan)} className="btn-icon text-accent" title="Edit" style={{ marginRight: '0.5rem' }}>
+                        <Edit3 size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(bahan.id)} className="btn-delete" title="Hapus">
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  )}
                 </motion.tr>
               ))
             )}
@@ -274,58 +276,62 @@ const GudangBahan = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Calendar size={14} /> Exp: {bahan.expiredDate || '-'}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Truck size={14} /> Sup: {bahan.supplier || '-'}</div>
               </div>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '10px', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
-                <button onClick={() => handleEdit(bahan)} className="btn-primary-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
-                  <Edit3 size={16} /> Edit
-                </button>
-                <button onClick={() => handleDelete(bahan.id)} className="btn-danger-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem', justifyContent: 'center' }}>
-                  <Trash2 size={16} /> Hapus
-                </button>
-              </div>
+              {role === 'superadmin' && (
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+                  <button onClick={() => handleEdit(bahan)} className="btn-primary-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
+                    <Edit3 size={16} /> Edit
+                  </button>
+                  <button onClick={() => handleDelete(bahan.id)} className="btn-danger-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem', justifyContent: 'center' }}>
+                    <Trash2 size={16} /> Hapus
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="form-card glass-card mt-8" style={{ maxWidth: '800px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ margin: 0 }}>{editingId ? 'Edit Data Bahan' : 'Tambah Bahan Baru'}</h3>
-          {editingId && (
-            <button type="button" onClick={() => { setEditingId(null); setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' }); }} className="text-muted" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Batal</button>
-          )}
-        </div>
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          
-          <div className="input-group" style={{ gridColumn: 'span 2' }}>
-            <label>Merek Bahan</label>
-            <input type="text" placeholder="Contoh: Tepung Segitiga Biru" value={formData.merek} onChange={(e) => setFormData({...formData, merek: e.target.value})} required />
+      {role === 'superadmin' && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="form-card glass-card mt-8" style={{ maxWidth: '800px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0 }}>{editingId ? 'Edit Data Bahan' : 'Tambah Bahan Baru'}</h3>
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' }); }} className="text-muted" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Batal</button>
+            )}
           </div>
-          
-          <div className="input-group">
-            <label>Produsen / Pabrik</label>
-            <input type="text" placeholder="Contoh: PT Bogasari" value={formData.produsen} onChange={(e) => setFormData({...formData, produsen: e.target.value})} required />
-          </div>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            
+            <div className="input-group" style={{ gridColumn: 'span 2' }}>
+              <label>Merek Bahan</label>
+              <input type="text" placeholder="Contoh: Tepung Segitiga Biru" value={formData.merek} onChange={(e) => setFormData({...formData, merek: e.target.value})} required />
+            </div>
+            
+            <div className="input-group">
+              <label>Produsen / Pabrik</label>
+              <input type="text" placeholder="Contoh: PT Bogasari" value={formData.produsen} onChange={(e) => setFormData({...formData, produsen: e.target.value})} required />
+            </div>
 
-          <div className="input-group">
-            <label>Nomor Sertifikat Halal</label>
-            <input type="text" placeholder="Contoh: ID1234567890" value={formData.sertifikatHalal} onChange={(e) => setFormData({...formData, sertifikatHalal: e.target.value})} required />
-          </div>
+            <div className="input-group">
+              <label>Nomor Sertifikat Halal</label>
+              <input type="text" placeholder="Contoh: ID1234567890" value={formData.sertifikatHalal} onChange={(e) => setFormData({...formData, sertifikatHalal: e.target.value})} required />
+            </div>
 
-          <div className="input-group">
-            <label>Expired Date</label>
-            <input type="date" value={formData.expiredDate} onChange={(e) => setFormData({...formData, expiredDate: e.target.value})} required />
-          </div>
+            <div className="input-group">
+              <label>Expired Date</label>
+              <input type="date" value={formData.expiredDate} onChange={(e) => setFormData({...formData, expiredDate: e.target.value})} required />
+            </div>
 
-          <div className="input-group">
-            <label>Supplier / Toko Pembelian</label>
-            <input type="text" placeholder="Contoh: Toko Berkah" value={formData.supplier} onChange={(e) => setFormData({...formData, supplier: e.target.value})} required />
-          </div>
+            <div className="input-group">
+              <label>Supplier / Toko Pembelian</label>
+              <input type="text" placeholder="Contoh: Toko Berkah" value={formData.supplier} onChange={(e) => setFormData({...formData, supplier: e.target.value})} required />
+            </div>
 
-          <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', marginTop: '0.5rem' }} disabled={loading}>
-            <PlusCircle size={18} /> {loading ? 'Menyimpan...' : (editingId ? 'Update Data Bahan' : 'Simpan Data Bahan')}
-          </button>
-        </form>
-      </motion.div>
+            <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', marginTop: '0.5rem' }} disabled={loading}>
+              <PlusCircle size={18} /> {loading ? 'Menyimpan...' : (editingId ? 'Update Data Bahan' : 'Simpan Data Bahan')}
+            </button>
+          </form>
+        </motion.div>
+      )}
     </div>
   );
 };
