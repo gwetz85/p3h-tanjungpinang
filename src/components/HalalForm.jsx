@@ -49,7 +49,7 @@ const HalalForm = ({ job, onClose }) => {
   useEffect(() => {
     // Lazily fetch photos from separate path
     const photosRef = ref(rtdb, `pekerjaan_photos/${job.id}`);
-    onValue(photosRef, (snapshot) => {
+    const unsubPhotos = onValue(photosRef, (snapshot) => {
       if (snapshot.exists()) {
         const val = snapshot.val();
         setFormData(prev => ({
@@ -58,16 +58,15 @@ const HalalForm = ({ job, onClose }) => {
           photoKTP: val.photoKTP || prev.photoKTP
         }));
       }
-    }, { onlyOnce: true });
+    });
 
     // Fetch Gudang Bahan for auto-fill
     const gudangRef = ref(rtdb, 'gudang_bahan');
-    onValue(gudangRef, (snapshot) => {
+    const unsubGudang = onValue(gudangRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         
-        // Keep unique by merek
         const uniqueList = [];
         const seen = new Set();
         list.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
@@ -81,7 +80,12 @@ const HalalForm = ({ job, onClose }) => {
         }
         setGudangBahanList(uniqueList);
       }
-    }, { onlyOnce: true });
+    });
+
+    return () => {
+      unsubPhotos();
+      unsubGudang();
+    };
   }, [job.id]);
 
   const calculateProgress = (data) => {
@@ -664,21 +668,53 @@ const HalalForm = ({ job, onClose }) => {
             {formData.bahan.map((b, i) => (
               <div key={i} className="bahan-item glass-card mb-2">
                 <div className="bahan-main">
-                  <div className="input-group">
+                  <div className="input-group" style={{ position: 'relative' }}>
                     <label>Merk</label>
                     <input 
                       list="gudang-bahan-list"
                       placeholder="Merk" 
                       value={b.merk} 
+                      onBlur={e => {
+                        const value = e.target.value.trim().toLowerCase();
+                        if (value.length > 2) {
+                          const matched = gudangBahanList.find(gb => 
+                            gb.merek && gb.merek.toLowerCase().trim().includes(value)
+                          );
+                          if (matched) {
+                            const newBahan = [...formData.bahan];
+                            let currentBahan = {...b};
+                            if (!currentBahan.produsen) currentBahan.produsen = matched.produsen || '';
+                            if (!currentBahan.sertifikat) currentBahan.sertifikat = matched.sertifikatHalal || '';
+                            if (!currentBahan.expired) currentBahan.expired = matched.expiredDate || '';
+                            if (!currentBahan.supplier && matched.supplier) {
+                              let sup = matched.supplier;
+                              if (sup.includes('Swalayan')) {
+                                currentBahan.supplier = 'Swalayan';
+                                const matchSwalayan = sup.match(/\((.*?)\)/);
+                                if (matchSwalayan) currentBahan.namaSwalayan = matchSwalayan[1];
+                              } else if (sup.includes('Pasar')) {
+                                currentBahan.supplier = 'Pasar';
+                              } else if (sup.includes('Kedai')) {
+                                currentBahan.supplier = 'Kedai Kelontong';
+                              } else {
+                                currentBahan.supplier = sup;
+                              }
+                            }
+                            newBahan[i] = currentBahan;
+                            setFormData({...formData, bahan: newBahan});
+                          }
+                        }
+                      }}
                       onChange={e => {
                         const value = e.target.value;
                         const newBahan = [...formData.bahan]; 
                         let currentBahan = {...b, merk: value};
                         
-                        // Auto-fill logic
+                        // Exact match on change
                         if (value.trim().length > 2) {
+                          const searchVal = value.trim().toLowerCase();
                           const matched = gudangBahanList.find(gb => 
-                            gb.merek && gb.merek.toLowerCase() === value.trim().toLowerCase()
+                            gb.merek && gb.merek.trim().toLowerCase() === searchVal
                           );
                           if (matched) {
                             if (!currentBahan.produsen) currentBahan.produsen = matched.produsen || '';
