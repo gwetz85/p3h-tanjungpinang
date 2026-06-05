@@ -156,10 +156,24 @@ const HalalForm = ({ job, onClose }) => {
           if (snapshot.exists()) {
             const data = snapshot.val();
             const list = Object.values(data);
-            exists = list.some(item => 
-              item.merek && item.merek.toLowerCase() === newBahanData.merek.toLowerCase() &&
-              item.produsen && item.produsen.toLowerCase() === newBahanData.produsen.toLowerCase()
-            );
+            
+            const getWords = (str) => {
+              return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !['merk', 'merek', 'cap', 'dan', 'pt', 'cv'].includes(w));
+            };
+
+            exists = list.some(item => {
+               if (item.sertifikatHalal && newBahanData.sertifikatHalal && item.sertifikatHalal === newBahanData.sertifikatHalal) return true;
+               const wordsA = getWords(item.merek);
+               const wordsB = getWords(newBahanData.merek);
+               if (wordsA.length === 0 || wordsB.length === 0) return false;
+               const common = wordsA.filter(w => wordsB.includes(w));
+               if (common.length >= 2) return true;
+               if (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0]) return true;
+               const normA = (item.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+               const normB = (newBahanData.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+               if (normA && normB && normA === normB) return true;
+               return false;
+            });
           }
           
           if (!exists) {

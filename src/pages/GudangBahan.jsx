@@ -29,10 +29,76 @@ const GudangBahan = () => {
       const data = snapshot.val();
       if (data) {
         const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        
+        // Grouping logic to remove duplicates and keep the most complete data
+        const grouped = [];
+        
+        const getScore = (item) => {
+          let score = 0;
+          if (item.merek) score += 1;
+          if (item.produsen) score += 2;
+          if (item.sertifikatHalal) score += 3;
+          if (item.expiredDate) score += 1;
+          if (item.supplier) score += 1;
+          return score;
+        };
+
+        const getWords = (str) => {
+          return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !['merk', 'merek', 'cap', 'dan', 'pt', 'cv'].includes(w));
+        };
+
+        const isSimilar = (a, b) => {
+          if (a.sertifikatHalal && b.sertifikatHalal && a.sertifikatHalal === b.sertifikatHalal) return true;
+          
+          const wordsA = getWords(a.merek);
+          const wordsB = getWords(b.merek);
+          
+          if (wordsA.length === 0 || wordsB.length === 0) return false;
+          
+          const common = wordsA.filter(w => wordsB.includes(w));
+          if (common.length >= 2) return true;
+          if (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0]) return true;
+
+          const normA = (a.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const normB = (b.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (normA && normB && normA === normB) return true;
+
+          return false;
+        };
+
+        list.forEach(item => {
+          let foundIdx = -1;
+          for (let i = 0; i < grouped.length; i++) {
+            if (isSimilar(grouped[i], item)) {
+              foundIdx = i;
+              break;
+            }
+          }
+          
+          if (foundIdx === -1) {
+            grouped.push({ ...item });
+          } else {
+            const existingScore = getScore(grouped[foundIdx]);
+            const newScore = getScore(item);
+            
+            if (newScore > existingScore) {
+              // Keep the new more complete item, but preserve original ID for DB operations
+              const oldId = grouped[foundIdx].id;
+              grouped[foundIdx] = { ...item, id: oldId };
+            } else if (newScore === existingScore) {
+              // Merge missing fields just in case
+              if (!grouped[foundIdx].produsen && item.produsen) grouped[foundIdx].produsen = item.produsen;
+              if (!grouped[foundIdx].expiredDate && item.expiredDate) grouped[foundIdx].expiredDate = item.expiredDate;
+              if (!grouped[foundIdx].supplier && item.supplier) grouped[foundIdx].supplier = item.supplier;
+              if (!grouped[foundIdx].sertifikatHalal && item.sertifikatHalal) grouped[foundIdx].sertifikatHalal = item.sertifikatHalal;
+            }
+          }
+        });
+
         // Sort descending by input date
-        list.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
-        setBahanList(list);
-        setFilteredBahan(list);
+        grouped.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
+        setBahanList(grouped);
+        setFilteredBahan(grouped);
       } else {
         setBahanList([]);
         setFilteredBahan([]);
