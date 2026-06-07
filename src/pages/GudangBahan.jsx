@@ -95,8 +95,14 @@ const GudangBahan = () => {
           }
         });
 
-        // Sort descending by input date
-        grouped.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
+        // Sort alphabetically by merek
+        grouped.sort((a, b) => {
+          const merekA = (a.merek || '').toLowerCase();
+          const merekB = (b.merek || '').toLowerCase();
+          if (merekA < merekB) return -1;
+          if (merekA > merekB) return 1;
+          return 0;
+        });
         setBahanList(grouped);
         setFilteredBahan(grouped);
       } else {
@@ -169,7 +175,14 @@ const GudangBahan = () => {
 
   return (
     <div className="page-container">
-      <h1 className="title-gradient mb-8">Gudang Bahan</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h1 className="title-gradient" style={{ marginBottom: 0 }}>Gudang Bahan</h1>
+        {!initialLoading && (
+          <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: '500', fontSize: '0.9rem' }}>
+            Total Data: {filteredBahan.length}
+          </div>
+        )}
+      </div>
       
       <div className="search-bar-container" style={{ marginBottom: '1.5rem', display: 'flex', gap: '10px' }}>
         <div className="search-input-wrapper" style={{ flex: 1, position: 'relative' }}>
