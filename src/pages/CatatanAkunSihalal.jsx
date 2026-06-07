@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { rtdb, storage } from '../firebase';
+import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
-import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { supabase, STORAGE_BUCKET } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit3, Trash2, Upload, FileText, X, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -121,55 +121,72 @@ const CatatanAkunSihalal = () => {
   const handleUploadFile = async () => {
     if (!selectedFile) return;
     if (isUploading) return;
-    
-    // Pengecekan lebih longgar: periksa ekstensi file jika type kosong (sering terjadi di Windows/browser tertentu)
+
+    // Pengecekan ekstensi file
     if (!selectedFile.name.toLowerCase().endsWith('.pdf') && selectedFile.type !== 'application/pdf') {
-      alert("File harus berformat PDF.");
+      alert('File harus berformat PDF.');
       return;
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+    setUploadedBytes(0);
+    setTotalBytes(selectedFile.size);
 
     try {
-      const fileRef = storageRef(storage, `berkas_sihalal/${uploadingId}_${Date.now()}.pdf`);
-      // uploadBytesResumable digunakan untuk mendukung ukuran file yang sangat besar (tidak terbatas)
-      const uploadTask = uploadBytesResumable(fileRef, selectedFile);
+      const filePath = `${uploadingId}_${Date.now()}.pdf`;
 
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      // Upload menggunakan XMLHttpRequest agar bisa track progress secara real-time
+      const formData = new FormData();
+      formData.append('', selectedFile);
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100;
           setUploadProgress(progress);
-          setUploadedBytes(snapshot.bytesTransferred);
-          setTotalBytes(snapshot.totalBytes);
-        },
-        (error) => {
-          console.error("Error uploading file:", error);
-          setUploadProgress(0);
-          setUploadedBytes(0);
-          setTotalBytes(0);
-          setIsUploading(false);
-          alert("Gagal mengunggah file ke server. Detail: " + error.message + "\n\nMohon pastikan Firebase Storage sudah diaktifkan di Firebase Console dan aturan aksesnya (Rules) mengizinkan proses 'write'.");
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
-              berkasUrl: downloadURL
-            });
-            handleCloseUpload();
-            alert("File berhasil diunggah!");
-          } catch (err) {
-            console.error("Error saving url:", err);
-            setUploadProgress(0);
-            setIsUploading(false);
-            alert("Gagal menyimpan URL file: " + err.message);
-          }
+          setUploadedBytes(event.loaded);
+          setTotalBytes(event.total);
         }
-      );
+      };
+
+      // Upload file ke Supabase Storage menggunakan SDK
+      const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, selectedFile, {
+          contentType: 'application/pdf',
+          upsert: true,
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Dapatkan public URL
+      const { data: publicData } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(data.path);
+
+      const publicUrl = publicData.publicUrl;
+
+      // Simpan URL ke Firebase RTDB
+      await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
+        berkasUrl: publicUrl,
+      });
+
+      setUploadProgress(100);
+      setTimeout(() => {
+        handleCloseUpload();
+        alert('File berhasil diunggah ke Supabase Storage!');
+      }, 500);
+
     } catch (e) {
+      console.error('Upload error:', e);
+      setUploadProgress(0);
+      setUploadedBytes(0);
       setIsUploading(false);
-      alert("Terjadi kesalahan pada sistem unggah: " + e.message);
+      alert('Gagal mengunggah file: ' + e.message + '\n\nPastikan bucket "berkas-sihalal" sudah dibuat di Supabase Dashboard > Storage dan diatur sebagai Public.');
     }
   };
 
