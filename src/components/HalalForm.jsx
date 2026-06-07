@@ -320,6 +320,8 @@ const HalalForm = ({ job, onClose }) => {
       return;
     }
 
+    const baseUrl = window.location.origin;
+
     printWindow.document.write(`
 <!DOCTYPE html>
 <html lang="id">
@@ -420,13 +422,27 @@ const HalalForm = ({ job, onClose }) => {
 
     /* ── Header ── */
     .doc-header {
-      text-align: center;
-      border-bottom: 2px solid #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #10b981;
       padding-bottom: 14px;
       margin-bottom: 20px;
+      gap: 12px;
     }
-    .doc-header h1 { color: #10b981; font-size: 18pt; }
-    .doc-header p  { font-size: 10pt; color: #374151; margin-top: 4px; }
+    .doc-header-logo {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .doc-header-center {
+      flex: 1;
+      text-align: center;
+    }
+    .doc-header-center h1 { color: #10b981; font-size: 17pt; margin-bottom: 4px; }
+    .doc-header-center p  { font-size: 10pt; color: #374151; }
+    .doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
 
     /* ── Identity block (pemohon) ── */
     .identity-box {
@@ -465,8 +481,13 @@ const HalalForm = ({ job, onClose }) => {
 
   <!-- HEADER -->
   <div class="doc-header">
-    <h1>HALAL CENTRE TPI</h1>
-    <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
+    <img class="doc-header-logo" src="${baseUrl}/logo-halal-center.png" alt="Halal Center" onerror="this.style.display='none'" />
+    <div class="doc-header-center">
+      <h1>HALAL CENTRE TPI</h1>
+      <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
+      <p class="sub">Pendampingan Proses Produk Halal (P3H)</p>
+    </div>
+    <img class="doc-header-logo" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" />
   </div>
 
   <!-- IDENTITAS PEMOHON -->
