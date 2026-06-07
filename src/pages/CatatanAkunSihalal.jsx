@@ -22,6 +22,7 @@ const CatatanAkunSihalal = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadingId, setUploadingId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
 
   useEffect(() => {
@@ -110,16 +111,20 @@ const CatatanAkunSihalal = () => {
     setUploadingId(null);
     setSelectedFile(null);
     setUploadProgress(0);
+    setIsUploading(false);
   };
 
   const handleUploadFile = async () => {
     if (!selectedFile) return;
+    if (isUploading) return;
     
     // Pengecekan lebih longgar: periksa ekstensi file jika type kosong (sering terjadi di Windows/browser tertentu)
     if (!selectedFile.name.toLowerCase().endsWith('.pdf') && selectedFile.type !== 'application/pdf') {
       alert("File harus berformat PDF.");
       return;
     }
+
+    setIsUploading(true);
 
     try {
       const fileRef = storageRef(storage, `berkas_sihalal/${uploadingId}_${Date.now()}.pdf`);
@@ -135,6 +140,7 @@ const CatatanAkunSihalal = () => {
         (error) => {
           console.error("Error uploading file:", error);
           setUploadProgress(0);
+          setIsUploading(false);
           alert("Gagal mengunggah file ke server. Detail: " + error.message + "\n\nMohon pastikan Firebase Storage sudah diaktifkan di Firebase Console dan aturan aksesnya (Rules) mengizinkan proses 'write'.");
         },
         async () => {
@@ -148,11 +154,13 @@ const CatatanAkunSihalal = () => {
           } catch (err) {
             console.error("Error saving url:", err);
             setUploadProgress(0);
+            setIsUploading(false);
             alert("Gagal menyimpan URL file: " + err.message);
           }
         }
       );
     } catch (e) {
+      setIsUploading(false);
       alert("Terjadi kesalahan pada sistem unggah: " + e.message);
     }
   };
@@ -324,9 +332,9 @@ const CatatanAkunSihalal = () => {
                 )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button onClick={handleCloseUpload} className="btn-secondary" disabled={uploadProgress > 0}>Batal</button>
-                <button onClick={handleUploadFile} className="btn-primary" disabled={!selectedFile || uploadProgress > 0}>
-                  {uploadProgress > 0 ? `Mengunggah ${Math.round(uploadProgress)}%` : 'Unggah File'}
+                <button onClick={handleCloseUpload} className="btn-secondary" disabled={isUploading}>Batal</button>
+                <button onClick={handleUploadFile} className="btn-primary" disabled={!selectedFile || isUploading}>
+                  {isUploading ? (uploadProgress > 0 ? `Mengunggah ${Math.round(uploadProgress)}%` : 'Memulai unggahan...') : 'Unggah File'}
                 </button>
               </div>
             </motion.div>
