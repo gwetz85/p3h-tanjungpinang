@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { Package, Search, PlusCircle, Edit3, Trash2, Calendar, FileText, Factory, Truck } from 'lucide-react';
+import { Package, Search, PlusCircle, Edit3, Trash2, Calendar, FileText, Factory, Truck, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const GudangBahan = () => {
@@ -19,9 +19,20 @@ const GudangBahan = () => {
     supplier: ''
   });
   
+  const [isPositiveList, setIsPositiveList] = useState(false);
+  const [positiveCategory, setPositiveCategory] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
+
+  const positiveListCategories = [
+    "Bahan Alam: Tumbuhan (Buah, Sayur, Biji-bijian, dll)",
+    "Bahan Alam: Hewan Non-Sembelihan (Ikan, Hewan Laut)",
+    "Bahan Alam: Mikroba",
+    "Bahan Alam: Air dari alam",
+    "Bahan Tambang / Mineral Alam",
+    "Bahan Kimia Tidak Berbahaya"
+  ];
 
   useEffect(() => {
     const bahanRef = ref(rtdb, 'gudang_bahan');
@@ -140,6 +151,11 @@ const GudangBahan = () => {
         ...formData
       };
 
+      if (isPositiveList) {
+        dataToSave.produsen = "Positive List";
+        dataToSave.sertifikatHalal = positiveCategory ? `Dikecualikan (${positiveCategory})` : "Dikecualikan (KMA 1360/2021)";
+      }
+
       if (editingId) {
         await update(ref(rtdb, `gudang_bahan/${editingId}`), dataToSave);
         setEditingId(null);
@@ -148,6 +164,8 @@ const GudangBahan = () => {
         await push(ref(rtdb, 'gudang_bahan'), dataToSave);
       }
       setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' });
+      setIsPositiveList(false);
+      setPositiveCategory('');
     } catch (err) {
       console.error(err);
       alert('Gagal menyimpan data bahan.');
@@ -170,6 +188,18 @@ const GudangBahan = () => {
       expiredDate: bahan.expiredDate || '', 
       supplier: bahan.supplier || '' 
     });
+    if (bahan.produsen === "Positive List") {
+      setIsPositiveList(true);
+      if (bahan.sertifikatHalal && bahan.sertifikatHalal.includes('Dikecualikan (')) {
+        const cat = bahan.sertifikatHalal.replace('Dikecualikan (', '').replace(')', '');
+        if (positiveListCategories.includes(cat)) {
+          setPositiveCategory(cat);
+        }
+      }
+    } else {
+      setIsPositiveList(false);
+      setPositiveCategory('');
+    }
     setEditingId(bahan.id);
   };
 
@@ -201,7 +231,7 @@ const GudangBahan = () => {
         <table className="custom-table">
           <thead>
             <tr>
-              <th><Package size={16} /> Merek Bahan</th>
+              <th><Package size={16} /> Merek / Nama Bahan</th>
               <th><Factory size={16} /> Produsen</th>
               <th><FileText size={16} /> Sertifikat Halal</th>
               <th><Calendar size={16} /> Expired Date</th>
@@ -234,7 +264,11 @@ const GudangBahan = () => {
                   <td>{bahan.produsen || '-'}</td>
                   <td>
                     {bahan.sertifikatHalal ? (
-                      <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                      <span style={{ 
+                        background: bahan.sertifikatHalal.includes('Dikecualikan') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
+                        color: bahan.sertifikatHalal.includes('Dikecualikan') ? '#60a5fa' : '#10b981', 
+                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' 
+                      }}>
                         {bahan.sertifikatHalal}
                       </span>
                     ) : '-'}
@@ -280,7 +314,12 @@ const GudangBahan = () => {
               </h4>
               {/* Sertifikat badge row */}
               {bahan.sertifikatHalal ? (
-                <span style={{ alignSelf: 'flex-start', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500' }}>
+                <span style={{ 
+                  alignSelf: 'flex-start', 
+                  background: bahan.sertifikatHalal.includes('Dikecualikan') ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)', 
+                  color: bahan.sertifikatHalal.includes('Dikecualikan') ? '#60a5fa' : '#10b981', 
+                  padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500' 
+                }}>
                   🏷️ {bahan.sertifikatHalal}
                 </span>
               ) : null}
@@ -309,29 +348,68 @@ const GudangBahan = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0 }}>{editingId ? 'Edit Data Bahan' : 'Tambah Bahan Baru'}</h3>
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' }); }} className="text-muted" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Batal</button>
+              <button type="button" onClick={() => { setEditingId(null); setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' }); setIsPositiveList(false); setPositiveCategory(''); }} className="text-muted" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Batal</button>
             )}
           </div>
+
+          <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500' }}>
+              <input 
+                type="checkbox" 
+                checked={isPositiveList}
+                onChange={(e) => setIsPositiveList(e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: '#3b82f6' }}
+              />
+              Bahan Termasuk Positive List (Dikecualikan KMA 1360/2021)
+            </label>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', gap: '6px' }}>
+              <Info size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
+              <span>Centang jika bahan merupakan barang yang dikecualikan dari kewajiban bersertifikat halal sesuai KMA 1360 Tahun 2021.</span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             
             <div className="input-group" style={{ gridColumn: 'span 2' }}>
-              <label>Merek Bahan</label>
-              <input type="text" placeholder="Contoh: Tepung Segitiga Biru" value={formData.merek} onChange={(e) => setFormData({...formData, merek: e.target.value})} required />
-            </div>
-            
-            <div className="input-group">
-              <label>Produsen / Pabrik</label>
-              <input type="text" placeholder="Contoh: PT Bogasari" value={formData.produsen} onChange={(e) => setFormData({...formData, produsen: e.target.value})} required />
+              <label>Nama Bahan Spesifik {isPositiveList ? '(Misal: Daun Pandan, Kopi Biji)' : '/ Merek'}</label>
+              <input type="text" placeholder={isPositiveList ? "Contoh: Daun Pandan Segar" : "Contoh: Tepung Segitiga Biru"} value={formData.merek} onChange={(e) => setFormData({...formData, merek: e.target.value})} required />
             </div>
 
-            <div className="input-group">
-              <label>Nomor Sertifikat Halal</label>
-              <input type="text" placeholder="Contoh: ID1234567890" value={formData.sertifikatHalal} onChange={(e) => setFormData({...formData, sertifikatHalal: e.target.value})} required />
-            </div>
+            {isPositiveList && (
+              <div className="input-group" style={{ gridColumn: 'span 2' }}>
+                <label>Kategori Jenis Barang (KMA 1360/2021)</label>
+                <select 
+                  value={positiveCategory} 
+                  onChange={(e) => setPositiveCategory(e.target.value)} 
+                  required
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'var(--bg-input, rgba(0,0,0,0.2))', color: 'inherit' }}
+                >
+                  <option value="">-- Pilih Jenis Barang --</option>
+                  {positiveListCategories.map((cat, idx) => (
+                    <option key={idx} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>Sertifikat Halal akan terisi otomatis: Dikecualikan. Produsen: Positive List.</small>
+              </div>
+            )}
+            
+            {!isPositiveList && (
+              <>
+                <div className="input-group">
+                  <label>Produsen / Pabrik</label>
+                  <input type="text" placeholder="Contoh: PT Bogasari" value={formData.produsen} onChange={(e) => setFormData({...formData, produsen: e.target.value})} required={!isPositiveList} />
+                </div>
+
+                <div className="input-group">
+                  <label>Nomor Sertifikat Halal</label>
+                  <input type="text" placeholder="Contoh: ID1234567890" value={formData.sertifikatHalal} onChange={(e) => setFormData({...formData, sertifikatHalal: e.target.value})} required={!isPositiveList} />
+                </div>
+              </>
+            )}
 
             <div className="input-group">
               <label>Expired Date</label>
-              <input type="date" value={formData.expiredDate} onChange={(e) => setFormData({...formData, expiredDate: e.target.value})} required />
+              <input type="date" value={formData.expiredDate} onChange={(e) => setFormData({...formData, expiredDate: e.target.value})} />
             </div>
 
             <div className="input-group">
@@ -350,3 +428,4 @@ const GudangBahan = () => {
 };
 
 export default GudangBahan;
+
