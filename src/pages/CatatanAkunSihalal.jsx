@@ -22,6 +22,8 @@ const CatatanAkunSihalal = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadingId, setUploadingId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedBytes, setUploadedBytes] = useState(0);
+  const [totalBytes, setTotalBytes] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
 
@@ -111,6 +113,8 @@ const CatatanAkunSihalal = () => {
     setUploadingId(null);
     setSelectedFile(null);
     setUploadProgress(0);
+    setUploadedBytes(0);
+    setTotalBytes(0);
     setIsUploading(false);
   };
 
@@ -136,10 +140,14 @@ const CatatanAkunSihalal = () => {
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setUploadProgress(progress);
+          setUploadedBytes(snapshot.bytesTransferred);
+          setTotalBytes(snapshot.totalBytes);
         },
         (error) => {
           console.error("Error uploading file:", error);
           setUploadProgress(0);
+          setUploadedBytes(0);
+          setTotalBytes(0);
           setIsUploading(false);
           alert("Gagal mengunggah file ke server. Detail: " + error.message + "\n\nMohon pastikan Firebase Storage sudah diaktifkan di Firebase Console dan aturan aksesnya (Rules) mengizinkan proses 'write'.");
         },
@@ -326,14 +334,34 @@ const CatatanAkunSihalal = () => {
                   />
                 </div>
                 {isUploading && (
-                  <div style={{ marginTop: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.85rem', color: 'var(--text-color, #333)' }}>
-                      <span>Status: {uploadProgress > 0 ? 'Sedang mengunggah...' : 'Memulai unggahan...'}</span>
-                      <span style={{ fontWeight: 'bold' }}>{Math.round(uploadProgress)}%</span>
+                  <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59,130,246,0.06)', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.15)' }}>
+                    {/* Header persentase */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-color, #333)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {uploadProgress === 0
+                          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
+                              Menginisialisasi...
+                            </span>
+                          : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
+                              Sedang mengunggah...
+                            </span>
+                        }
+                      </span>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#3b82f6' }}>{Math.round(uploadProgress)}%</span>
                     </div>
-                    <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '8px', overflow: 'hidden', height: '12px' }}>
-                      <div style={{ width: `${uploadProgress}%`, background: 'var(--accent-color, #3b82f6)', height: '100%', transition: 'width 0.3s' }}></div>
+                    {/* Progress bar */}
+                    <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '20px', overflow: 'hidden', height: '14px', marginBottom: '6px' }}>
+                      <div style={{ width: `${uploadProgress}%`, background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', height: '100%', borderRadius: '20px', transition: 'width 0.4s ease' }}></div>
                     </div>
+                    {/* Info bytes */}
+                    {totalBytes > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'rgba(0,0,0,0.5)' }}>
+                        <span>{(uploadedBytes / (1024 * 1024)).toFixed(2)} MB diunggah</span>
+                        <span>{(totalBytes / (1024 * 1024)).toFixed(2)} MB total</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
