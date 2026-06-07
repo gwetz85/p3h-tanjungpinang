@@ -14,7 +14,6 @@ import RunningTextSettings from './pages/RunningTextSettings';
 import Chat from './pages/Chat';
 import PendaftaranSihalal from './pages/PendaftaranSihalal';
 import GudangBahan from './pages/GudangBahan';
-import PositiveList from './pages/PositiveList';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
@@ -118,12 +117,6 @@ function App() {
             <Route path="gudang-bahan" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
                 <GudangBahan />
-              </ProtectedRoute>
-            } />
-
-            <Route path="positive-list" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
-                <PositiveList />
               </ProtectedRoute>
             } />
             
