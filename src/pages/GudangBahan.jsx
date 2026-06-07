@@ -274,16 +274,16 @@ const GudangBahan = () => {
         ) : (
           filteredBahan.map((bahan) => (
             <div key={bahan.id} className="visit-card-compact glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <h4 style={{ margin: '0', fontSize: '1.1rem', color: 'white' }}>{bahan.merek || '-'}</h4>
-                {bahan.sertifikatHalal ? (
-                  <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
-                    {bahan.sertifikatHalal}
-                  </span>
-                ) : (
-                  <span style={{ color: 'var(--text-muted)' }}>-</span>
-                )}
-              </div>
+              {/* Merek - full width, always visible */}
+              <h4 style={{ margin: '0', fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary, #ffffff)', lineHeight: '1.3' }}>
+                {bahan.merek || '-'}
+              </h4>
+              {/* Sertifikat badge row */}
+              {bahan.sertifikatHalal ? (
+                <span style={{ alignSelf: 'flex-start', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500' }}>
+                  🏷️ {bahan.sertifikatHalal}
+                </span>
+              ) : null}
               <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Factory size={14} /> {bahan.produsen || '-'}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Calendar size={14} /> Exp: {bahan.expiredDate || '-'}</div>
