@@ -405,13 +405,13 @@ const CatatanAkunSihalal = () => {
       {/* View PDF Modal */}
       <AnimatePresence>
         {isViewModalOpen && (
-          <div className="modal-overlay" style={{ padding: '2rem' }}>
+          <div className="modal-overlay" style={{ padding: '0.5rem' }}>
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className="modal-content glass-card"
-              style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+              style={{ width: '100%', maxWidth: '1200px', height: '95vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', margin: 'auto' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)' }}>
                 <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
