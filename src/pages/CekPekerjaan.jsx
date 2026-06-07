@@ -276,7 +276,7 @@ const CekPekerjaan = () => {
   const handleEditAlamatClick = (job, e) => {
     if (e) e.stopPropagation();
     setEditAlamatJob(job);
-    setNewAlamatUsaha(job.alamatUsaha || '');
+    setNewAlamatUsaha(job.alamat || '');
     setShowEditAlamat(true);
   };
 
@@ -288,13 +288,13 @@ const CekPekerjaan = () => {
     }
     try {
       await update(ref(rtdb, `pekerjaan/${editAlamatJob.id}`), {
-        alamatUsaha: newAlamatUsaha.trim()
+        alamat: newAlamatUsaha.trim()
       });
-      setJobs(prev => prev.map(j => j.id === editAlamatJob.id ? { ...j, alamatUsaha: newAlamatUsaha.trim() } : j));
+      setJobs(prev => prev.map(j => j.id === editAlamatJob.id ? { ...j, alamat: newAlamatUsaha.trim() } : j));
       if (selectedJob && selectedJob.id === editAlamatJob.id) {
-        setSelectedJob(prev => ({ ...prev, alamatUsaha: newAlamatUsaha.trim() }));
+        setSelectedJob(prev => ({ ...prev, alamat: newAlamatUsaha.trim() }));
       }
-      alert('Alamat Lokasi Usaha berhasil diperbarui!');
+      alert('Alamat Domisili berhasil diperbarui!');
       setShowEditAlamat(false);
       setEditAlamatJob(null);
     } catch (err) {
@@ -895,7 +895,7 @@ const CekPekerjaan = () => {
               <div className="modal-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Home size={20} style={{ color: '#8b5cf6' }} />
-                  <h2 style={{ margin: 0 }}>Edit Alamat Lokasi Usaha</h2>
+                  <h2 style={{ margin: 0 }}>Edit Alamat Domisili</h2>
                 </div>
                 <button onClick={() => { setShowEditAlamat(false); setEditAlamatJob(null); }} className="btn-close"><X /></button>
               </div>
@@ -905,11 +905,11 @@ const CekPekerjaan = () => {
                 </div>
                 <div className="input-group">
                   <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={14} /> Alamat Lokasi Usaha
+                    <MapPin size={14} /> Alamat Domisili
                   </label>
                   <textarea
                     rows="3"
-                    placeholder="Masukkan alamat lokasi usaha..."
+                    placeholder="Masukkan alamat domisili..."
                     value={newAlamatUsaha}
                     onChange={(e) => setNewAlamatUsaha(e.target.value)}
                     required
