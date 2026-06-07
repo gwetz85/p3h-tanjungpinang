@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -46,6 +46,9 @@ const CekPekerjaan = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [jobToCancel, setJobToCancel] = useState(null);
+  const [showEditAlamat, setShowEditAlamat] = useState(false);
+  const [editAlamatJob, setEditAlamatJob] = useState(null);
+  const [newAlamatUsaha, setNewAlamatUsaha] = useState('');
 
   useEffect(() => {
     if (selectedJob && selectedJob.id) {
@@ -270,6 +273,36 @@ const CekPekerjaan = () => {
       alert('Gagal memproses pembatalan.');
     }
   };
+  const handleEditAlamatClick = (job, e) => {
+    if (e) e.stopPropagation();
+    setEditAlamatJob(job);
+    setNewAlamatUsaha(job.alamatUsaha || '');
+    setShowEditAlamat(true);
+  };
+
+  const handleSaveAlamat = async (e) => {
+    e.preventDefault();
+    if (!newAlamatUsaha.trim()) {
+      alert('Alamat tidak boleh kosong.');
+      return;
+    }
+    try {
+      await update(ref(rtdb, `pekerjaan/${editAlamatJob.id}`), {
+        alamatUsaha: newAlamatUsaha.trim()
+      });
+      setJobs(prev => prev.map(j => j.id === editAlamatJob.id ? { ...j, alamatUsaha: newAlamatUsaha.trim() } : j));
+      if (selectedJob && selectedJob.id === editAlamatJob.id) {
+        setSelectedJob(prev => ({ ...prev, alamatUsaha: newAlamatUsaha.trim() }));
+      }
+      alert('Alamat Lokasi Usaha berhasil diperbarui!');
+      setShowEditAlamat(false);
+      setEditAlamatJob(null);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menyimpan alamat.');
+    }
+  };
+
   const Countdown = ({ targetDate }) => {
     const [timeLeft, setTimeLeft] = useState('');
 
@@ -475,6 +508,14 @@ const CekPekerjaan = () => {
                                 <FileText size={16} />
                               </button>
                             )}
+                            <button
+                              className="btn-table-icon"
+                              title="Edit Alamat Lokasi Usaha"
+                              onClick={(e) => handleEditAlamatClick(job, e)}
+                              style={{ color: '#8b5cf6' }}
+                            >
+                              <Home size={16} />
+                            </button>
                             <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
                               <Info size={16} />
                             </button>
@@ -547,6 +588,14 @@ const CekPekerjaan = () => {
                             <FileText size={16} />
                           </button>
                         )}
+                        <button
+                          className="btn-table-icon"
+                          title="Edit Alamat Lokasi Usaha"
+                          onClick={(e) => handleEditAlamatClick(job, e)}
+                          style={{ color: '#8b5cf6' }}
+                        >
+                          <Home size={16} />
+                        </button>
                         <button 
                           className="btn-table-icon text-danger" 
                           title="Batalkan Pekerjaan" 
@@ -834,6 +883,44 @@ const CekPekerjaan = () => {
                 <div className="modal-actions">
                   <button type="button" onClick={() => { setShowCancelModal(false); setJobToCancel(null); }} className="btn-secondary">Batal</button>
                   <button type="submit" className="btn-primary" style={{ backgroundColor: '#ef4444' }}>Simpan & Selesaikan</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {showEditAlamat && editAlamatJob && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="modal-content glass-card" style={{ maxWidth: '480px' }}>
+              <div className="modal-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Home size={20} style={{ color: '#8b5cf6' }} />
+                  <h2 style={{ margin: 0 }}>Edit Alamat Lokasi Usaha</h2>
+                </div>
+                <button onClick={() => { setShowEditAlamat(false); setEditAlamatJob(null); }} className="btn-close"><X /></button>
+              </div>
+              <form onSubmit={handleSaveAlamat} className="edit-form" style={{ padding: '1.5rem' }}>
+                <div style={{ marginBottom: '1rem', padding: '10px 14px', background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.2)', borderRadius: '8px', fontSize: '0.88rem' }}>
+                  <strong>{editAlamatJob.nama}</strong> — {editAlamatJob.jenisPekerjaan}
+                </div>
+                <div className="input-group">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={14} /> Alamat Lokasi Usaha
+                  </label>
+                  <textarea
+                    rows="3"
+                    placeholder="Masukkan alamat lokasi usaha..."
+                    value={newAlamatUsaha}
+                    onChange={(e) => setNewAlamatUsaha(e.target.value)}
+                    required
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" onClick={() => { setShowEditAlamat(false); setEditAlamatJob(null); }} className="btn-secondary">Batal</button>
+                  <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+                    <Save size={16} /> Simpan Alamat
+                  </button>
                 </div>
               </form>
             </motion.div>
