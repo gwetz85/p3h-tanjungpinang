@@ -118,11 +118,10 @@ const CatatanAkunSihalal = () => {
     setIsUploading(false);
   };
 
-  const handleUploadFile = async () => {
+  const handleUploadFile = () => {
     if (!selectedFile) return;
     if (isUploading) return;
 
-    // Pengecekan ekstensi file
     if (!selectedFile.name.toLowerCase().endsWith('.pdf') && selectedFile.type !== 'application/pdf') {
       alert('File harus berformat PDF.');
       return;
@@ -133,61 +132,71 @@ const CatatanAkunSihalal = () => {
     setUploadedBytes(0);
     setTotalBytes(selectedFile.size);
 
-    try {
-      const filePath = `${uploadingId}_${Date.now()}.pdf`;
+    const SUPABASE_URL = 'https://rbnnbjauwfmmxsniahys.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibm5iamF1d2ZtbXhzbmlhaHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzMyMDMsImV4cCI6MjA5NjQwOTIwM30.YKnpoyouDIMp_YLINNU1uYCHsC_NhksEtSCTNOiLUKQ';
+    const filePath = `${uploadingId}_${Date.now()}.pdf`;
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/berkas-sihalal/${filePath}`;
 
-      // Upload menggunakan XMLHttpRequest agar bisa track progress secara real-time
-      const formData = new FormData();
-      formData.append('', selectedFile);
+    const xhr = new XMLHttpRequest();
 
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = (event.loaded / event.total) * 100;
-          setUploadProgress(progress);
-          setUploadedBytes(event.loaded);
-          setTotalBytes(event.total);
-        }
-      };
-
-      // Upload file ke Supabase Storage menggunakan SDK
-      const { data, error } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(filePath, selectedFile, {
-          contentType: 'application/pdf',
-          upsert: true,
-        });
-
-      if (error) {
-        throw new Error(error.message);
+    // Track progress secara real-time
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = (event.loaded / event.total) * 100;
+        setUploadProgress(progress);
+        setUploadedBytes(event.loaded);
+        setTotalBytes(event.total);
       }
+    };
 
-      // Dapatkan public URL
-      const { data: publicData } = supabase.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(data.path);
+    xhr.onload = async () => {
+      if (xhr.status === 200 || xhr.status === 201) {
+        try {
+          // Bentuk public URL langsung
+          const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/berkas-sihalal/${filePath}`;
 
-      const publicUrl = publicData.publicUrl;
+          // Simpan URL ke Firebase RTDB
+          await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
+            berkasUrl: publicUrl,
+          });
 
-      // Simpan URL ke Firebase RTDB
-      await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
-        berkasUrl: publicUrl,
-      });
+          setUploadProgress(100);
+          setTimeout(() => {
+            handleCloseUpload();
+            alert('File berhasil diunggah ke Supabase Storage!');
+          }, 600);
+        } catch (err) {
+          console.error('Error saving URL:', err);
+          setIsUploading(false);
+          setUploadProgress(0);
+          alert('File terunggah tapi gagal menyimpan URL: ' + err.message);
+        }
+      } else {
+        console.error('Upload failed, status:', xhr.status, xhr.responseText);
+        setIsUploading(false);
+        setUploadProgress(0);
+        setUploadedBytes(0);
+        let errMsg = 'Upload gagal (status ' + xhr.status + ')';
+        try {
+          const resp = JSON.parse(xhr.responseText);
+          errMsg += ': ' + (resp.message || resp.error || xhr.responseText);
+        } catch (_) {}
+        alert(errMsg + '\n\nPastikan bucket "berkas-sihalal" sudah diset sebagai Public di Supabase Dashboard.');
+      }
+    };
 
-      setUploadProgress(100);
-      setTimeout(() => {
-        handleCloseUpload();
-        alert('File berhasil diunggah ke Supabase Storage!');
-      }, 500);
-
-    } catch (e) {
-      console.error('Upload error:', e);
+    xhr.onerror = () => {
+      setIsUploading(false);
       setUploadProgress(0);
       setUploadedBytes(0);
-      setIsUploading(false);
-      alert('Gagal mengunggah file: ' + e.message + '\n\nPastikan bucket "berkas-sihalal" sudah dibuat di Supabase Dashboard > Storage dan diatur sebagai Public.');
-    }
+      alert('Koneksi gagal. Periksa koneksi internet Anda dan coba lagi.');
+    };
+
+    xhr.open('POST', uploadUrl, true);
+    xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
+    xhr.setRequestHeader('Content-Type', 'application/pdf');
+    xhr.setRequestHeader('x-upsert', 'true');
+    xhr.send(selectedFile);
   };
 
   const handleViewPdf = (url) => {
