@@ -275,7 +275,7 @@ const GudangBahan = () => {
           filteredBahan.map((bahan) => (
             <div key={bahan.id} className="visit-card-compact glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {/* Merek - full width, always visible */}
-              <h4 style={{ margin: '0', fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary, #ffffff)', lineHeight: '1.3' }}>
+              <h4 style={{ margin: '0', fontSize: '1.05rem', fontWeight: '700', color: 'var(--text, #0f172a)', lineHeight: '1.3' }}>
                 {bahan.merek || '-'}
               </h4>
               {/* Sertifikat badge row */}
