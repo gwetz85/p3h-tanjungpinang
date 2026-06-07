@@ -104,6 +104,7 @@ const Topbar = () => {
       case '/cek': return 'Proses & Verifikasi';
       case '/pendaftaran': return 'Pendaftaran SIHALAL';
       case '/selesai': return 'Riwayat Selesai';
+      case '/catatan-akun': return 'Catatan Akun Sihalal';
       case '/chat': return 'Pesan';
       default: return 'P3H TPI';
     }
