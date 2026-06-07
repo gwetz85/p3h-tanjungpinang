@@ -122,15 +122,21 @@ const CatatanAkunSihalal = () => {
       },
       (error) => {
         console.error("Error uploading file:", error);
-        alert("Gagal mengunggah file.");
+        alert("Gagal mengunggah file: " + error.message);
         handleCloseUpload();
       },
       async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        await updateDoc(doc(db, 'catatanAkunSihalal', uploadingId), {
-          berkasUrl: downloadURL
-        });
-        handleCloseUpload();
+        try {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          await updateDoc(doc(db, 'catatanAkunSihalal', uploadingId), {
+            berkasUrl: downloadURL
+          });
+          handleCloseUpload();
+        } catch (err) {
+          console.error("Error saving url:", err);
+          alert("Gagal menyimpan URL file: " + err.message);
+          handleCloseUpload();
+        }
       }
     );
   };
@@ -233,7 +239,7 @@ const CatatanAkunSihalal = () => {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ margin: 0 }}>{editingId ? 'Edit Catatan Akun' : 'Tambah Catatan Akun'}</h3>
-                <button onClick={handleCloseForm} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+                <button onClick={handleCloseForm} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
                   <X size={24} />
                 </button>
               </div>
@@ -280,23 +286,23 @@ const CatatanAkunSihalal = () => {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ margin: 0 }}>Upload Berkas PDF</h3>
-                <button onClick={handleCloseUpload} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+                <button onClick={handleCloseUpload} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
                   <X size={24} />
                 </button>
               </div>
               <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ padding: '2rem', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '12px', marginBottom: '1rem' }}>
+                <div style={{ padding: '2rem', border: '2px dashed var(--accent-color)', borderRadius: '12px', marginBottom: '1rem', background: 'var(--surface-alt, rgba(0,0,0,0.02))' }}>
                   <FileText size={48} style={{ color: 'var(--accent-color)', marginBottom: '1rem' }} />
-                  <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>Pilih file PDF dari perangkat Anda</p>
+                  <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--text-color, inherit)' }}>Pilih file PDF dari perangkat Anda</p>
                   <input 
                     type="file" 
                     accept="application/pdf" 
                     onChange={(e) => setSelectedFile(e.target.files[0])} 
-                    style={{ color: 'white', width: '100%' }}
+                    style={{ color: 'inherit', width: '100%', padding: '0.5rem', border: '1px solid var(--surface-border)', borderRadius: '8px' }}
                   />
                 </div>
                 {uploadProgress > 0 && (
-                  <div style={{ width: '100%', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', overflow: 'hidden', height: '8px' }}>
+                  <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '8px', overflow: 'hidden', height: '8px' }}>
                     <div style={{ width: `${uploadProgress}%`, background: 'var(--accent-color)', height: '100%', transition: 'width 0.3s' }}></div>
                   </div>
                 )}
@@ -323,11 +329,11 @@ const CatatanAkunSihalal = () => {
               className="modal-content glass-card"
               style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)' }}>
                 <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FileText size={20} /> Preview Berkas PDF
                 </h3>
-                <button onClick={() => setIsViewModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+                <button onClick={() => setIsViewModalOpen(false)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
                   <X size={24} />
                 </button>
               </div>
