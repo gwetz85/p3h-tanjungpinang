@@ -207,7 +207,20 @@ const CatatanAkunSihalal = () => {
   // Helper functions to check roles
   const canEditOrDelete = role === 'superadmin';
   const canAdd = ['superadmin', 'Admin', 'Petugas'].includes(role);
-  const canUpload = ['superadmin', 'Admin', 'Petugas'].includes(role);
+  const isSuperadmin = role === 'superadmin';
+
+  // Tombol Upload tampil jika:
+  // - File belum ada (berkasUrl kosong): semua role yang diizinkan bisa upload
+  // - File sudah ada (berkasUrl ada): HANYA Superadmin yang bisa re-upload
+  const shouldShowUpload = (item) => {
+    if (!item.berkasUrl) {
+      // Belum ada file: Superadmin, Admin, Petugas bisa upload
+      return ['superadmin', 'Admin', 'Petugas'].includes(role);
+    } else {
+      // Sudah ada file: hanya Superadmin yang bisa re-upload
+      return isSuperadmin;
+    }
+  };
 
   return (
     <div className="page-container">
@@ -260,9 +273,9 @@ const CatatanAkunSihalal = () => {
                           <Eye size={14} /> View
                         </button>
                       )}
-                      {canUpload && (
-                        <button onClick={() => handleOpenUpload(item.id)} className="btn-secondary" style={{ padding: '4px 8px', fontSize: '0.8rem' }} title="Upload Berkas">
-                          <Upload size={14} /> Upload
+                      {shouldShowUpload(item) && (
+                        <button onClick={() => handleOpenUpload(item.id)} className="btn-secondary" style={{ padding: '4px 8px', fontSize: '0.8rem' }} title={item.berkasUrl ? 'Ganti Berkas (Superadmin)' : 'Upload Berkas'}>
+                          <Upload size={14} /> {item.berkasUrl ? 'Ganti' : 'Upload'}
                         </button>
                       )}
                       {canEditOrDelete && (
