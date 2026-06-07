@@ -12,7 +12,8 @@ import {
   X,
   Settings,
   Layers,
-  Package
+  Package,
+  FileText
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +33,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['superadmin', 'Petugas'] },
     { name: 'Pendaftaran SIHALAL', path: '/pendaftaran', icon: FileSearch, roles: ['superadmin', 'Admin'] },
     { name: 'Gudang Bahan', path: '/gudang-bahan', icon: Package, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Positive List (KMA)', path: '/positive-list', icon: FileText, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Riwayat Selesai', path: '/selesai', icon: History, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
     { name: 'Manajemen User', path: '/users', icon: Users, roles: ['superadmin'] },
