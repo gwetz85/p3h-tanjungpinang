@@ -325,9 +325,15 @@ const CatatanAkunSihalal = () => {
                     style={{ color: 'inherit', width: '100%', padding: '0.5rem', border: '1px solid var(--surface-border)', borderRadius: '8px' }}
                   />
                 </div>
-                {uploadProgress > 0 && (
-                  <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '8px', overflow: 'hidden', height: '8px' }}>
-                    <div style={{ width: `${uploadProgress}%`, background: 'var(--accent-color)', height: '100%', transition: 'width 0.3s' }}></div>
+                {isUploading && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.85rem', color: 'var(--text-color, #333)' }}>
+                      <span>Status: {uploadProgress > 0 ? 'Sedang mengunggah...' : 'Memulai unggahan...'}</span>
+                      <span style={{ fontWeight: 'bold' }}>{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '8px', overflow: 'hidden', height: '12px' }}>
+                      <div style={{ width: `${uploadProgress}%`, background: 'var(--accent-color, #3b82f6)', height: '100%', transition: 'width 0.3s' }}></div>
+                    </div>
                   </div>
                 )}
               </div>
