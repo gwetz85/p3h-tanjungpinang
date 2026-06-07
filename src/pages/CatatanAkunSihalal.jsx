@@ -115,39 +115,46 @@ const CatatanAkunSihalal = () => {
   const handleUploadFile = async () => {
     if (!selectedFile) return;
     
-    if (selectedFile.type !== 'application/pdf') {
+    // Pengecekan lebih longgar: periksa ekstensi file jika type kosong (sering terjadi di Windows/browser tertentu)
+    if (!selectedFile.name.toLowerCase().endsWith('.pdf') && selectedFile.type !== 'application/pdf') {
       alert("File harus berformat PDF.");
       return;
     }
 
-    const fileRef = storageRef(storage, `berkas_sihalal/${uploadingId}_${Date.now()}.pdf`);
-    const uploadTask = uploadBytesResumable(fileRef, selectedFile);
+    try {
+      const fileRef = storageRef(storage, `berkas_sihalal/${uploadingId}_${Date.now()}.pdf`);
+      // uploadBytesResumable digunakan untuk mendukung ukuran file yang sangat besar (tidak terbatas)
+      const uploadTask = uploadBytesResumable(fileRef, selectedFile);
 
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        console.error("Error uploading file:", error);
-        alert("Gagal mengunggah file: " + error.message);
-        handleCloseUpload();
-      },
-      async () => {
-        try {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
-            berkasUrl: downloadURL
-          });
-          handleCloseUpload();
-        } catch (err) {
-          console.error("Error saving url:", err);
-          alert("Gagal menyimpan URL file: " + err.message);
-          handleCloseUpload();
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.error("Error uploading file:", error);
+          setUploadProgress(0);
+          alert("Gagal mengunggah file ke server. Detail: " + error.message + "\n\nMohon pastikan Firebase Storage sudah diaktifkan di Firebase Console dan aturan aksesnya (Rules) mengizinkan proses 'write'.");
+        },
+        async () => {
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
+              berkasUrl: downloadURL
+            });
+            handleCloseUpload();
+            alert("File berhasil diunggah!");
+          } catch (err) {
+            console.error("Error saving url:", err);
+            setUploadProgress(0);
+            alert("Gagal menyimpan URL file: " + err.message);
+          }
         }
-      }
-    );
+      );
+    } catch (e) {
+      alert("Terjadi kesalahan pada sistem unggah: " + e.message);
+    }
   };
 
   const handleViewPdf = (url) => {
