@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { db, storage } from '../firebase';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { rtdb, storage } from '../firebase';
+import { ref, push, onValue, remove, update } from 'firebase/database';
 import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit3, Trash2, Upload, FileText, X, Eye } from 'lucide-react';
@@ -25,18 +25,27 @@ const CatatanAkunSihalal = () => {
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'catatanAkunSihalal'), (snapshot) => {
-      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Sort by createdAt descending locally since we didn't create a composite index
-      list.sort((a, b) => {
-        if (!a.createdAt) return 1;
-        if (!b.createdAt) return -1;
-        return b.createdAt.toMillis() - a.createdAt.toMillis();
-      });
-      setData(list);
+    const listRef = ref(rtdb, 'catatanAkunSihalal');
+    const unsubscribe = onValue(listRef, (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        const list = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+        list.sort((a, b) => {
+          if (!a.createdAt) return 1;
+          if (!b.createdAt) return -1;
+          return b.createdAt - a.createdAt;
+        });
+        setData(list);
+      } else {
+        setData([]);
+      }
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching data:", error);
+      alert("Gagal memuat data: " + error.message);
       setLoading(false);
     });
-    return () => unsub();
+    return () => unsubscribe();
   }, []);
 
   const handleOpenForm = (record = null) => {
@@ -60,31 +69,31 @@ const CatatanAkunSihalal = () => {
     e.preventDefault();
     try {
       if (editingId) {
-        await updateDoc(doc(db, 'catatanAkunSihalal', editingId), {
+        await update(ref(rtdb, `catatanAkunSihalal/${editingId}`), {
           ...formData,
-          updatedAt: serverTimestamp()
+          updatedAt: Date.now()
         });
       } else {
-        await addDoc(collection(db, 'catatanAkunSihalal'), {
+        await push(ref(rtdb, 'catatanAkunSihalal'), {
           ...formData,
           berkasUrl: null,
-          createdAt: serverTimestamp()
+          createdAt: Date.now()
         });
       }
       handleCloseForm();
     } catch (error) {
       console.error("Error saving data:", error);
-      alert("Terjadi kesalahan saat menyimpan data.");
+      alert("Terjadi kesalahan saat menyimpan data: " + error.message);
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Apakah Anda yakin ingin menghapus catatan akun ini?")) {
       try {
-        await deleteDoc(doc(db, 'catatanAkunSihalal', id));
+        await remove(ref(rtdb, `catatanAkunSihalal/${id}`));
       } catch (error) {
         console.error("Error deleting data:", error);
-        alert("Terjadi kesalahan saat menghapus data.");
+        alert("Terjadi kesalahan saat menghapus data: " + error.message);
       }
     }
   };
@@ -128,7 +137,7 @@ const CatatanAkunSihalal = () => {
       async () => {
         try {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          await updateDoc(doc(db, 'catatanAkunSihalal', uploadingId), {
+          await update(ref(rtdb, `catatanAkunSihalal/${uploadingId}`), {
             berkasUrl: downloadURL
           });
           handleCloseUpload();
