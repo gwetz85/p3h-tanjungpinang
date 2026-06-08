@@ -2,16 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, set, push, remove, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { UserPlus, Trash2, Shield, Mail, UserCheck } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Mail, UserCheck, Lock, Eye, EyeOff } from 'lucide-react';
 
 const DataUser = () => {
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
     email: '',
     role: 'Petugas',
-    nama: ''
+    nama: '',
+    password: ''
   });
   const [loading, setLoading] = useState(true);
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+
+  const togglePassword = (id) => {
+    setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     const usersRef = ref(rtdb, 'users');
@@ -19,8 +25,7 @@ const DataUser = () => {
       const data = snapshot.val();
       if (data) {
         const list = Object.entries(data)
-          .map(([id, val]) => ({ id, ...val }))
-          .filter(user => user.role !== 'superadmin');
+          .map(([id, val]) => ({ id, ...val }));
         setUsers(list);
       } else {
         setUsers([]);
@@ -42,7 +47,7 @@ const DataUser = () => {
         createdAt: Date.now()
       });
       
-      setFormData({ email: '', role: 'Petugas', nama: '' });
+      setFormData({ email: '', role: 'Petugas', nama: '', password: '' });
       alert('User berhasil didaftarkan di database!');
     } catch (err) {
       alert('Gagal menambah user');
@@ -99,6 +104,15 @@ const DataUser = () => {
                 <option value="Monitoring">Monitoring (Hanya Lihat)</option>
               </select>
             </div>
+            <div className="input-group">
+              <label><Lock size={14} /> Password (Opsional)</label>
+              <input 
+                type="text" 
+                placeholder="Simpan password untuk referensi" 
+                value={formData.password} 
+                onChange={(e) => setFormData({...formData, password: e.target.value})} 
+              />
+            </div>
             <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
               Simpan Pengguna
             </button>
@@ -118,6 +132,7 @@ const DataUser = () => {
                   <tr>
                     <th>User</th>
                     <th>Role</th>
+                    <th>Password</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -178,6 +193,23 @@ const DataUser = () => {
                             <option value="Monitoring">Monitoring</option>
                           </select>
                         </div>
+                      </td>
+                      <td>
+                        {user.password ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                              {visiblePasswords[user.id] ? user.password : '••••••••'}
+                            </span>
+                            <button 
+                              onClick={() => togglePassword(user.id)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', color: '#64748b' }}
+                            >
+                              {visiblePasswords[user.id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                            </button>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>Tidak tersimpan</span>
+                        )}
                       </td>
                       <td>
                         <button onClick={() => handleDelete(user.id)} className="text-danger" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
