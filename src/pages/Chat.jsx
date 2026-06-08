@@ -41,8 +41,14 @@ const Chat = () => {
     const unsub = onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
+        const SUPERADMIN_EMAILS = ['admin@tarunabangsa.id', 'sihalal-akun@gmail.com'];
         const list = Object.entries(data)
-          .filter(([id, val]) => id !== currentUser.uid && val.role !== 'Pending' && val.role?.toLowerCase() !== 'superadmin')
+          .filter(([id, val]) => 
+            id !== currentUser.uid && 
+            val.role !== 'Pending' && 
+            val.role?.toLowerCase() !== 'superadmin' &&
+            !SUPERADMIN_EMAILS.includes(val.email)
+          )
           .map(([id, val]) => ({ id, ...val }));
         setUsers(list);
       }
