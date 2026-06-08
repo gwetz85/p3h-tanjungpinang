@@ -6,8 +6,8 @@ import { Search, CheckCircle2, Calendar, User, Briefcase, RotateCcw, Info } from
 import { useAuth } from '../context/AuthContext';
 
 const Selesai = () => {
-  const { currentUser } = useAuth();
-  const isSuperAdmin = currentUser?.email === 'admin@tarunabangsa.id';
+  const { currentUser, role } = useAuth();
+  const isSuperAdmin = role === 'superadmin';
   const [completedJobs, setCompletedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

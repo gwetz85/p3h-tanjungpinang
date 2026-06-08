@@ -32,6 +32,7 @@ const PendaftaranSihalal = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJobKTP, setSelectedJobKTP] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showHalal, setShowHalal] = useState(false);
   const [adminNote, setAdminNote] = useState('');
@@ -95,7 +96,26 @@ const PendaftaranSihalal = () => {
         }
       }, { onlyOnce: true });
     }
+
+    // Lazy-load foto KTP
+    if (selectedJob && selectedJob.id) {
+      setSelectedJobKTP('');
+      const ktpRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKTP`);
+      onValue(ktpRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobKTP(snapshot.val());
+      }, { onlyOnce: true });
+    }
   }, [selectedJob?.id]);
+
+  const downloadImage = (dataUrl, filename) => {
+    if (!dataUrl) return;
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleStartProcess = async (jobId) => {
     try {
@@ -250,6 +270,20 @@ const PendaftaranSihalal = () => {
                         >
                           <ExternalLink size={18} /> Buka Google Drive Survey
                         </a>
+                      </div>
+                    )}
+
+                    {selectedJobKTP && (
+                      <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                        <label style={{ color: '#10b981', marginBottom: '8px', display: 'block' }}>📷 Foto KTP Pelaku Usaha</label>
+                        <img src={selectedJobKTP} alt="KTP" style={{ width: '100%', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        <button
+                          type="button"
+                          onClick={() => downloadImage(selectedJobKTP, `KTP_${selectedJob.nama || selectedJob.id}.jpg`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16,185,129,0.2)', border: '1px solid #10b981', color: '#10b981', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                        >
+                          <Download size={16} /> Download Foto KTP
+                        </button>
                       </div>
                     )}
 

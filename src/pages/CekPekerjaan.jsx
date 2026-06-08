@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -39,6 +39,7 @@ const CekPekerjaan = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedJobPhoto, setSelectedJobPhoto] = useState('');
+  const [selectedJobKTP, setSelectedJobKTP] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [showHalal, setShowHalal] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -50,14 +51,33 @@ const CekPekerjaan = () => {
   const [editAlamatJob, setEditAlamatJob] = useState(null);
   const [newAlamatUsaha, setNewAlamatUsaha] = useState('');
 
+  const downloadImage = (dataUrl, filename) => {
+    if (!dataUrl) return;
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     if (selectedJob && selectedJob.id) {
       setSelectedJobPhoto('');
+      setSelectedJobKTP('');
       // Lazy-load photo from separate node
       const photoRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoPengajuan`);
       onValue(photoRef, (snapshot) => {
         if (snapshot.exists()) {
           setSelectedJobPhoto(snapshot.val());
+        }
+      }, { onlyOnce: true });
+
+      // Lazy-load foto KTP
+      const ktpRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKTP`);
+      onValue(ktpRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setSelectedJobKTP(snapshot.val());
         }
       }, { onlyOnce: true });
 
@@ -700,6 +720,20 @@ const CekPekerjaan = () => {
                           <div className="info-item full">
                             <label>Foto Pengajuan</label>
                             <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" />
+                          </div>
+                        )}
+
+                        {selectedJobKTP && (
+                          <div className="info-item full">
+                            <label>Foto KTP Pelaku Usaha</label>
+                            <img src={selectedJobKTP} alt="KTP" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobKTP, `KTP_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#10b981', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download Foto KTP
+                            </button>
                           </div>
                         )}
 

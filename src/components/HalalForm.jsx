@@ -309,6 +309,17 @@ const HalalForm = ({ job, onClose }) => {
     }
   };
 
+  // Download foto sebagai file gambar
+  const downloadImage = (dataUrl, filename) => {
+    if (!dataUrl) return;
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const generatePDF = () => {
     const bahanFilled = formData.bahan.filter(b => b.merk);
     const pembersihFilled = formData.pembersih.filter(p => p.merk);
@@ -922,7 +933,17 @@ const HalalForm = ({ job, onClose }) => {
           <div className="section-title mt-4">Foto KTP Pelaku Usaha</div>
           <div className="photo-upload glass-card mb-4">
             {formData.photoKTP ? (
-              <img src={formData.photoKTP} alt="KTP" className="preview-img" />
+              <>
+                <img src={formData.photoKTP} alt="KTP" className="preview-img" />
+                <button
+                  type="button"
+                  onClick={() => downloadImage(formData.photoKTP, `KTP_${job.nama || job.id}.jpg`)}
+                  className="btn-primary"
+                  style={{ marginTop: '10px', width: '100%', background: 'rgba(16,185,129,0.2)', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <Download size={16} /> Download Foto KTP
+                </button>
+              </>
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto KTP</p></div>
             )}
