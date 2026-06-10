@@ -59,6 +59,8 @@ const ArsipSH = () => {
       setFormData({ namaUsaha: '', nomorSertifikat: '', keterangan: '' });
       setEditingId(null);
     }
+    setSelectedFile(null);
+    setUploadProgress(0);
     setIsFormModalOpen(true);
   };
 
@@ -66,27 +68,114 @@ const ArsipSH = () => {
     setIsFormModalOpen(false);
     setFormData({ namaUsaha: '', nomorSertifikat: '', keterangan: '' });
     setEditingId(null);
+    setSelectedFile(null);
+    setUploadProgress(0);
+    setIsUploading(false);
   };
 
   const handleSaveForm = async (e) => {
     e.preventDefault();
-    try {
-      if (editingId) {
-        await update(ref(rtdb, `arsipSH/${editingId}`), {
-          ...formData,
-          updatedAt: Date.now()
-        });
-      } else {
-        await push(ref(rtdb, 'arsipSH'), {
-          ...formData,
-          berkasUrl: null,
-          createdAt: Date.now()
-        });
+    if (selectedFile) {
+      if (!selectedFile.name.toLowerCase().endsWith('.pdf') && selectedFile.type !== 'application/pdf') {
+        alert('File harus berformat PDF.');
+        return;
       }
-      handleCloseForm();
-    } catch (error) {
-      console.error("Error saving data:", error);
-      alert("Terjadi kesalahan saat menyimpan data: " + error.message);
+      setIsUploading(true);
+      setUploadProgress(0);
+      setUploadedBytes(0);
+      setTotalBytes(selectedFile.size);
+
+      const SUPABASE_URL = 'https://rbnnbjauwfmmxsniahys.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibm5iamF1d2ZtbXhzbmlhaHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MzMyMDMsImV4cCI6MjA5NjQwOTIwM30.YKnpoyouDIMp_YLINNU1uYCHsC_NhksEtSCTNOiLUKQ';
+      
+      let targetId = editingId;
+      let newRef = null;
+      if (!targetId) {
+        newRef = push(ref(rtdb, 'arsipSH'));
+        targetId = newRef.key;
+      }
+      
+      const filePath = `arsip_${targetId}_${Date.now()}.pdf`;
+      const uploadUrl = `${SUPABASE_URL}/storage/v1/object/berkas-sihalal/${filePath}`;
+
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100;
+          setUploadProgress(progress);
+          setUploadedBytes(event.loaded);
+          setTotalBytes(event.total);
+        }
+      };
+      
+      xhr.onload = async () => {
+        if (xhr.status === 200 || xhr.status === 201) {
+          try {
+            const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/berkas-sihalal/${filePath}`;
+            if (editingId) {
+              await update(ref(rtdb, `arsipSH/${editingId}`), {
+                ...formData,
+                berkasUrl: publicUrl,
+                updatedAt: Date.now()
+              });
+            } else {
+              await update(newRef, {
+                ...formData,
+                berkasUrl: publicUrl,
+                createdAt: Date.now()
+              });
+            }
+            setUploadProgress(100);
+            setTimeout(() => {
+              handleCloseForm();
+            }, 600);
+          } catch (err) {
+            console.error('Error saving URL:', err);
+            setIsUploading(false);
+            alert('File terunggah tapi gagal menyimpan data: ' + err.message);
+          }
+        } else {
+          console.error('Upload failed, status:', xhr.status, xhr.responseText);
+          setIsUploading(false);
+          let errMsg = 'Upload gagal (status ' + xhr.status + ')';
+          try {
+            const resp = JSON.parse(xhr.responseText);
+            errMsg += ': ' + (resp.message || resp.error || xhr.responseText);
+          } catch (_) {}
+          alert(errMsg);
+        }
+      };
+
+      xhr.onerror = () => {
+        setIsUploading(false);
+        alert('Koneksi gagal saat mengunggah.');
+      };
+
+      xhr.open('POST', uploadUrl, true);
+      xhr.setRequestHeader('Authorization', `Bearer ${SUPABASE_ANON_KEY}`);
+      xhr.setRequestHeader('Content-Type', 'application/pdf');
+      xhr.setRequestHeader('x-upsert', 'true');
+      xhr.send(selectedFile);
+      
+    } else {
+      try {
+        if (editingId) {
+          await update(ref(rtdb, `arsipSH/${editingId}`), {
+            ...formData,
+            updatedAt: Date.now()
+          });
+        } else {
+          await push(ref(rtdb, 'arsipSH'), {
+            ...formData,
+            berkasUrl: null,
+            createdAt: Date.now()
+          });
+        }
+        handleCloseForm();
+      } catch (error) {
+        console.error("Error saving data:", error);
+        alert("Terjadi kesalahan saat menyimpan data: " + error.message);
+      }
     }
   };
 
@@ -318,9 +407,37 @@ const ArsipSH = () => {
                     style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--surface-border)', background: 'var(--surface-color)', color: 'inherit' }}
                   />
                 </div>
+                <div className="input-group">
+                  <label>Upload Sertifikat (Opsional)</label>
+                  <div style={{ padding: '0.8rem', border: '1px dashed var(--surface-border)', borderRadius: '8px', background: 'var(--surface-alt, rgba(0,0,0,0.02))' }}>
+                    <input 
+                      type="file" 
+                      accept="application/pdf" 
+                      onChange={(e) => setSelectedFile(e.target.files[0])} 
+                      style={{ color: 'inherit', width: '100%' }}
+                      disabled={isUploading}
+                    />
+                  </div>
+                </div>
+                {isUploading && (
+                  <div style={{ marginTop: '0.5rem', padding: '1rem', background: 'rgba(59,130,246,0.06)', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.15)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-color, #333)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: uploadProgress === 0 ? '#f59e0b' : '#3b82f6', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
+                        {uploadProgress === 0 ? 'Menginisialisasi...' : 'Sedang mengunggah...'}
+                      </span>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#3b82f6' }}>{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '20px', overflow: 'hidden', height: '14px', marginBottom: '6px' }}>
+                      <div style={{ width: `${uploadProgress}%`, background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', height: '100%', borderRadius: '20px', transition: 'width 0.4s ease' }}></div>
+                    </div>
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
-                  <button type="button" onClick={handleCloseForm} className="btn-secondary">Batal</button>
-                  <button type="submit" className="btn-primary">Simpan</button>
+                  <button type="button" onClick={handleCloseForm} className="btn-secondary" disabled={isUploading}>Batal</button>
+                  <button type="submit" className="btn-primary" disabled={isUploading}>
+                    {isUploading ? 'Menyimpan...' : 'Simpan'}
+                  </button>
                 </div>
               </form>
             </motion.div>
