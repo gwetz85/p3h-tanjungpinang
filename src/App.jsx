@@ -15,6 +15,7 @@ import Chat from './pages/Chat';
 import PendaftaranSihalal from './pages/PendaftaranSihalal';
 import GudangBahan from './pages/GudangBahan';
 import CatatanAkunSihalal from './pages/CatatanAkunSihalal';
+import ArsipSH from './pages/ArsipSH';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
@@ -130,6 +131,11 @@ function App() {
             <Route path="catatan-akun" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
                 <CatatanAkunSihalal />
+              </ProtectedRoute>
+            } />
+            <Route path="arsip-sh" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+                <ArsipSH />
               </ProtectedRoute>
             } />
             <Route path="chat" element={<Chat />} />
