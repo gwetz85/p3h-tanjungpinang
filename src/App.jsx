@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import DataKoordinator from './pages/DataKoordinator';
 import InputPekerjaan from './pages/InputPekerjaan';
 import CekPekerjaan from './pages/CekPekerjaan';
+import VerifikasiPU from './pages/VerifikasiPU';
 import Selesai from './pages/Selesai';
 import Setup from './pages/Setup';
 import DataUser from './pages/DataUser';
@@ -125,6 +126,11 @@ function App() {
             <Route path="cek" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
                 <CekPekerjaan />
+              </ProtectedRoute>
+            } />
+            <Route path="verifikasi-pu" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
+                <VerifikasiPU />
               </ProtectedRoute>
             } />
             <Route path="selesai" element={<Selesai />} />

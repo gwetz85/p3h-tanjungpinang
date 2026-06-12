@@ -32,7 +32,7 @@ const KELURAHAN_LIST = [
   "Tanjung Ayun Sakti"
 ];
 
-const CekPekerjaan = () => {
+const VerifikasiPU = () => {
   const { role } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,72 +97,30 @@ const CekPekerjaan = () => {
 
 
   useEffect(() => {
-    // Separate queries to avoid fetching all jobs (which contain heavy base64 images)
-    const qProses = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Proses'));
-    const qPending = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Pending'));
-    const qReturned = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Returned'));
+    const qVerifikasi = query(ref(rtdb, 'pekerjaan'), orderByChild('status'), equalTo('Verifikasi PU'));
 
-    let prosesData = {};
-    let pendingData = {};
-    let returnedData = {};
-
-    const updateJobsList = () => {
-      // Strip heavy halalData from list items — it's only needed in the detail modal
-      // and will be loaded lazily from the separate path when needed
+    const updateJobsList = (data) => {
+      if (!data) {
+        setJobs([]);
+        setLoading(false);
+        return;
+      }
       const stripHeavy = (obj) => Object.values(obj).map(({ halalData, ...rest }) => rest);
-      const combined = [...stripHeavy(prosesData), ...stripHeavy(pendingData), ...stripHeavy(returnedData)];
-      setJobs(combined);
+      setJobs(stripHeavy(data));
       setLoading(false);
     };
 
-    const unsubProses = onValue(qProses, (snapshot) => {
+    const unsubVerifikasi = onValue(qVerifikasi, (snapshot) => {
       try {
         const data = snapshot.val();
+        let verifData = {};
         if (data) {
-          prosesData = Object.keys(data).reduce((acc, key) => {
+          verifData = Object.keys(data).reduce((acc, key) => {
             acc[key] = { id: key, ...data[key] };
             return acc;
           }, {});
-        } else {
-          prosesData = {};
         }
-        updateJobsList();
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-      }
-    });
-
-    const unsubPending = onValue(qPending, (snapshot) => {
-      try {
-        const data = snapshot.val();
-        if (data) {
-          pendingData = Object.keys(data).reduce((acc, key) => {
-            acc[key] = { id: key, ...data[key] };
-            return acc;
-          }, {});
-        } else {
-          pendingData = {};
-        }
-        updateJobsList();
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-      }
-    });
-
-    const unsubReturned = onValue(qReturned, (snapshot) => {
-      try {
-        const data = snapshot.val();
-        if (data) {
-          returnedData = Object.keys(data).reduce((acc, key) => {
-            acc[key] = { id: key, ...data[key] };
-            return acc;
-          }, {});
-        } else {
-          returnedData = {};
-        }
-        updateJobsList();
+        updateJobsList(verifData);
       } catch (err) {
         console.error(err);
         setLoading(false);
@@ -170,9 +128,7 @@ const CekPekerjaan = () => {
     });
 
     return () => {
-      unsubProses();
-      unsubPending();
-      unsubReturned();
+      unsubVerifikasi();
     };
   }, [role]);
 
@@ -251,29 +207,17 @@ const CekPekerjaan = () => {
     }
   };
 
-  const handleToggleStatus = async (job) => {
-    try {
-      const newStatus = job.status === 'Proses' ? 'Pending' : 'Proses';
-      await update(ref(rtdb, `pekerjaan/${job.id}`), {
-        status: newStatus
-      });
-      alert(`Status pekerjaan diubah menjadi: ${newStatus}`);
-    } catch (err) {
-      console.error(err);
-      alert('Gagal mengubah status pekerjaan');
-    }
-  };
-
-  const handleMigrateVerifikasi = async (job) => {
-    if (window.confirm('Pindahkan data ini ke menu Verifikasi PU?')) {
+  const handleKirimAdmin = async (job) => {
+    if (window.confirm('Kirim data ini ke Admin (Pendaftaran SIHalal)? Status akan diubah menjadi Review.')) {
       try {
         await update(ref(rtdb, `pekerjaan/${job.id}`), {
-          status: 'Verifikasi PU'
+          status: 'Review',
+          reviewStartedAt: Date.now()
         });
-        alert('Data berhasil dipindahkan ke menu Verifikasi PU');
+        alert('Data berhasil dikirim ke Pendaftaran SIHalal!');
       } catch (err) {
         console.error(err);
-        alert('Gagal memindahkan data');
+        alert('Gagal mengirim data ke Admin.');
       }
     }
   };
@@ -390,7 +334,7 @@ const CekPekerjaan = () => {
   return (
     <div className="page-container" style={{ maxWidth: '1200px' }}>
       <div className="page-header">
-        <h1 className="title-gradient">Proses & Verifikasi</h1>
+        <h1 className="title-gradient">Verifikasi PU</h1>
       </div>
 
       {/* View-only banner for Admin */}
@@ -417,31 +361,10 @@ const CekPekerjaan = () => {
       <div className="stats-summary-grid">
         <div className="stat-summary-card glass-card">
           <div className="stat-summary-info">
-            <span className="stat-summary-label">Total Data</span>
+            <span className="stat-summary-label">Total Verifikasi PU</span>
             <h2 className="stat-summary-value">{filteredJobs.length}</h2>
           </div>
           <div className="stat-summary-icon text-primary"><CheckCircle2 size={24} /></div>
-        </div>
-        <div className="stat-summary-card glass-card" style={{ borderLeftColor: '#f59e0b' }}>
-          <div className="stat-summary-info">
-            <span className="stat-summary-label">Proses</span>
-            <h2 className="stat-summary-value">{filteredJobs.filter(j => j.status === 'Proses').length}</h2>
-          </div>
-          <div className="stat-summary-icon" style={{ color: '#f59e0b' }}><Play size={24} /></div>
-        </div>
-        <div className="stat-summary-card glass-card" style={{ borderLeftColor: '#6b7280' }}>
-          <div className="stat-summary-info">
-            <span className="stat-summary-label">Pending</span>
-            <h2 className="stat-summary-value">{filteredJobs.filter(j => j.status === 'Pending').length}</h2>
-          </div>
-          <div className="stat-summary-icon" style={{ color: '#6b7280' }}><Clock size={24} /></div>
-        </div>
-        <div className="stat-summary-card glass-card" style={{ borderLeftColor: '#ef4444' }}>
-          <div className="stat-summary-info">
-            <span className="stat-summary-label">Perlu Perbaikan</span>
-            <h2 className="stat-summary-value">{filteredJobs.filter(j => j.status === 'Returned').length}</h2>
-          </div>
-          <div className="stat-summary-icon text-danger"><X size={24} /></div>
         </div>
       </div>
 
@@ -523,11 +446,11 @@ const CekPekerjaan = () => {
                         {role !== 'Admin' ? (
                           <div className="table-actions" onClick={(e) => e.stopPropagation()}>
                             <button 
-                              className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
-                              title={job.status === 'Proses' ? 'Tandai Pending (Menunggu)' : 'Mulai Kerjakan (Proses)'}
-                              onClick={() => handleToggleStatus(job)}
+                              className="btn-table-icon text-success"
+                              title="Kirim ke Admin"
+                              onClick={() => handleKirimAdmin(job)}
                             >
-                              {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
+                              <Send size={16} />
                             </button>
                             <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                               <Calendar size={16} />
@@ -549,9 +472,6 @@ const CekPekerjaan = () => {
                               style={{ color: '#8b5cf6' }}
                             >
                               <Home size={16} />
-                            </button>
-                            <button className="btn-table-icon" title="Migrate to Verifikasi PU" onClick={() => handleMigrateVerifikasi(job)} style={{ color: '#3b82f6' }}>
-                              <Send size={16} />
                             </button>
                             <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
                               <Info size={16} />
@@ -606,11 +526,11 @@ const CekPekerjaan = () => {
                     {role !== 'Admin' && (
                       <>
                         <button 
-                          className={`btn-table-icon ${job.status === 'Proses' ? 'text-warning' : 'text-success'}`}
-                          title={job.status === 'Proses' ? 'Tandai Pending' : 'Mulai Kerjakan'}
-                          onClick={(e) => { e.stopPropagation(); handleToggleStatus(job); }}
+                          className="btn-table-icon text-success"
+                          title="Kirim ke Admin"
+                          onClick={(e) => { e.stopPropagation(); handleKirimAdmin(job); }}
                         >
-                          {job.status === 'Proses' ? <Pause size={16} /> : <Play size={16} />}
+                          <Send size={16} />
                         </button>
                         <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                           <Calendar size={16} />
@@ -632,14 +552,6 @@ const CekPekerjaan = () => {
                           style={{ color: '#8b5cf6' }}
                         >
                           <Home size={16} />
-                        </button>
-                        <button 
-                          className="btn-table-icon" 
-                          title="Migrate to Verifikasi PU" 
-                          onClick={(e) => { e.stopPropagation(); handleMigrateVerifikasi(job); }}
-                          style={{ color: '#3b82f6' }}
-                        >
-                          <Send size={16} />
                         </button>
                         <button 
                           className="btn-table-icon text-danger" 
@@ -992,4 +904,4 @@ const CekPekerjaan = () => {
   );
 };
 
-export default CekPekerjaan;
+export default VerifikasiPU;

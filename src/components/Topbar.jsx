@@ -102,6 +102,7 @@ const Topbar = () => {
       case '/users': return 'Manajemen User';
       case '/input': return 'Input Pekerjaan';
       case '/cek': return 'Proses & Verifikasi';
+      case '/verifikasi-pu': return 'Verifikasi PU';
       case '/pendaftaran': return 'Pendaftaran SIHALAL';
       case '/selesai': return 'Riwayat Selesai';
       case '/catatan-akun': return 'Catatan Akun Sihalal';
