@@ -42,6 +42,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
     { name: 'Manajemen User', path: '/users', icon: Users, roles: ['superadmin'] },
     { name: 'Running Text', path: '/running-text', icon: Settings, roles: ['superadmin'] },
+    { name: 'Scan KTP', path: '/scan-ktp.html', icon: FileSearch, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'], isExternal: true },
     { name: 'Pesan Chat', path: '/chat', icon: MessageCircle, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
   ];
 
@@ -56,15 +57,29 @@ const Sidebar = ({ isOpen, onClose }) => {
       
       <nav className="sidebar-nav">
         {navItems.filter(item => item.roles.includes(role)).map((item) => (
-          <NavLink 
-            key={item.path} 
-            to={item.path}
-            onClick={onClose}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            <item.icon size={18} />
-            <span>{item.name}</span>
-          </NavLink>
+          item.isExternal ? (
+            <a 
+              key={item.path} 
+              href={item.path}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onClose}
+              className="nav-item"
+            >
+              <item.icon size={18} />
+              <span>{item.name}</span>
+            </a>
+          ) : (
+            <NavLink 
+              key={item.path} 
+              to={item.path}
+              onClick={onClose}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <item.icon size={18} />
+              <span>{item.name}</span>
+            </NavLink>
+          )
         ))}
       </nav>
 

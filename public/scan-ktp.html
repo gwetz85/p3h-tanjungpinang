@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CamKTP Scan AGUS - Pemindai KTP & OCR Pintar</title>
+    <!-- Tailwind CSS untuk Styling Premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons untuk Ikon yang Modern -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF untuk Ekspor PDF secara Lokal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Tesseract.js untuk OCR Lokal tanpa Server (Privasi Aman) -->
+    <script src="https://unpkg.com/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
+    <style>
+        /* Gaya khusus untuk area drag sudut pemotongan perspektif */
+        .corner-handle {
+            width: 24px;
+            height: 24px;
+            background-color: #3b82f6;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-12px, -12px);
+            cursor: move;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            touch-action: none;
+            z-index: 30;
+        }
+        .corner-handle::after {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            margin: 5px auto 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl text-white shadow-md shadow-blue-500/20">
+                    <i data-lucide="scan-line" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        CamKTP <span class="text-blue-400 font-semibold">Scan AGUS</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Pemindai KTP Presisi & Ekstrasi OCR</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs bg-slate-700/50 px-3 py-1.5 rounded-full text-slate-300">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                OCR Offline Aktif
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
+
+        <!-- STEP 1: Capture / Upload Option -->
+        <section id="step-select" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 text-center shadow-xl">
+            <h2 class="text-2xl font-bold mb-2">Mulai Pindai KTP Anda</h2>
+            <p class="text-slate-400 mb-8 max-w-md mx-auto text-sm">Ambil foto KTP Anda menggunakan kamera secara langsung atau unggah gambar yang sudah ada dari galeri penyimpanan Anda.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <!-- Kamera Option -->
+                <button id="btn-open-camera" class="group bg-gradient-to-br from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white p-8 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center gap-4 shadow-lg shadow-blue-950/40 border border-blue-500/30 transform hover:-translate-y-1">
+                    <div class="bg-white/10 p-4 rounded-2xl group-hover:scale-110 transition-transform">
+                        <i data-lucide="camera" class="w-10 h-10"></i>
+                    </div>
+                    <div class="text-left w-full text-center">
+                        <span class="block text-lg font-bold">Gunakan Kamera</span>
+                        <span class="block text-xs text-blue-200 mt-1">Ambil gambar secara langsung dari perangkat</span>
+                    </div>
+                </button>
+
+                <!-- File Upload Option -->
+                <button id="btn-trigger-upload" class="group bg-slate-700 hover:bg-slate-600/80 text-white p-8 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center gap-4 shadow-lg border border-slate-600 transform hover:-translate-y-1">
+                    <div class="bg-slate-600 p-4 rounded-2xl group-hover:scale-110 transition-transform">
+                        <i data-lucide="image-plus" class="w-10 h-10 text-blue-400"></i>
+                    </div>
+                    <div class="text-left w-full text-center">
+                        <span class="block text-lg font-bold">Unggah Foto KTP</span>
+                        <span class="block text-xs text-slate-400 mt-1">Format JPG, PNG, atau WebP dari penyimpanan Anda</span>
+                    </div>
+                    <input type="file" id="file-input" class="hidden" accept="image/*">
+                </button>
+            </div>
+
+            <!-- Catatan Penggunaan Aman -->
+            <div class="mt-8 flex items-center justify-center gap-2 text-xs text-slate-500">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                <span>Keamanan Data Terjamin: Seluruh proses pemindaian dilakukan 100% lokal di browser Anda.</span>
+            </div>
+        </section>
+
+        <!-- STEP 2: Active Camera View -->
+        <section id="step-camera" class="hidden bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+            <div class="bg-slate-700/50 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
+                <span class="font-semibold text-sm flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span> Kamera Aktif
+                </span>
+                <button id="btn-close-camera" class="text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="relative bg-black flex justify-center items-center overflow-hidden" style="min-height: 350px; max-height: 60vh;">
+                <video id="webcam" class="w-full h-full object-cover" autoplay playsinline></video>
+                
+                <!-- Overlay Penunjuk KTP -->
+                <div class="absolute inset-0 pointer-events-none flex flex-col justify-center items-center p-6">
+                    <div class="w-full max-w-sm aspect-[85.6/53.98] border-2 border-dashed border-blue-400 rounded-xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] flex items-center justify-center">
+                        <span class="text-blue-300 text-xs font-semibold bg-slate-900/80 px-3 py-1 rounded-full backdrop-blur-sm">
+                            Posisikan KTP Anda di dalam bingkai ini
+                        </span>
+                        <!-- Sudut-Sudut Pembingkai Visual -->
+                        <div class="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>
+                        <div class="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-blue-400 rounded-tr-lg"></div>
+                        <div class="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-blue-400 rounded-bl-lg"></div>
+                        <div class="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-blue-400 rounded-br-lg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 bg-slate-800 border-t border-slate-700 flex justify-between items-center">
+                <button id="btn-switch-camera" class="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Ganti Kamera
+                </button>
+                <button id="btn-capture" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 shadow-lg shadow-teal-950/50">
+                    <i data-lucide="aperture" class="w-5 h-5"></i> Ambil Foto
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 3: Crop & Warp (Interactive Perspective Adjustment) -->
+        <section id="step-crop" class="hidden bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700 pb-4 gap-2">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="crop" class="text-blue-400 w-5 h-5"></i> Atur Batas Potongan KTP
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Sistem mendeteksi sudut secara otomatis. Anda juga dapat menggeser manual jika diperlukan.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <!-- Tombol Rotasi Sumber -->
+                    <button id="btn-rotate-left" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Putar Kiri
+                    </button>
+                    <button id="btn-rotate-right" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                        <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Putar Kanan
+                    </button>
+                    <button id="btn-auto-detect" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-md shadow-emerald-900/30">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Deteksi Otomatis KTP
+                    </button>
+                    <button id="btn-reset-crop" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg transition">
+                        Reset Tengah
+                    </button>
+                    <button id="btn-back-to-select" class="text-xs bg-slate-700/50 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interaktif Editor Perspektif -->
+            <div class="flex justify-center bg-slate-950 rounded-xl p-2 relative overflow-hidden select-none" id="crop-area-container">
+                <div id="crop-wrapper" class="relative max-w-full">
+                    <!-- Gambar yang diunggah/diambil -->
+                    <img id="source-image" class="max-h-[60vh] object-contain max-w-full pointer-events-none" src="" alt="Source KTP">
+                    
+                    <!-- Lapisan SVG untuk menggambar garis tepi interaktif -->
+                    <svg id="crop-svg" class="absolute top-0 left-0 w-full h-full pointer-events-none">
+                        <polygon id="crop-poly" points="" class="fill-blue-500/25 stroke-blue-400 stroke-2" />
+                    </svg>
+                    
+                    <!-- Handle Interaktif 4 Sudut (Top-Left, Top-Right, Bottom-Right, Bottom-Left) -->
+                    <div id="handle-tl" class="corner-handle" data-corner="0"></div>
+                    <div id="handle-tr" class="corner-handle" data-corner="1"></div>
+                    <div id="handle-br" class="corner-handle" data-corner="2"></div>
+                    <div id="handle-bl" class="corner-handle" data-corner="3"></div>
+                </div>
+            </div>
+
+            <!-- Panel Status Deteksi -->
+            <div id="detection-status" class="bg-slate-900/60 border border-slate-700/50 rounded-xl p-3 text-xs flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                    <span id="status-text" class="text-slate-300">Memproses kecocokan kartu...</span>
+                </span>
+                <span class="text-slate-500 text-[10px]">Koreksi manual diperbolehkan</span>
+            </div>
+
+            <!-- Tombol Konfirmasi Crop -->
+            <div class="flex justify-end pt-2">
+                <button id="btn-apply-crop" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    Potong & Rapikan KTP <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 4: Filter Options, OCR & Export -->
+        <section id="step-result" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Kolom Preview Hasil & Tab OCR -->
+            <div class="md:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                    <!-- Tab Selector -->
+                    <div class="flex border-b border-slate-700 mb-4">
+                        <button id="tab-btn-scan" class="py-2 px-4 border-b-2 border-blue-500 font-bold text-sm text-blue-400 focus:outline-none flex items-center gap-2">
+                            <i data-lucide="image" class="w-4 h-4"></i> Hasil Scan KTP
+                        </button>
+                        <button id="tab-btn-ocr" class="py-2 px-4 border-b-2 border-transparent hover:border-slate-500 font-bold text-sm text-slate-400 hover:text-slate-200 focus:outline-none flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4"></i> Data Hasil OCR KTP
+                        </button>
+                    </div>
+
+                    <!-- KONTEN TAB 1: Hasil Gambar Scan -->
+                    <div id="tab-content-scan">
+                        <p class="text-xs text-slate-400 mb-4">Secara otomatis diratakan sesuai rasio ukuran kartu standar internasional (85.6mm x 53.98mm).</p>
+                        <div class="bg-slate-950 p-4 rounded-xl flex items-center justify-center border border-slate-700/50">
+                            <canvas id="output-canvas" class="max-w-full h-auto rounded-lg shadow-2xl bg-white"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- KONTEN TAB 2: Pembacaan Teks OCR -->
+                    <div id="tab-content-ocr" class="hidden space-y-4">
+                        <!-- Progress Bar Deteksi Teks -->
+                        <div id="ocr-loader" class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50 text-center space-y-3">
+                            <div class="flex justify-between items-center text-xs text-slate-400">
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="cpu" class="w-4 h-4 text-blue-400 animate-spin"></i>
+                                    <span id="ocr-status-message">Menginisialisasi Pembacaan OCR...</span>
+                                </span>
+                                <span id="ocr-status-percent">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div id="ocr-status-bar" class="bg-blue-500 h-2 w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+
+                        <!-- Form Detail Hasil Pembacaan OCR -->
+                        <div class="grid grid-cols-1 gap-3 text-sm">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">PROVINSI / KOTA (Asal KTP)</label>
+                                <input type="text" id="ocr-field-region" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">NOMOR INDUK KEPENDUDUKAN (NIK)</label>
+                                <div class="relative">
+                                    <input type="text" id="ocr-field-nik" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-white focus:outline-none focus:border-blue-500 font-mono tracking-wider text-base text-yellow-400" placeholder="-">
+                                    <button onclick="copyToClipboard('ocr-field-nik')" class="absolute right-2 top-2 text-slate-400 hover:text-white" title="Salin NIK"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">NAMA LENGKAP</label>
+                                <input type="text" id="ocr-field-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">TEMPAT & TANGGAL LAHIR</label>
+                                    <input type="text" id="ocr-field-birth" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">JENIS KELAMIN</label>
+                                    <input type="text" id="ocr-field-gender" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">ALAMAT LENGKAP</label>
+                                <textarea id="ocr-field-address" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none" placeholder="-"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">TEKS MENTAH HASIL OCR (Seluruh Dokumen)</label>
+                                <textarea id="ocr-raw-output" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-400 font-mono focus:outline-none" readonly placeholder="Teks mentah hasil deteksi dokumen akan ditampilkan di sini..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button id="btn-re-crop" class="flex-1 bg-slate-700 hover:bg-slate-600 text-sm font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> Atur Ulang Potongan
+                    </button>
+                    <button id="btn-reset-all" class="flex-1 bg-slate-700/50 hover:bg-slate-700 text-sm font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 text-rose-400">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Scan Ulang Baru
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kolom Pengaturan Filter dan Pembuatan PDF -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col justify-between gap-6">
+                <!-- Pilihan Filter -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Filter Peningkatan Gambar</h4>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button class="btn-filter bg-slate-700 text-white hover:bg-slate-600 p-3 rounded-xl text-xs font-semibold transition active" data-filter="original">
+                            <span class="block text-base mb-1">📷</span> Asli (Original)
+                        </button>
+                        <button class="btn-filter bg-slate-900 text-slate-300 hover:bg-slate-700 p-3 rounded-xl text-xs font-semibold transition" data-filter="magic">
+                            <span class="block text-base mb-1">✨</span> Magic Color
+                        </button>
+                        <button class="btn-filter bg-slate-900 text-slate-300 hover:bg-slate-700 p-3 rounded-xl text-xs font-semibold transition" data-filter="grayscale">
+                            <span class="block text-base mb-1">🌓</span> Abu-abu
+                        </button>
+                        <button class="btn-filter bg-slate-900 text-slate-300 hover:bg-slate-700 p-3 rounded-xl text-xs font-semibold transition" data-filter="threshold">
+                            <span class="block text-base mb-1">📄</span> Hitam Putih (B&W)
+                        </button>
+                    </div>
+
+                    <!-- Tombol Putar Hasil 180 Derajat -->
+                    <button id="btn-rotate-result-180" class="w-full bg-slate-900 border border-slate-700 hover:bg-slate-700/80 text-blue-400 hover:text-white py-2.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> 🔄 Putar Hasil 180° (Balikkan)
+                    </button>
+                </div>
+
+                <!-- Opsi Format Ekspor PDF -->
+                <div class="border-t border-slate-700 pt-4">
+                    <h4 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3">Tata Letak PDF</h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-3 bg-slate-900/40 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-900 transition">
+                            <input type="radio" name="pdf-layout" value="fit" checked class="w-4 h-4 text-blue-500 focus:ring-0">
+                            <div>
+                                <span class="block text-sm font-semibold">Ukuran Pas KTP</span>
+                                <span class="block text-xxs text-slate-500">PDF seukuran kartu asli (ideal untuk diarsip)</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-slate-900/40 border border-slate-700 rounded-xl cursor-pointer hover:bg-slate-900 transition">
+                            <input type="radio" name="pdf-layout" value="a4" class="w-4 h-4 text-blue-500 focus:ring-0">
+                            <div>
+                                <span class="block text-sm font-semibold">Tengah Kertas A4 (Siap Cetak)</span>
+                                <span class="block text-xxs text-slate-500">KTP diletakkan rapi di tengah halaman dokumen A4</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Aksi Ekspor Utama -->
+                <div class="border-t border-slate-700 pt-4 space-y-2">
+                    <button id="btn-download-pdf" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold py-4 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-teal-950/40">
+                        <i data-lucide="file-text" class="w-5 h-5"></i> Simpan Sebagai PDF
+                    </button>
+                    <button id="btn-download-img" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 px-4 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                        <i data-lucide="image" class="w-4 h-4"></i> Simpan Gambar PNG
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Informasi Panduan Singkat -->
+        <section id="guide-box" class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400 flex items-start gap-3">
+            <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+            <div>
+                <strong class="text-slate-300 block mb-1">Bagaimana cara kerja perspektif rapi & OCR ini?</strong>
+                Dengan mencocokkan 4 sudut penanda pada sudut KTP Anda, algoritme kami akan meratakan foto kembali ke perspektif aslinya. Setelah dirapikan, mesin OCR bawaan **Tesseract.js** akan menganalisis konten tulisan bahasa Indonesia pada kartu KTP dan mengisi bidang data NIK/Nama secara instan tanpa mengirim data Anda ke server mana pun.
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500 px-4">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 CamKTP Scan AGUS. Seluruh hak cipta dilindungi.</p>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-slate-400">Kebijakan Privasi</a>
+                <span class="text-slate-700">|</span>
+                <a href="#" class="hover:text-slate-400">Syarat Ketentuan</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Utama Logika Pemindaian, Koreksi Perspektif & Pembacaan OCR -->
+    <script>
+        // Inisialisasi Ikon Lucide
+        lucide.createIcons();
+
+        // Elemen-Elemen DOM
+        const stepSelect = document.getElementById('step-select');
+        const stepCamera = document.getElementById('step-camera');
+        const stepCrop = document.getElementById('step-crop');
+        const stepResult = document.getElementById('step-result');
+        const guideBox = document.getElementById('guide-box');
+
+        const btnOpenCamera = document.getElementById('btn-open-camera');
+        const btnCloseCamera = document.getElementById('btn-close-camera');
+        const btnSwitchCamera = document.getElementById('btn-switch-camera');
+        const btnCapture = document.getElementById('btn-capture');
+        const btnTriggerUpload = document.getElementById('btn-trigger-upload');
+        const btnApplyCrop = document.getElementById('btn-apply-crop');
+        const btnResetCrop = document.getElementById('btn-reset-crop');
+        const btnAutoDetect = document.getElementById('btn-auto-detect');
+        const btnBackToSelect = document.getElementById('btn-back-to-select');
+        const btnReCrop = document.getElementById('btn-re-crop');
+        const btnResetAll = document.getElementById('btn-reset-all');
+        const btnDownloadPdf = document.getElementById('btn-download-pdf');
+        const btnDownloadImg = document.getElementById('btn-download-img');
+        
+        // Elemen Rotasi
+        const btnRotateLeft = document.getElementById('btn-rotate-left');
+        const btnRotateRight = document.getElementById('btn-rotate-right');
+        const btnRotateResult180 = document.getElementById('btn-rotate-result-180');
+
+        const fileInput = document.getElementById('file-input');
+        const video = document.getElementById('webcam');
+        const sourceImg = document.getElementById('source-image');
+        const cropWrapper = document.getElementById('crop-wrapper');
+        const cropSvg = document.getElementById('crop-svg');
+        const cropPoly = document.getElementById('crop-poly');
+        const outputCanvas = document.getElementById('output-canvas');
+        
+        // Elemen Status Deteksi
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        // Elemen Tab & OCR Baru
+        const tabBtnScan = document.getElementById('tab-btn-scan');
+        const tabBtnOcr = document.getElementById('tab-btn-ocr');
+        const tabContentScan = document.getElementById('tab-content-scan');
+        const tabContentOcr = document.getElementById('tab-content-ocr');
+        
+        const ocrLoader = document.getElementById('ocr-loader');
+        const ocrStatusMessage = document.getElementById('ocr-status-message');
+        const ocrStatusPercent = document.getElementById('ocr-status-percent');
+        const ocrStatusBar = document.getElementById('ocr-status-bar');
+
+        const ocrFieldRegion = document.getElementById('ocr-field-region');
+        const ocrFieldNik = document.getElementById('ocr-field-nik');
+        const ocrFieldName = document.getElementById('ocr-field-name');
+        const ocrFieldBirth = document.getElementById('ocr-field-birth');
+        const ocrFieldGender = document.getElementById('ocr-field-gender');
+        const ocrFieldAddress = document.getElementById('ocr-field-address');
+        const ocrRawOutput = document.getElementById('ocr-raw-output');
+
+        // State Aplikasi
+        let currentStream = null;
+        let useFacingMode = "environment"; // Default menggunakan kamera belakang untuk HP
+        let uploadedImage = new Image();
+        let selectedFilter = 'original';
+
+        // Koordinat 4 titik potong (Top-Left, Top-Right, Bottom-Right, Bottom-Left)
+        let corners = [
+            { x: 0.15, y: 0.2 }, // TL
+            { x: 0.85, y: 0.2 }, // TR
+            { x: 0.85, y: 0.8 }, // BR
+            { x: 0.15, y: 0.8 }  // BL
+        ];
+
+        // Rasio ukuran KTP standar (85.6mm x 53.98mm) -> Rasio aspek sekitar 1.5857
+        const KTP_WIDTH_PX = 856;
+        const KTP_HEIGHT_PX = 540;
+
+        // Canvas penyimpanan sementara untuk memisahkan filter dari gambar asli yang di-warp
+        let tempWarpedCanvas = document.createElement('canvas');
+
+        // 1. EVENT HANDLERS - INPUT SELECTION
+        btnTriggerUpload.addEventListener('click', () => {
+            fileInput.value = ''; // Reset nilai input file agar file yang sama bisa dipilih kembali
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', handleFileSelection);
+
+        // Ambil dari Kamera
+        btnOpenCamera.addEventListener('click', startWebcam);
+        btnCloseCamera.addEventListener('click', stopWebcam);
+        btnSwitchCamera.addEventListener('click', switchCamera);
+        btnCapture.addEventListener('click', captureFrame);
+
+        // Batal / Reset / Deteksi Otomatis / Rotasi
+        btnBackToSelect.addEventListener('click', () => {
+            showStep(stepSelect);
+        });
+
+        btnResetAll.addEventListener('click', () => {
+            fileInput.value = '';
+            showStep(stepSelect);
+        });
+
+        btnReCrop.addEventListener('click', () => {
+            showStep(stepCrop);
+            initCropHandles();
+        });
+
+        btnResetCrop.addEventListener('click', () => {
+            resetCropCorners();
+            initCropHandles();
+            updateStatusUI('warning', 'Reset ke posisi default.');
+        });
+
+        btnAutoDetect.addEventListener('click', () => {
+            autoDetectCorners();
+            initCropHandles();
+        });
+
+        // Event Listener untuk tombol rotasi gambar sumber
+        btnRotateLeft.addEventListener('click', () => {
+            rotateSourceImage('left');
+        });
+
+        btnRotateRight.addEventListener('click', () => {
+            rotateSourceImage('right');
+        });
+
+        // Event Listener untuk memutar hasil akhir 180 derajat secara instan
+        btnRotateResult180.addEventListener('click', () => {
+            rotateWarpedCanvas180();
+        });
+
+        // Event Handlers untuk Navigasi Tab Hasil & OCR
+        tabBtnScan.addEventListener('click', () => switchTab('scan'));
+        tabBtnOcr.addEventListener('click', () => switchTab('ocr'));
+
+        // 2. CAMERA FUNCTIONS
+        async function startWebcam() {
+            try {
+                if (currentStream) {
+                    stopWebcam();
+                }
+                showStep(stepCamera);
+                
+                const constraints = {
+                    video: {
+                        facingMode: useFacingMode,
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: false
+                };
+                
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+            } catch (err) {
+                console.error("Gagal mengakses kamera: ", err);
+                // Fallback jika mode environment spesifik tidak didukung
+                if (useFacingMode === "environment") {
+                    useFacingMode = "user";
+                    startWebcam();
+                } else {
+                    alert("Akses kamera tidak diizinkan atau tidak didukung pada perangkat ini. Silakan gunakan opsi unggah foto.");
+                    showStep(stepSelect);
+                }
+            }
+        }
+
+        function stopWebcam() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            showStep(stepSelect);
+        }
+
+        function switchCamera() {
+            useFacingMode = (useFacingMode === "environment") ? "user" : "environment";
+            startWebcam();
+        }
+
+        function captureFrame() {
+            if (!currentStream) return;
+
+            // Membuat canvas sementara untuk tangkap frame kamera resolusi tinggi asli
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            const ctx = tempCanvas.getContext('2d');
+            
+            // Gambar frame video ke canvas
+            ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Convert ke data URL
+            const dataUrl = tempCanvas.toDataURL('image/png');
+            
+            // Hentikan kamera dan teruskan ke editor pemotongan
+            stopWebcam();
+            loadImageToEditor(dataUrl);
+        }
+
+        // 3. FILE SELECTION FUNCTIONS
+        function handleFileSelection(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                loadImageToEditor(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadImageToEditor(src) {
+            uploadedImage = new Image();
+            uploadedImage.onload = function() {
+                sourceImg.src = src;
+                
+                // Secara otomatis jalankan deteksi crop sebelum beralih langkah (dengan proteksi try-catch)
+                try {
+                    autoDetectCorners();
+                } catch (e) {
+                    console.warn("Deteksi otomatis gagal, memuat sudut default.", e);
+                    resetCropCorners();
+                    updateStatusUI('warning', 'Deteksi otomatis terkendala. Memuat sudut default.');
+                }
+                
+                showStep(stepCrop);
+                // Tunggu render untuk kalkulasi ukuran kontainer
+                setTimeout(initCropHandles, 100);
+            };
+            uploadedImage.src = src;
+        }
+
+        function resetCropCorners() {
+            corners = [
+                { x: 0.15, y: 0.2 }, // TL
+                { x: 0.85, y: 0.2 }, // TR
+                { x: 0.85, y: 0.8 }, // BR
+                { x: 0.15, y: 0.8 }  // BL
+            ];
+        }
+
+        function updateStatusUI(type, message) {
+            if (type === 'success') {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+                statusText.className = "text-emerald-400 font-semibold";
+            } else if (type === 'warning') {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+                statusText.className = "text-amber-400";
+            } else {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
+                statusText.className = "text-slate-300";
+            }
+            statusText.innerText = message;
+        }
+
+        // 3.2 FITUR ROTASI SUMBER PINTAR
+        function rotateSourceImage(direction) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const w = uploadedImage.naturalWidth;
+            const h = uploadedImage.naturalHeight;
+
+            if (direction === 'right') {
+                canvas.width = h;
+                canvas.height = w;
+                ctx.translate(h, 0);
+                ctx.rotate(90 * Math.PI / 180);
+            } else if (direction === 'left') {
+                canvas.width = h;
+                canvas.height = w;
+                ctx.translate(0, w);
+                ctx.rotate(-90 * Math.PI / 180);
+            }
+
+            ctx.drawImage(uploadedImage, 0, 0);
+            const rotatedDataUrl = canvas.toDataURL('image/png');
+
+            // Muat ulang gambar baru yang telah diputar fisik
+            uploadedImage = new Image();
+            uploadedImage.onload = function() {
+                sourceImg.src = rotatedDataUrl;
+                try {
+                    autoDetectCorners();
+                } catch (e) {
+                    resetCropCorners();
+                }
+                initCropHandles();
+                updateStatusUI('success', `Berhasil memutar gambar ke ${direction === 'right' ? 'kanan' : 'kiri'}!`);
+            };
+            uploadedImage.src = rotatedDataUrl;
+        }
+
+        // 3.3 ALGORITME CROP OTOMATIS CERDAS (SMART BLUE-COLOR SEGMENTATION)
+        function autoDetectCorners() {
+            const w = uploadedImage.naturalWidth;
+            const h = uploadedImage.naturalHeight;
+            
+            if (!w || !h) return;
+
+            // Buat canvas resolusi rendah untuk pengolahan piksel ultra-cepat
+            const canvas = document.createElement('canvas');
+            const scale = Math.min(250 / w, 250 / h, 1);
+            const sw = Math.round(w * scale);
+            const sh = Math.round(h * scale);
+            canvas.width = sw;
+            canvas.height = sh;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(uploadedImage, 0, 0, sw, sh);
+            const imgData = ctx.getImageData(0, 0, sw, sh);
+            const data = imgData.data;
+
+            // Deteksi apakah gambar cenderung grayscale (misal fotokopi KTP)
+            let colorVarianceSum = 0;
+            const sampleCount = Math.min(500, sw * sh);
+            for (let i = 0; i < sampleCount; i++) {
+                const idx = Math.floor(Math.random() * (sw * sh)) * 4;
+                const r = data[idx];
+                const g = data[idx+1];
+                const b = data[idx+2];
+                const avg = (r + g + b) / 3;
+                colorVarianceSum += Math.abs(r - avg) + Math.abs(g - avg) + Math.abs(b - avg);
+            }
+            const isGrayscale = (colorVarianceSum / sampleCount) < 15;
+
+            let matchingPoints = [];
+
+            if (!isGrayscale) {
+                // METODE A: SEGMENTASI WARNA BIRU/SIAN (Khas KTP Indonesia asli)
+                for (let y = 0; y < sh; y++) {
+                    for (let x = 0; x < sw; x++) {
+                        const idx = (y * sw + x) * 4;
+                        const r = data[idx];
+                        const g = data[idx+1];
+                        const b = data[idx+2];
+
+                        // Nilai KTP Indonesia didominasi warna Biru dan Sian (Rendah di Merah, Tinggi di Biru/Hijau)
+                        if (b > r + 15 && b > 60 && g > r + 5) {
+                            matchingPoints.push({ x, y });
+                        }
+                    }
+                }
+            }
+
+            // Jika metode warna mendeteksi piksel KTP yang cukup (min 5% dari total piksel gambar)
+            if (matchingPoints.length > (sw * sh * 0.05)) {
+                let tlPt = matchingPoints[0], trPt = matchingPoints[0], brPt = matchingPoints[0], blPt = matchingPoints[0];
+                let minSum = Infinity, maxSum = -Infinity, minDiff = Infinity, maxDiff = -Infinity;
+
+                matchingPoints.forEach(pt => {
+                    const sum = pt.x + pt.y;       // Konsep proyeksi diagonal TL (min) dan BR (max)
+                    const diff = pt.x - pt.y;      // Konsep proyeksi diagonal TR (max) dan BL (min)
+
+                    if (sum < minSum) {
+                        minSum = sum;
+                        tlPt = pt;
+                    }
+                    if (sum > maxSum) {
+                        maxSum = sum;
+                        brPt = pt;
+                    }
+                    if (diff > maxDiff) {
+                        maxDiff = diff;
+                        trPt = pt;
+                    }
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        blPt = pt;
+                    }
+                });
+
+                const padX = sw * 0.025;
+                const padY = sh * 0.025;
+
+                corners = [
+                    { x: Math.max(0, tlPt.x - padX) / sw, y: Math.max(0, tlPt.y - padY) / sh }, // TL
+                    { x: Math.min(sw - 1, trPt.x + padX) / sw, y: Math.max(0, trPt.y - padY) / sh }, // TR
+                    { x: Math.min(sw - 1, brPt.x + padX) / sw, y: Math.min(sh - 1, brPt.y + padY) / sh }, // BR
+                    { x: Math.max(0, blPt.x - padX) / sw, y: Math.min(sh - 1, blPt.y + padY) / sh }  // BL
+                ];
+
+                updateStatusUI('success', 'KTP Berwarna Terdeteksi Otomatis!');
+            } else {
+                // METODE B: FALLBACK EDGE GRADIENT DETECTOR (Untuk Fotokopi / Meja Gelap)
+                function getGray(x, y) {
+                    const idx = (y * sw + x) * 4;
+                    return 0.299 * data[idx] + 0.587 * data[idx+1] + 0.114 * data[idx+2];
+                }
+                
+                let bgSum = 0;
+                let bgSamples = 0;
+                const borderSize = Math.max(2, Math.floor(sw * 0.03));
+                
+                for (let x = 0; x < sw; x += 4) {
+                    for (let y = 0; y < borderSize; y++) {
+                        bgSum += getGray(x, y) + getGray(x, sh - 1 - y);
+                        bgSamples += 2;
+                    }
+                }
+                
+                const avgBg = bgSum / bgSamples;
+                const threshold = 18;
+                let left = 0, right = sw - 1, top = 0, bottom = sh - 1;
+                
+                // Scan Kiri
+                for (let x = 0; x < sw / 2; x++) {
+                    let diff = 0;
+                    for (let y = borderSize; y < sh - borderSize; y += 4) {
+                        diff += Math.abs(getGray(x, y) - avgBg);
+                    }
+                    if ((diff / (sh / 4)) > threshold) { left = x; break; }
+                }
+                // Scan Kanan
+                for (let x = sw - 1; x > sw / 2; x--) {
+                    let diff = 0;
+                    for (let y = borderSize; y < sh - borderSize; y += 4) {
+                        diff += Math.abs(getGray(x, y) - avgBg);
+                    }
+                    if ((diff / (sh / 4)) > threshold) { right = x; break; }
+                }
+                // Scan Atas
+                for (let y = 0; y < sh / 2; y++) {
+                    let diff = 0;
+                    for (let x = borderSize; x < sw - borderSize; x += 4) {
+                        diff += Math.abs(getGray(x, y) - avgBg);
+                    }
+                    if ((diff / (sw / 4)) > threshold) { top = y; break; }
+                }
+                // Scan Bawah
+                for (let y = sh - 1; y > sh / 2; y--) {
+                    let diff = 0;
+                    for (let x = borderSize; x < sw - borderSize; x += 4) {
+                        diff += Math.abs(getGray(x, y) - avgBg);
+                    }
+                    if ((diff / (sw / 4)) > threshold) { bottom = y; break; }
+                }
+                
+                const minWidth = sw * 0.35;
+                const minHeight = sh * 0.35;
+                if ((right - left) < minWidth || (bottom - top) < minHeight) {
+                    resetCropCorners();
+                    updateStatusUI('warning', 'Tepi kurang jelas. Menggunakan layout tengah.');
+                } else {
+                    const padW = Math.round((right - left) * 0.02);
+                    const padH = Math.round((bottom - top) * 0.02);
+                    left = Math.max(0, left - padW);
+                    right = Math.min(sw - 1, right + padW);
+                    top = Math.max(0, top - padH);
+                    bottom = Math.min(sh - 1, bottom + padH);
+                    
+                    corners = [
+                        { x: left / sw, y: top / sh },
+                        { x: right / sw, y: top / sh },
+                        { x: right / sw, y: bottom / sh },
+                        { x: left / sw, y: bottom / sh }
+                    ];
+                    updateStatusUI('success', 'Deteksi Tepi Kartu (B&W/Fotokopi) Berhasil!');
+                }
+            }
+        }
+
+        // 4. INTERACTIVE PERSPECTIVE CROPPER LOGIC
+        function initCropHandles() {
+            const rect = sourceImg.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            cropSvg.style.width = width + 'px';
+            cropSvg.style.height = height + 'px';
+            cropWrapper.style.width = width + 'px';
+            cropWrapper.style.height = height + 'px';
+
+            updateHandlesAndLines();
+        }
+
+        window.addEventListener('resize', () => {
+            if (!stepCrop.classList.contains('hidden') && sourceImg.src) {
+                initCropHandles();
+            }
+        });
+
+        function updateHandlesAndLines() {
+            const rect = sourceImg.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+
+            const handles = [
+                document.getElementById('handle-tl'),
+                document.getElementById('handle-tr'),
+                document.getElementById('handle-br'),
+                document.getElementById('handle-bl')
+            ];
+
+            let pointsAttr = [];
+
+            corners.forEach((corner, idx) => {
+                const px = corner.x * w;
+                const py = corner.y * h;
+                
+                handles[idx].style.left = px + 'px';
+                handles[idx].style.top = py + 'px';
+
+                pointsAttr.push(`${px},${py}`);
+            });
+
+            cropPoly.setAttribute('points', pointsAttr.join(' '));
+        }
+
+        // Logic Drag on Handle dengan Dukungan Sentuhan
+        const handlesElements = document.querySelectorAll('.corner-handle');
+        handlesElements.forEach(handle => {
+            handle.addEventListener('mousedown', startDrag);
+            handle.addEventListener('touchstart', startDrag, { passive: false });
+        });
+
+        let activeHandleIndex = null;
+
+        function startDrag(e) {
+            e.preventDefault();
+            activeHandleIndex = parseInt(this.getAttribute('data-corner'));
+            
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchmove', dragMove, { passive: false });
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function dragMove(e) {
+            if (activeHandleIndex === null) return;
+            e.preventDefault();
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const rect = sourceImg.getBoundingClientRect();
+            
+            let x = clientX - rect.left;
+            let y = clientY - rect.top;
+            
+            let nx = x / rect.width;
+            let ny = y / rect.height;
+            
+            nx = Math.max(0, Math.min(1, nx));
+            ny = Math.max(0, Math.min(1, ny));
+            
+            corners[activeHandleIndex] = { x: nx, y: ny };
+            updateHandlesAndLines();
+        }
+        
+        function endDrag() {
+            activeHandleIndex = null;
+            document.removeEventListener('mousemove', dragMove);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchmove', dragMove);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        // 5. STEP NAVIGATION & TAB SWITCHING
+        function showStep(stepElement) {
+            [stepSelect, stepCamera, stepCrop, stepResult].forEach(el => {
+                if (el) el.classList.add('hidden');
+            });
+            if (stepElement) {
+                stepElement.classList.remove('hidden');
+                if (stepElement === stepResult) {
+                    stepElement.classList.add('grid');
+                } else {
+                    stepElement.classList.remove('grid');
+                }
+            }
+        }
+
+        function switchTab(tab) {
+            if (tab === 'scan') {
+                tabBtnScan.classList.replace('border-transparent', 'border-blue-500');
+                tabBtnScan.classList.replace('text-slate-400', 'text-blue-400');
+                tabBtnOcr.classList.replace('border-blue-500', 'border-transparent');
+                tabBtnOcr.classList.replace('text-blue-400', 'text-slate-400');
+                
+                tabContentScan.classList.remove('hidden');
+                tabContentOcr.classList.add('hidden');
+            } else {
+                tabBtnOcr.classList.replace('border-transparent', 'border-blue-500');
+                tabBtnOcr.classList.replace('text-slate-400', 'text-blue-400');
+                tabBtnScan.classList.replace('border-blue-500', 'border-transparent');
+                tabBtnScan.classList.replace('text-blue-400', 'text-slate-400');
+                
+                tabContentOcr.classList.remove('hidden');
+                tabContentScan.classList.add('hidden');
+            }
+        }
+
+        // 6. PERSPECTIVE WARP & CROP LOGIC
+        btnApplyCrop.addEventListener('click', () => {
+            showStep(stepResult);
+            warpPerspective();
+        });
+
+        function warpPerspective() {
+            const nw = uploadedImage.naturalWidth;
+            const nh = uploadedImage.naturalHeight;
+            
+            const srcPts = corners.map(c => ({ x: c.x * nw, y: c.y * nh }));
+            
+            const destW = KTP_WIDTH_PX;
+            const destH = KTP_HEIGHT_PX;
+            
+            outputCanvas.width = destW;
+            outputCanvas.height = destH;
+            const ctx = outputCanvas.getContext('2d');
+            
+            // Draw triangles for perspective approximation
+            function drawTriangle(ctx, img, p0, p1, p2, uv0, uv1, uv2) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(p0.x, p0.y);
+                ctx.lineTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.closePath();
+                ctx.clip();
+                
+                const denom = uv0.x * (uv1.y - uv2.y) - uv1.x * (uv0.y - uv2.y) + uv2.x * (uv0.y - uv1.y);
+                if (denom === 0) { ctx.restore(); return; }
+                
+                const a = (p0.x * (uv1.y - uv2.y) - p1.x * (uv0.y - uv2.y) + p2.x * (uv0.y - uv1.y)) / denom;
+                const b = (p0.y * (uv1.y - uv2.y) - p1.y * (uv0.y - uv2.y) + p2.y * (uv0.y - uv1.y)) / denom;
+                const c = (uv0.x * (p1.x * uv2.y - p2.x * uv1.y) - uv1.x * (p0.x * uv2.y - p2.x * uv0.y) + uv2.x * (p0.x * uv1.y - p1.x * uv0.x)) / denom;
+                const d = (p0.x * (uv2.x - uv1.x) - p1.x * (uv2.x - uv0.x) + p2.x * (uv1.x - uv0.x)) / denom;
+                const e = (p0.y * (uv2.x - uv1.x) - p1.y * (uv2.x - uv0.x) + p2.y * (uv1.x - uv0.x)) / denom;
+                const f = (uv0.y * (p1.x * uv2.x - p2.x * uv1.x) - uv1.y * (p0.x * uv2.x - p2.x * uv0.x) + uv2.y * (p0.x * uv1.x - p1.x * uv0.x)) / denom;
+                
+                ctx.transform(a, b, d, e, c, f);
+                ctx.drawImage(img, 0, 0);
+                ctx.restore();
+            }
+            
+            const destPts = [
+                {x: 0, y: 0},
+                {x: destW, y: 0},
+                {x: destW, y: destH},
+                {x: 0, y: destH}
+            ];
+            
+            drawTriangle(ctx, uploadedImage, destPts[0], destPts[1], destPts[3], srcPts[0], srcPts[1], srcPts[3]);
+            drawTriangle(ctx, uploadedImage, destPts[1], destPts[2], destPts[3], srcPts[1], srcPts[2], srcPts[3]);
+            
+            tempWarpedCanvas.width = destW;
+            tempWarpedCanvas.height = destH;
+            tempWarpedCanvas.getContext('2d').drawImage(outputCanvas, 0, 0);
+            
+            applyFilter(selectedFilter);
+            runOCR();
+        }
+
+        function rotateWarpedCanvas180() {
+            const temp = document.createElement('canvas');
+            temp.width = tempWarpedCanvas.width;
+            temp.height = tempWarpedCanvas.height;
+            const tctx = temp.getContext('2d');
+            tctx.translate(temp.width, temp.height);
+            tctx.rotate(Math.PI);
+            tctx.drawImage(tempWarpedCanvas, 0, 0);
+            
+            const ctx = tempWarpedCanvas.getContext('2d');
+            ctx.clearRect(0,0, tempWarpedCanvas.width, tempWarpedCanvas.height);
+            ctx.drawImage(temp, 0, 0);
+            
+            applyFilter(selectedFilter);
+            runOCR(); // Re-run OCR after rotation
+        }
+
+        // 7. FILTERS
+        document.querySelectorAll('.btn-filter').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.btn-filter').forEach(b => {
+                    b.classList.remove('bg-slate-700', 'text-white', 'active');
+                    b.classList.add('bg-slate-900', 'text-slate-300');
+                });
+                const t = e.currentTarget;
+                t.classList.remove('bg-slate-900', 'text-slate-300');
+                t.classList.add('bg-slate-700', 'text-white', 'active');
+                
+                selectedFilter = t.getAttribute('data-filter');
+                applyFilter(selectedFilter);
+            });
+        });
+
+        function applyFilter(filter) {
+            const ctx = outputCanvas.getContext('2d');
+            ctx.drawImage(tempWarpedCanvas, 0, 0);
+            
+            if (filter === 'original') return;
+            
+            const imgData = ctx.getImageData(0, 0, outputCanvas.width, outputCanvas.height);
+            const data = imgData.data;
+            
+            if (filter === 'grayscale') {
+                for (let i = 0; i < data.length; i += 4) {
+                    const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+                    data[i] = avg; data[i+1] = avg; data[i+2] = avg;
+                }
+            } else if (filter === 'threshold') {
+                for (let i = 0; i < data.length; i += 4) {
+                    const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+                    const val = avg > 128 ? 255 : 0;
+                    data[i] = val; data[i+1] = val; data[i+2] = val;
+                }
+            } else if (filter === 'magic') {
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] = Math.min(255, data[i] * 1.2);
+                    data[i+1] = Math.min(255, data[i+1] * 1.2);
+                    data[i+2] = Math.min(255, data[i+2] * 1.2);
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        // 8. OCR WITH TESSERACT.JS
+        async function runOCR() {
+            if (typeof Tesseract === 'undefined') return;
+            
+            ocrLoader.classList.remove('hidden');
+            ocrRawOutput.value = '';
+            
+            try {
+                ocrStatusMessage.innerText = 'Mempersiapkan OCR...';
+                ocrStatusBar.style.width = '10%';
+                
+                const imgData = outputCanvas.toDataURL('image/png');
+                
+                const worker = await Tesseract.createWorker({
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            const pct = Math.round(m.progress * 100);
+                            ocrStatusPercent.innerText = `${pct}%`;
+                            ocrStatusBar.style.width = `${pct}%`;
+                            ocrStatusMessage.innerText = 'Membaca Teks KTP...';
+                        }
+                    }
+                });
+                
+                await worker.loadLanguage('ind');
+                await worker.initialize('ind');
+                
+                const { data: { text } } = await worker.recognize(imgData);
+                
+                ocrRawOutput.value = text;
+                parseKTPText(text);
+                
+                ocrStatusMessage.innerText = 'Selesai!';
+                ocrStatusBar.style.width = '100%';
+                
+                await worker.terminate();
+                
+                setTimeout(() => {
+                    ocrLoader.classList.add('hidden');
+                }, 2000);
+                
+            } catch (err) {
+                console.error(err);
+                ocrStatusMessage.innerText = 'Gagal membaca OCR';
+            }
+        }
+
+        function parseKTPText(text) {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            let nik = '', nama = '', ttl = '', jk = '', alamat = '', provinsi = '';
+            
+            for (let i = 0; i < lines.length; i++) {
+                const l = lines[i].toUpperCase();
+                
+                if (l.includes('PROVINSI') || l.includes('KABUPATEN') || l.includes('KOTA')) {
+                    if (!provinsi) provinsi = l;
+                }
+                if (l.replace(/\s/g, '').match(/\d{16}/)) {
+                    nik = l.replace(/[^0-9]/g, '');
+                }
+                if (l.includes('NAMA') || l.includes('N A M A')) {
+                    nama = l.split(':').pop().trim();
+                    if (!nama && i+1 < lines.length) nama = lines[i+1].trim();
+                }
+                if (l.includes('TEMPAT') || l.includes('LAHIR') || l.includes('TGL')) {
+                    ttl = l.split(':').pop().trim();
+                }
+                if (l.includes('JENIS KELAMIN') || l.includes('KELAMIN')) {
+                    jk = l.split(':').pop().trim();
+                }
+                if (l.includes('ALAMAT')) {
+                    alamat = l.split(':').pop().trim();
+                }
+            }
+            
+            ocrFieldNik.value = nik;
+            ocrFieldName.value = nama;
+            ocrFieldBirth.value = ttl;
+            ocrFieldGender.value = jk;
+            ocrFieldAddress.value = alamat;
+            ocrFieldRegion.value = provinsi;
+        }
+
+        function copyToClipboard(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.select();
+                document.execCommand('copy');
+                alert('Tersalin: ' + el.value);
+            }
+        }
+        window.copyToClipboard = copyToClipboard;
+
+        // 9. EXPORT & DOWNLOAD
+        btnDownloadImg.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'KTP_Scan.png';
+            link.href = outputCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        btnDownloadPdf.addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const layout = document.querySelector('input[name="pdf-layout"]:checked').value;
+            const imgData = outputCanvas.toDataURL('image/jpeg', 1.0);
+            
+            if (layout === 'fit') {
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'mm',
+                    format: [85.6, 53.98]
+                });
+                pdf.addImage(imgData, 'JPEG', 0, 0, 85.6, 53.98);
+                pdf.save('KTP_Scan.pdf');
+            } else {
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                const x = (210 - 85.6) / 2;
+                const y = (297 - 53.98) / 2;
+                pdf.addImage(imgData, 'JPEG', x, y, 85.6, 53.98);
+                pdf.save('KTP_Scan_A4.pdf');
+            }
+        });
+
+        // Init App state
+        showStep(stepSelect);
+    </script>
+</body>
+</html>
