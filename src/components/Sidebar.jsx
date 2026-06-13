@@ -31,6 +31,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Scan KTP', path: '/scan-ktp.html', icon: FileSearch, roles: ['Petugas'], isExternal: true },
     { name: 'Input Pekerjaan', path: '/input', icon: PlusSquare, roles: ['superadmin', 'Admin'] },
     { name: 'Proses & Verifikasi', path: '/cek', icon: CheckCircle2, roles: ['superadmin', 'Petugas'] },
     { name: 'Verifikasi PU', path: '/verifikasi-pu', icon: ClipboardCheck, roles: ['superadmin', 'Petugas'] },
@@ -42,7 +43,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
     { name: 'Manajemen User', path: '/users', icon: Users, roles: ['superadmin'] },
     { name: 'Running Text', path: '/running-text', icon: Settings, roles: ['superadmin'] },
-    { name: 'Scan KTP', path: '/scan-ktp.html', icon: FileSearch, roles: ['Petugas'], isExternal: true },
     { name: 'Pesan Chat', path: '/chat', icon: MessageCircle, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
   ];
 
