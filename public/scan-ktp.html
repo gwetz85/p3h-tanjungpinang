@@ -1111,7 +1111,7 @@
                 
                 const imgData = outputCanvas.toDataURL('image/png');
                 
-                const worker = await Tesseract.createWorker({
+                const worker = await Tesseract.createWorker('ind', 1, {
                     logger: m => {
                         if (m.status === 'recognizing text') {
                             const pct = Math.round(m.progress * 100);
@@ -1121,9 +1121,6 @@
                         }
                     }
                 });
-                
-                await worker.loadLanguage('ind');
-                await worker.initialize('ind');
                 
                 const { data: { text } } = await worker.recognize(imgData);
                 
@@ -1142,6 +1139,7 @@
             } catch (err) {
                 console.error(err);
                 ocrStatusMessage.innerText = 'Gagal membaca OCR';
+                ocrLoader.classList.add('hidden');
             }
         }
 
