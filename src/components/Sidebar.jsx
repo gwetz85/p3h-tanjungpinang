@@ -42,7 +42,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Manajemen Petugas', path: '/koordinator', icon: Users, roles: ['superadmin', 'Admin', 'Petugas'] },
     { name: 'Manajemen User', path: '/users', icon: Users, roles: ['superadmin'] },
     { name: 'Running Text', path: '/running-text', icon: Settings, roles: ['superadmin'] },
-    { name: 'Scan KTP', path: '/scan-ktp.html', icon: FileSearch, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'], isExternal: true },
+    { name: 'Scan KTP', path: '/scan-ktp.html', icon: FileSearch, roles: ['Petugas'], isExternal: true },
     { name: 'Pesan Chat', path: '/chat', icon: MessageCircle, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
   ];
 

@@ -10,8 +10,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- jsPDF untuk Ekspor PDF secara Lokal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Tesseract.js untuk OCR Lokal tanpa Server (Privasi Aman) -->
-    <script src="https://unpkg.com/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
+    <!-- Tesseract removed -->
     <style>
         /* Gaya khusus untuk area drag sudut pemotongan perspektif */
         .corner-handle {
@@ -54,10 +53,7 @@
                     <p class="text-xs text-slate-400">Pemindai KTP Presisi & Ekstrasi OCR</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 text-xs bg-slate-700/50 px-3 py-1.5 rounded-full text-slate-300">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                OCR Offline Aktif
-            </div>
+            <!-- OCR Offline Badge removed -->
         </div>
     </header>
 
@@ -210,14 +206,10 @@
             <!-- Kolom Preview Hasil & Tab OCR -->
             <div class="md:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
                 <div>
-                    <!-- Tab Selector -->
-                    <div class="flex border-b border-slate-700 mb-4">
-                        <button id="tab-btn-scan" class="py-2 px-4 border-b-2 border-blue-500 font-bold text-sm text-blue-400 focus:outline-none flex items-center gap-2">
+                    <div class="mb-4">
+                        <h3 class="font-bold text-sm text-blue-400 flex items-center gap-2 border-b border-slate-700 pb-2">
                             <i data-lucide="image" class="w-4 h-4"></i> Hasil Scan KTP
-                        </button>
-                        <button id="tab-btn-ocr" class="py-2 px-4 border-b-2 border-transparent hover:border-slate-500 font-bold text-sm text-slate-400 hover:text-slate-200 focus:outline-none flex items-center gap-2">
-                            <i data-lucide="file-text" class="w-4 h-4"></i> Data Hasil OCR KTP
-                        </button>
+                        </h3>
                     </div>
 
                     <!-- KONTEN TAB 1: Hasil Gambar Scan -->
@@ -225,60 +217,6 @@
                         <p class="text-xs text-slate-400 mb-4">Secara otomatis diratakan sesuai rasio ukuran kartu standar internasional (85.6mm x 53.98mm).</p>
                         <div class="bg-slate-950 p-4 rounded-xl flex items-center justify-center border border-slate-700/50">
                             <canvas id="output-canvas" class="max-w-full h-auto rounded-lg shadow-2xl bg-white"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- KONTEN TAB 2: Pembacaan Teks OCR -->
-                    <div id="tab-content-ocr" class="hidden space-y-4">
-                        <!-- Progress Bar Deteksi Teks -->
-                        <div id="ocr-loader" class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/50 text-center space-y-3">
-                            <div class="flex justify-between items-center text-xs text-slate-400">
-                                <span class="flex items-center gap-1.5">
-                                    <i data-lucide="cpu" class="w-4 h-4 text-blue-400 animate-spin"></i>
-                                    <span id="ocr-status-message">Menginisialisasi Pembacaan OCR...</span>
-                                </span>
-                                <span id="ocr-status-percent">0%</span>
-                            </div>
-                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                                <div id="ocr-status-bar" class="bg-blue-500 h-2 w-0 transition-all duration-300"></div>
-                            </div>
-                        </div>
-
-                        <!-- Form Detail Hasil Pembacaan OCR -->
-                        <div class="grid grid-cols-1 gap-3 text-sm">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">PROVINSI / KOTA (Asal KTP)</label>
-                                <input type="text" id="ocr-field-region" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">NOMOR INDUK KEPENDUDUKAN (NIK)</label>
-                                <div class="relative">
-                                    <input type="text" id="ocr-field-nik" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-white focus:outline-none focus:border-blue-500 font-mono tracking-wider text-base text-yellow-400" placeholder="-">
-                                    <button onclick="copyToClipboard('ocr-field-nik')" class="absolute right-2 top-2 text-slate-400 hover:text-white" title="Salin NIK"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">NAMA LENGKAP</label>
-                                <input type="text" id="ocr-field-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-400 mb-1">TEMPAT & TANGGAL LAHIR</label>
-                                    <input type="text" id="ocr-field-birth" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-400 mb-1">JENIS KELAMIN</label>
-                                    <input type="text" id="ocr-field-gender" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500" placeholder="-">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">ALAMAT LENGKAP</label>
-                                <textarea id="ocr-field-address" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none" placeholder="-"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">TEKS MENTAH HASIL OCR (Seluruh Dokumen)</label>
-                                <textarea id="ocr-raw-output" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-400 font-mono focus:outline-none" readonly placeholder="Teks mentah hasil deteksi dokumen akan ditampilkan di sini..."></textarea>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -356,8 +294,8 @@
         <section id="guide-box" class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400 flex items-start gap-3">
             <i data-lucide="info" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
             <div>
-                <strong class="text-slate-300 block mb-1">Bagaimana cara kerja perspektif rapi & OCR ini?</strong>
-                Dengan mencocokkan 4 sudut penanda pada sudut KTP Anda, algoritme kami akan meratakan foto kembali ke perspektif aslinya. Setelah dirapikan, mesin OCR bawaan **Tesseract.js** akan menganalisis konten tulisan bahasa Indonesia pada kartu KTP dan mengisi bidang data NIK/Nama secara instan tanpa mengirim data Anda ke server mana pun.
+                <strong class="text-slate-300 block mb-1">Bagaimana cara kerja perspektif rapi ini?</strong>
+                Dengan mencocokkan 4 sudut penanda pada sudut KTP Anda, algoritme kami akan meratakan foto kembali ke perspektif aslinya.
             </div>
         </section>
 
@@ -418,24 +356,7 @@
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
 
-        // Elemen Tab & OCR Baru
-        const tabBtnScan = document.getElementById('tab-btn-scan');
-        const tabBtnOcr = document.getElementById('tab-btn-ocr');
-        const tabContentScan = document.getElementById('tab-content-scan');
-        const tabContentOcr = document.getElementById('tab-content-ocr');
-        
-        const ocrLoader = document.getElementById('ocr-loader');
-        const ocrStatusMessage = document.getElementById('ocr-status-message');
-        const ocrStatusPercent = document.getElementById('ocr-status-percent');
-        const ocrStatusBar = document.getElementById('ocr-status-bar');
-
-        const ocrFieldRegion = document.getElementById('ocr-field-region');
-        const ocrFieldNik = document.getElementById('ocr-field-nik');
-        const ocrFieldName = document.getElementById('ocr-field-name');
-        const ocrFieldBirth = document.getElementById('ocr-field-birth');
-        const ocrFieldGender = document.getElementById('ocr-field-gender');
-        const ocrFieldAddress = document.getElementById('ocr-field-address');
-        const ocrRawOutput = document.getElementById('ocr-raw-output');
+        // Elemen OCR dihapus
 
         // State Aplikasi
         let currentStream = null;
@@ -511,9 +432,7 @@
             rotateWarpedCanvas180();
         });
 
-        // Event Handlers untuk Navigasi Tab Hasil & OCR
-        tabBtnScan.addEventListener('click', () => switchTab('scan'));
-        tabBtnOcr.addEventListener('click', () => switchTab('ocr'));
+        // Event listener OCR dihapus
 
         // 2. CAMERA FUNCTIONS
         async function startWebcam() {
@@ -953,25 +872,7 @@
             }
         }
 
-        function switchTab(tab) {
-            if (tab === 'scan') {
-                tabBtnScan.classList.replace('border-transparent', 'border-blue-500');
-                tabBtnScan.classList.replace('text-slate-400', 'text-blue-400');
-                tabBtnOcr.classList.replace('border-blue-500', 'border-transparent');
-                tabBtnOcr.classList.replace('text-blue-400', 'text-slate-400');
-                
-                tabContentScan.classList.remove('hidden');
-                tabContentOcr.classList.add('hidden');
-            } else {
-                tabBtnOcr.classList.replace('border-transparent', 'border-blue-500');
-                tabBtnOcr.classList.replace('text-slate-400', 'text-blue-400');
-                tabBtnScan.classList.replace('border-blue-500', 'border-transparent');
-                tabBtnScan.classList.replace('text-blue-400', 'text-slate-400');
-                
-                tabContentOcr.classList.remove('hidden');
-                tabContentScan.classList.add('hidden');
-            }
-        }
+        // switchTab dihapus
 
         // 6. PERSPECTIVE WARP & CROP LOGIC
         btnApplyCrop.addEventListener('click', () => {
@@ -1032,7 +933,6 @@
             tempWarpedCanvas.getContext('2d').drawImage(outputCanvas, 0, 0);
             
             applyFilter(selectedFilter);
-            runOCR();
         }
 
         function rotateWarpedCanvas180() {
@@ -1049,7 +949,6 @@
             ctx.drawImage(temp, 0, 0);
             
             applyFilter(selectedFilter);
-            runOCR(); // Re-run OCR after rotation
         }
 
         // 7. FILTERS
@@ -1098,97 +997,7 @@
             ctx.putImageData(imgData, 0, 0);
         }
 
-        // 8. OCR WITH TESSERACT.JS
-        async function runOCR() {
-            if (typeof Tesseract === 'undefined') return;
-            
-            ocrLoader.classList.remove('hidden');
-            ocrRawOutput.value = '';
-            
-            try {
-                ocrStatusMessage.innerText = 'Mempersiapkan OCR...';
-                ocrStatusBar.style.width = '10%';
-                
-                const imgData = outputCanvas.toDataURL('image/png');
-                
-                const worker = await Tesseract.createWorker('ind', 1, {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            const pct = Math.round(m.progress * 100);
-                            ocrStatusPercent.innerText = `${pct}%`;
-                            ocrStatusBar.style.width = `${pct}%`;
-                            ocrStatusMessage.innerText = 'Membaca Teks KTP...';
-                        }
-                    }
-                });
-                
-                const { data: { text } } = await worker.recognize(imgData);
-                
-                ocrRawOutput.value = text;
-                parseKTPText(text);
-                
-                ocrStatusMessage.innerText = 'Selesai!';
-                ocrStatusBar.style.width = '100%';
-                
-                await worker.terminate();
-                
-                setTimeout(() => {
-                    ocrLoader.classList.add('hidden');
-                }, 2000);
-                
-            } catch (err) {
-                console.error(err);
-                ocrStatusMessage.innerText = 'Gagal membaca OCR';
-                ocrLoader.classList.add('hidden');
-            }
-        }
-
-        function parseKTPText(text) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            
-            let nik = '', nama = '', ttl = '', jk = '', alamat = '', provinsi = '';
-            
-            for (let i = 0; i < lines.length; i++) {
-                const l = lines[i].toUpperCase();
-                
-                if (l.includes('PROVINSI') || l.includes('KABUPATEN') || l.includes('KOTA')) {
-                    if (!provinsi) provinsi = l;
-                }
-                if (l.replace(/\s/g, '').match(/\d{16}/)) {
-                    nik = l.replace(/[^0-9]/g, '');
-                }
-                if (l.includes('NAMA') || l.includes('N A M A')) {
-                    nama = l.split(':').pop().trim();
-                    if (!nama && i+1 < lines.length) nama = lines[i+1].trim();
-                }
-                if (l.includes('TEMPAT') || l.includes('LAHIR') || l.includes('TGL')) {
-                    ttl = l.split(':').pop().trim();
-                }
-                if (l.includes('JENIS KELAMIN') || l.includes('KELAMIN')) {
-                    jk = l.split(':').pop().trim();
-                }
-                if (l.includes('ALAMAT')) {
-                    alamat = l.split(':').pop().trim();
-                }
-            }
-            
-            ocrFieldNik.value = nik;
-            ocrFieldName.value = nama;
-            ocrFieldBirth.value = ttl;
-            ocrFieldGender.value = jk;
-            ocrFieldAddress.value = alamat;
-            ocrFieldRegion.value = provinsi;
-        }
-
-        function copyToClipboard(id) {
-            const el = document.getElementById(id);
-            if(el) {
-                el.select();
-                document.execCommand('copy');
-                alert('Tersalin: ' + el.value);
-            }
-        }
-        window.copyToClipboard = copyToClipboard;
+        // OCR Functions dihapus
 
         // 9. EXPORT & DOWNLOAD
         btnDownloadImg.addEventListener('click', () => {
