@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send } from 'lucide-react';
+import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool } from 'lucide-react';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [gudangBahanList, setGudangBahanList] = useState([]);
+  const sigCanvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
   const defaultData = {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
     tatacara: '',
@@ -16,6 +19,7 @@ const HalalForm = ({ job, onClose }) => {
     location: null,
     siHalalEmail: '',
     siHalalPassword: '',
+    tandaTanganPelakuUsaha: '',
     bahan: Array(40).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', expired: '', supplier: '', namaSwalayan: '', sub: [''] })),
     pembersih: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '', sub: [''] })),
     kemasan: Array(10).fill(null).map(() => ({ merk: '', produsen: '', sertifikat: '' }))
@@ -55,7 +59,8 @@ const HalalForm = ({ job, onClose }) => {
         setFormData(prev => ({
           ...prev,
           photo: val.photo || prev.photo,
-          photoKTP: val.photoKTP || prev.photoKTP
+          photoKTP: val.photoKTP || prev.photoKTP,
+          tandaTanganPelakuUsaha: val.tandaTanganPelakuUsaha || prev.tandaTanganPelakuUsaha
         }));
       }
     });
@@ -89,7 +94,7 @@ const HalalForm = ({ job, onClose }) => {
   }, [job.id]);
 
   const calculateProgress = (data) => {
-    let totalFields = 17; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal
+    let totalFields = 18; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal + 1 TandaTangan
     let filledFields = 0;
 
     if (data.nib) filledFields++;
@@ -109,6 +114,7 @@ const HalalForm = ({ job, onClose }) => {
     if (data.location) filledFields++;
     if (data.siHalalEmail) filledFields++;
     if (data.siHalalPassword) filledFields++;
+    if (data.tandaTanganPelakuUsaha) filledFields++;
 
     return Math.round((filledFields / totalFields) * 100);
   };
@@ -126,7 +132,7 @@ const HalalForm = ({ job, onClose }) => {
         sub: (p.sub || []).filter(s => s && s.trim() !== '')
       }));
       
-      const { photo, photoKTP, ...restFormData } = formData;
+      const { photo, photoKTP, tandaTanganPelakuUsaha, ...restFormData } = formData;
       const dataToSave = {
         ...restFormData,
         bahan: cleanedBahan,
@@ -156,6 +162,7 @@ const HalalForm = ({ job, onClose }) => {
       const photoUpdates = {};
       if (photo) photoUpdates.photo = photo;
       if (photoKTP) photoUpdates.photoKTP = photoKTP;
+      if (tandaTanganPelakuUsaha) photoUpdates.tandaTanganPelakuUsaha = tandaTanganPelakuUsaha;
 
       if (Object.keys(photoUpdates).length > 0) {
         await update(ref(rtdb, `pekerjaan_photos/${job.id}`), photoUpdates);
@@ -309,7 +316,6 @@ const HalalForm = ({ job, onClose }) => {
     }
   };
 
-  // Download foto sebagai file gambar
   const downloadImage = (dataUrl, filename) => {
     if (!dataUrl) return;
     const link = document.createElement('a');
@@ -319,6 +325,76 @@ const HalalForm = ({ job, onClose }) => {
     link.click();
     document.body.removeChild(link);
   };
+
+  const getCoordinates = (e) => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches && e.touches.length > 0) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+      };
+    } else {
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+  };
+
+  const startDrawing = (e) => {
+    const coords = getCoordinates(e);
+    if (!coords) return;
+    const ctx = sigCanvasRef.current.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(coords.x, coords.y);
+    setIsDrawing(true);
+  };
+
+  const drawSignature = (e) => {
+    if (!isDrawing) return;
+    // prevent scrolling when drawing on touch
+    if (e.type.includes('touch')) {
+      e.preventDefault();
+    }
+    const coords = getCoordinates(e);
+    if (!coords) return;
+    const ctx = sigCanvasRef.current.getContext('2d');
+    ctx.lineTo(coords.x, coords.y);
+    ctx.stroke();
+  };
+
+  const finishDrawing = () => {
+    if (!isDrawing) return;
+    const ctx = sigCanvasRef.current.getContext('2d');
+    ctx.closePath();
+    setIsDrawing(false);
+    const dataUrl = sigCanvasRef.current.toDataURL('image/png');
+    setFormData(prev => ({ ...prev, tandaTanganPelakuUsaha: dataUrl }));
+  };
+
+  const clearSignature = () => {
+    const canvas = sigCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setFormData(prev => ({ ...prev, tandaTanganPelakuUsaha: '' }));
+  };
+
+  // set up touch options to non-passive for preventing scroll
+  useEffect(() => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const handleTouchMove = (e) => {
+      if (isDrawing) {
+        e.preventDefault();
+      }
+    };
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => {
+      canvas.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isDrawing]);
 
   const generatePDF = () => {
     const bahanFilled = formData.bahan.filter(b => b.merk);
@@ -623,11 +699,21 @@ const HalalForm = ({ job, onClose }) => {
   </div>` : ''}
 
   <!-- TANDA TANGAN -->
-  <div class="sign-block">
-    <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
-    <p class="sign-line"></p>
-    <p>Petugas Halal Centre TPI</p>
-  </div>
+  <table style="width: 100%; margin-top: 36px; page-break-inside: avoid; break-inside: avoid; border: none;">
+    <tr>
+      <td style="width: 50%; text-align: center; vertical-align: bottom; border: none;">
+        <p style="margin-bottom: 20px;">PELAKU USAHA</p>
+        ${formData.tandaTanganPelakuUsaha ? `<img src="${formData.tandaTanganPelakuUsaha}" style="max-height: 80px; max-width: 200px; display: block; margin: 0 auto;" alt="Tanda Tangan" />` : '<div style="height: 80px;"></div>'}
+        <p style="margin-top: 5px; font-weight: bold; text-decoration: underline;">${job.nama || '-'}</p>
+      </td>
+      <td style="width: 50%; text-align: center; vertical-align: bottom; border: none;">
+        <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+        <div style="height: 60px;"></div>
+        <p class="sign-line" style="margin-top: 0; width: 80%; margin-left: auto; margin-right: auto;"></p>
+        <p>Petugas Halal Centre TPI</p>
+      </td>
+    </tr>
+  </table>
 
 </body>
 </html>`);
@@ -990,6 +1076,43 @@ const HalalForm = ({ job, onClose }) => {
                 AMBIL LOKASI VERVAL
               </button>
             </div>
+          </div>
+
+          <div className="section-title mt-4">Tanda Tangan Pelaku Usaha</div>
+          <div className="glass-card mb-4 p-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '2px solid #e5e7eb', marginBottom: '10px' }}>
+              <canvas
+                ref={sigCanvasRef}
+                width={300}
+                height={150}
+                style={{ display: 'block', touchAction: 'none' }}
+                onMouseDown={startDrawing}
+                onMouseMove={drawSignature}
+                onMouseUp={finishDrawing}
+                onMouseOut={finishDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={drawSignature}
+                onTouchEnd={finishDrawing}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: '10px', width: '300px' }}>
+              <button 
+                type="button" 
+                onClick={clearSignature} 
+                className="btn-primary-outline" 
+                style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}
+              >
+                <Eraser size={16} /> Hapus
+              </button>
+            </div>
+            
+            {formData.tandaTanganPelakuUsaha && (
+              <div style={{ marginTop: '15px', textAlign: 'center' }}>
+                <p style={{ fontSize: '0.8rem', color: '#10b981', marginBottom: '5px' }}>Tanda Tangan Tersimpan:</p>
+                <img src={formData.tandaTanganPelakuUsaha} alt="Tanda Tangan Pelaku Usaha" style={{ maxHeight: '80px', border: '1px solid #d1d5db', background: '#fff', padding: '4px', borderRadius: '4px' }} />
+              </div>
+            )}
           </div>
         </div>
 
