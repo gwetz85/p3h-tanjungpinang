@@ -699,21 +699,14 @@ const HalalForm = ({ job, onClose }) => {
   </div>` : ''}
 
   <!-- TANDA TANGAN -->
-  <table style="width: 100%; margin-top: 36px; page-break-inside: avoid; break-inside: avoid; border: none;">
-    <tr>
-      <td style="width: 50%; text-align: center; vertical-align: bottom; border: none;">
-        <p style="margin-bottom: 20px;">PELAKU USAHA</p>
-        ${formData.tandaTanganPelakuUsaha ? `<img src="${formData.tandaTanganPelakuUsaha}" style="max-height: 80px; max-width: 200px; display: block; margin: 0 auto;" alt="Tanda Tangan" />` : '<div style="height: 80px;"></div>'}
-        <p style="margin-top: 5px; font-weight: bold; text-decoration: underline;">${job.nama || '-'}</p>
-      </td>
-      <td style="width: 50%; text-align: center; vertical-align: bottom; border: none;">
-        <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
-        <div style="height: 60px;"></div>
-        <p class="sign-line" style="margin-top: 0; width: 80%; margin-left: auto; margin-right: auto;"></p>
-        <p>Petugas Halal Centre TPI</p>
-      </td>
-    </tr>
-  </table>
+  <div class="sign-block" style="margin-top: 36px; text-align: right; page-break-inside: avoid; break-inside: avoid;">
+    <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+    <div style="display: inline-block; text-align: center; margin-top: 20px; min-width: 200px;">
+      <p style="margin-bottom: 10px; font-weight: bold;">PELAKU USAHA</p>
+      ${formData.tandaTanganPelakuUsaha ? `<img src="${formData.tandaTanganPelakuUsaha}" style="max-height: 80px; max-width: 200px; display: block; margin: 0 auto;" alt="Tanda Tangan" />` : '<div style="height: 80px;"></div>'}
+      <p style="margin-top: 5px; font-weight: bold; text-decoration: underline;">${job.nama || '-'}</p>
+    </div>
+  </div>
 
 </body>
 </html>`);
