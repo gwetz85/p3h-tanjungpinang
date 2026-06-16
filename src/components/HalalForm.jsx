@@ -824,7 +824,7 @@ const HalalForm = ({ job, onClose }) => {
     .title {
       text-align: center;
       font-weight: bold;
-      font-size: 13pt;
+      font-size: 11pt;
       text-decoration: underline;
       margin-bottom: 8px;
     }
