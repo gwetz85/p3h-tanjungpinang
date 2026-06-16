@@ -785,6 +785,167 @@ const HalalForm = ({ job, onClose }) => {
     }
   };
 
+  const generatePernyataanHalalPDF = () => {
+    const namaPelakuUsaha = formData.namaUsaha || job.nama || '-';
+
+    const now = new Date();
+    const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const tanggalStr = `${String(now.getDate()).padStart(2,'0')} ${bulanId[now.getMonth()]} ${now.getFullYear()}`;
+
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
+    if (!printWindow) {
+      alert('Popup diblokir browser. Izinkan popup untuk mencetak PDF.');
+      return;
+    }
+
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>KEBIJAKAN HALAL - ${namaPelakuUsaha}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12pt;
+      color: #111;
+      background: #fff;
+    }
+    @page {
+      size: A4 portrait;
+      margin: 20mm 20mm 20mm 20mm;
+    }
+    .wrapper {
+      border: 1.5px solid #111;
+      padding: 40px 48px 48px 48px;
+    }
+    .title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 13pt;
+      text-decoration: underline;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 12pt;
+      margin-bottom: 28px;
+    }
+    .body-text {
+      text-align: justify;
+      line-height: 1.9;
+      margin-bottom: 14px;
+      font-size: 12pt;
+    }
+    .numbered-list {
+      margin: 0 0 30px 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    .numbered-list li {
+      display: flex;
+      gap: 6px;
+      text-align: justify;
+      line-height: 1.9;
+      margin-bottom: 4px;
+      font-size: 12pt;
+    }
+    .numbered-list li .num {
+      min-width: 22px;
+      flex-shrink: 0;
+    }
+    .sign-area {
+      margin-top: 30px;
+    }
+    .sign-location {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12pt;
+      margin-bottom: 6px;
+    }
+    .sign-label {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12pt;
+      margin-bottom: 0;
+    }
+    .sign-img-wrap {
+      margin: 10px auto;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sign-img-wrap img {
+      max-height: 90px;
+      max-width: 220px;
+      object-fit: contain;
+      display: block;
+    }
+    .sign-name {
+      text-align: center;
+      font-weight: bold;
+      font-size: 12pt;
+      margin-bottom: 2px;
+    }
+    .sign-line {
+      text-align: center;
+      font-size: 12pt;
+    }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="title">KEBIJAKAN HALAL</div>
+    <div class="subtitle">(${namaPelakuUsaha.toUpperCase()})</div>
+
+    <div class="body-text">
+      Kami berkomitmen dan bertanggung jawab untuk menghasilkan produk halal secara konsisten dan berkesinambungan dengan melalukan tindakan:
+    </div>
+
+    <ol class="numbered-list">
+      <li><span class="num">1.</span><span>Mentaati peraturan perundang-undangan terkait jaminan produk halal.</span></li>
+      <li><span class="num">2.</span><span>Menggunakan bahan halal dan melaksanakan proses produk halal (PPH) sesuai dengan ketentuannya yang berlaku.</span></li>
+      <li><span class="num">3.</span><span>Menyediakan sumber daya manusia yang mendukung pelaksanaan PPH di perusahaan.</span></li>
+      <li><span class="num">4.</span><span>Mensosialisasikan dan mengkomunikasikan kebijakan halal pada seluruh pihak terkait untuk memastikan semua personel menjaga integritas halal di perusahaan.</span></li>
+    </ol>
+
+    <div class="sign-area">
+      <div class="sign-location">KOTA TANJUNG PINANG, ${tanggalStr}</div>
+      <div class="sign-label">Penanggung Jawab,</div>
+      <div class="sign-img-wrap">
+        ${formData.tandaTanganPelakuUsaha
+          ? `<img src="${formData.tandaTanganPelakuUsaha}" alt="Tanda Tangan" />`
+          : '<div style="height:90px;"></div>'
+        }
+      </div>
+      <div class="sign-name">${namaPelakuUsaha}</div>
+      <div class="sign-line">(......................................)</div>
+    </div>
+  </div>
+</body>
+</html>`);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    const images = printWindow.document.images;
+    let loaded = 0;
+    const total = images.length;
+    const doPrint = () => setTimeout(() => { printWindow.print(); printWindow.close(); }, 400);
+    if (total === 0) {
+      doPrint();
+    } else {
+      Array.from(images).forEach(img => {
+        if (img.complete) { loaded++; if (loaded === total) doPrint(); }
+        else { img.onload = img.onerror = () => { loaded++; if (loaded === total) doPrint(); }; }
+      });
+    }
+  };
 
   return (
     <div className="modal-overlay">
@@ -792,6 +953,9 @@ const HalalForm = ({ job, onClose }) => {
         <div className="modal-header">
           <h2><FileText size={24} /> Form Sertifikasi Halal</h2>
           <div className="header-actions">
+            <button onClick={generatePernyataanHalalPDF} className="btn-icon" title="Cetak Pernyataan Halal" style={{ color: '#f59e0b', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <FileText size={18} /><span style={{ fontWeight: 600 }}>Pernyataan Halal</span>
+            </button>
             <button onClick={generatePDF} className="btn-icon text-primary" title="Cetak PDF"><Download /></button>
             <button onClick={onClose} className="btn-close"><X /></button>
           </div>
