@@ -51,6 +51,46 @@ const HalalForm = ({ job, onClose }) => {
   });
 
   useEffect(() => {
+    // Fetch latest halalData to prevent overwriting with defaults if it was stripped from job prop
+    const halalDataRef = ref(rtdb, `pekerjaan/${job.id}/halalData`);
+    get(halalDataRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const fetchedData = snapshot.val();
+        setFormData(prev => {
+          const newBahan = (() => {
+            const existing = fetchedData.bahan || defaultData.bahan;
+            const padded = [...existing];
+            while (padded.length < 40) {
+              padded.push({ merk: '', produsen: '', sertifikat: '', expired: '', supplier: '', namaSwalayan: '', sub: [''] });
+            }
+            return padded.map(b => ({
+              ...b,
+              expired: b.expired || '',
+              supplier: b.supplier || '',
+              namaSwalayan: b.namaSwalayan || '',
+              sub: b.sub || ['']
+            }));
+          })();
+
+          const newPembersih = (fetchedData.pembersih || defaultData.pembersih).map(p => ({
+            ...p,
+            sub: p.sub || ['']
+          }));
+
+          return {
+            ...prev,
+            ...fetchedData,
+            bahan: newBahan,
+            pembersih: newPembersih,
+            kemasan: fetchedData.kemasan || defaultData.kemasan,
+            photo: prev.photo, // Preserve lazily loaded photos
+            photoKTP: prev.photoKTP,
+            tandaTanganPelakuUsaha: prev.tandaTanganPelakuUsaha
+          };
+        });
+      }
+    }).catch(err => console.error("Error fetching halalData:", err));
+
     // Lazily fetch photos from separate path
     const photosRef = ref(rtdb, `pekerjaan_photos/${job.id}`);
     const unsubPhotos = onValue(photosRef, (snapshot) => {
@@ -330,15 +370,17 @@ const HalalForm = ({ job, onClose }) => {
     const canvas = sigCanvasRef.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     if (e.touches && e.touches.length > 0) {
       return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY
       };
     } else {
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
       };
     }
   };
@@ -1073,12 +1115,12 @@ const HalalForm = ({ job, onClose }) => {
 
           <div className="section-title mt-4">Tanda Tangan Pelaku Usaha</div>
           <div className="glass-card mb-4 p-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '2px solid #e5e7eb', marginBottom: '10px' }}>
+            <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '2px solid #e5e7eb', marginBottom: '10px', width: '100%', maxWidth: '600px' }}>
               <canvas
                 ref={sigCanvasRef}
-                width={300}
-                height={150}
-                style={{ display: 'block', touchAction: 'none' }}
+                width={600}
+                height={300}
+                style={{ display: 'block', touchAction: 'none', width: '100%', height: 'auto' }}
                 onMouseDown={startDrawing}
                 onMouseMove={drawSignature}
                 onMouseUp={finishDrawing}
@@ -1089,7 +1131,7 @@ const HalalForm = ({ job, onClose }) => {
               />
             </div>
             
-            <div style={{ display: 'flex', gap: '10px', width: '300px' }}>
+            <div style={{ display: 'flex', gap: '10px', width: '100%', maxWidth: '600px' }}>
               <button 
                 type="button" 
                 onClick={clearSignature} 
