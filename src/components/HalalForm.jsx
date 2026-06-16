@@ -135,7 +135,7 @@ const HalalForm = ({ job, onClose }) => {
   }, [job.id]);
 
   const calculateProgress = (data) => {
-    let totalFields = 18; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal + 1 TandaTangan
+    let totalFields = 17; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal
     let filledFields = 0;
 
     if (data.nib) filledFields++;
@@ -155,7 +155,7 @@ const HalalForm = ({ job, onClose }) => {
     if (data.location) filledFields++;
     if (data.siHalalEmail) filledFields++;
     if (data.siHalalPassword) filledFields++;
-    if (data.tandaTanganPelakuUsaha) filledFields++;
+    // Signature no longer counted in progress
 
     return Math.round((filledFields / totalFields) * 100);
   };
