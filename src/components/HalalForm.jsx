@@ -12,6 +12,7 @@ const HalalForm = ({ job, onClose }) => {
 
   const defaultData = {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
+    namaPelakuUsaha: '', nikPelakuUsaha: '', tempatLahir: '', tglLahir: '', kontakWA: '', alamatPelakuUsaha: '',
     tatacara: '',
     photo: '',
     photoKTP: '',
@@ -786,7 +787,7 @@ const HalalForm = ({ job, onClose }) => {
   };
 
   const generatePernyataanHalalPDF = () => {
-    const namaPelakuUsaha = formData.namaUsaha || job.nama || '-';
+    const namaPelakuUsaha = formData.namaPelakuUsaha || job.nama || '-';
 
     const now = new Date();
     const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -971,6 +972,16 @@ const HalalForm = ({ job, onClose }) => {
             <div className="input-group"><label>Modal Usaha</label><input type="text" value={formData.modalUsaha} onChange={e => setFormData({...formData, modalUsaha: e.target.value})} /></div>
             <div className="input-group"><label>Lokasi Usaha</label><input type="text" value={formData.lokasiUsaha} onChange={e => setFormData({...formData, lokasiUsaha: e.target.value})} /></div>
             <div className="input-group"><label>Pendapatan</label><input type="text" value={formData.pendapatan} onChange={e => setFormData({...formData, pendapatan: e.target.value})} /></div>
+          </div>
+
+          <div className="section-title mt-4">Data Pelaku Usaha</div>
+          <div className="detail-grid">
+            <div className="input-group"><label>Nama Pelaku Usaha</label><input type="text" value={formData.namaPelakuUsaha} onChange={e => setFormData({...formData, namaPelakuUsaha: e.target.value})} placeholder="Nama lengkap pelaku usaha" /></div>
+            <div className="input-group"><label>NIK</label><input type="text" value={formData.nikPelakuUsaha} onChange={e => setFormData({...formData, nikPelakuUsaha: e.target.value})} placeholder="Nomor Induk Kependudukan" /></div>
+            <div className="input-group"><label>Tempat Lahir</label><input type="text" value={formData.tempatLahir} onChange={e => setFormData({...formData, tempatLahir: e.target.value})} placeholder="Kota tempat lahir" /></div>
+            <div className="input-group"><label>Tanggal Lahir</label><input type="date" value={formData.tglLahir} onChange={e => setFormData({...formData, tglLahir: e.target.value})} /></div>
+            <div className="input-group"><label>Kontak WA</label><input type="text" value={formData.kontakWA} onChange={e => setFormData({...formData, kontakWA: e.target.value})} placeholder="Nomor WhatsApp aktif" /></div>
+            <div className="input-group" style={{ gridColumn: '1 / -1' }}><label>Alamat</label><input type="text" value={formData.alamatPelakuUsaha} onChange={e => setFormData({...formData, alamatPelakuUsaha: e.target.value})} placeholder="Alamat lengkap pelaku usaha" /></div>
           </div>
 
           <div className="section-title mt-4">1. Bahan Pembuatan Produk (40 Item)</div>
