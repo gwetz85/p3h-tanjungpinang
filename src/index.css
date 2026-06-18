@@ -2768,31 +2768,36 @@ select option {
 
   /* ── Welcome banner ── */
   .welcome-banner {
-    padding: 1.1rem 1.2rem !important;
-    border-radius: 14px !important;
-    margin-bottom: 1rem !important;
+    padding: 0.85rem 1rem !important;
+    border-radius: 12px !important;
+    margin-bottom: 0.85rem !important;
   }
-  .welcome-banner h1 { font-size: 1.15rem !important; }
-  .welcome-banner p  { font-size: 0.8rem !important; }
+  .welcome-banner h1 { font-size: 1rem !important; margin-bottom: 4px !important; }
+  .welcome-banner p  { font-size: 0.75rem !important; }
 
   /* ── Stats cards: 2-column grid on mobile ── */
   .stats-grid {
     grid-template-columns: 1fr 1fr !important;
-    gap: 0.75rem !important;
-    margin-bottom: 1rem !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.85rem !important;
   }
   .stat-card {
-    padding: 1rem !important;
-    gap: 0.75rem !important;
-    border-radius: 12px !important;
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+    border-radius: 10px !important;
   }
-  .stat-card-value { font-size: 1.3rem !important; }
-  .stat-card-title { font-size: 0.7rem !important; }
-  .stat-icon-wrapper { width: 36px !important; height: 36px !important; }
+  .stat-card-value { font-size: 1.1rem !important; }
+  .stat-card-title { font-size: 0.65rem !important; }
+  .stat-icon-wrapper { width: 30px !important; height: 30px !important; }
 
   /* ── Dashboard grid: single column ── */
-  .dashboard-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
-  .dashboard-card { height: auto !important; min-height: 260px !important; }
+  .dashboard-grid { grid-template-columns: 1fr !important; gap: 0.85rem !important; }
+  .dashboard-card { 
+    height: auto !important; 
+    min-height: 220px !important; 
+    padding: 1rem !important; 
+    border-radius: 10px !important;
+  }
 
   /* ── Mobile job card list (all menus) ── */
   .job-list {
