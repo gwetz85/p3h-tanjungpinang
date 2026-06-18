@@ -679,6 +679,7 @@ const CekPekerjaan = () => {
                   </div>
                 );
               })}
+            </div>
           </>
         )}
       </div>
