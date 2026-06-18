@@ -272,6 +272,7 @@ const PerbaikanAkunSihalal = () => {
             <thead>
               <tr>
                 <th style={{ width: '25%' }}>Pelaku Usaha</th>
+                <th style={{ width: '15%' }}>Kontak WA</th>
                 <th style={{ width: '20%', textAlign: 'center' }}>Petugas</th>
                 <th style={{ width: '30%' }}>Keterangan</th>
                 <th style={{ width: '15%', textAlign: 'center' }}>Jadwal & Status</th>
@@ -280,13 +281,18 @@ const PerbaikanAkunSihalal = () => {
             </thead>
             <tbody>
               {data.length === 0 ? (
-                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada catatan perbaikan.</td></tr>
+                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada catatan perbaikan.</td></tr>
               ) : (
                 data.map((item) => (
                   <tr key={item.id}>
                     <td>
                       <div style={{ fontWeight: 'bold' }}>{item.namaPelaku}</div>
                       {item.namaUsaha && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{item.namaUsaha}</div>}
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <a href={`https://wa.me/${item.kontak.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="whatsapp-link" style={{ color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <MessageSquare size={14} /> {item.kontak}
+                      </a>
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       <span className="badge-type-large" style={{ background: '#f8fafc', color: '#334155', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
