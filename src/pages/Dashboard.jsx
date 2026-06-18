@@ -145,11 +145,21 @@ const Dashboard = () => {
         }
       });
 
-      perbaikanJobs.forEach(j => {
-        if (j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now) {
-          visitEvents.push({ ...j, nama: j.namaPelaku, visitType: 'Perbaikan Akun', time: j.jadwalKunjungan, jenisPekerjaan: 'Perbaikan Akun', kelurahan: j.alamat });
-        }
-      });
+        perbaikanJobs.forEach(j => {
+          if (j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now) {
+            visitEvents.push({
+              ...j,
+              nama: j.namaPelaku,
+              visitType: 'Perbaikan Akun',
+              time: j.jadwalKunjungan,
+              jenisPekerjaan: 'Perbaikan Akun',
+              kelurahan: j.alamat,
+              // Include WhatsApp contact and keterangan for widget display
+              kontak: j.kontak,
+              keterangan: j.keterangan
+            });
+          }
+        });
 
       const visits = visitEvents
         .sort((a, b) => new Date(a.time) - new Date(b.time))
@@ -616,14 +626,24 @@ const Dashboard = () => {
                     </p>
                   )}
                   <div className="visit-meta">
-                    <span><User size={13} /> {visit.jenisPekerjaan}</span>
-                    <span><MapPin size={13} /> {visit.kelurahan || 'Tanjungpinang'}</span>
+                     <span><User size={13} /> {visit.jenisPekerjaan}</span>
+                     <span><MapPin size={13} /> {visit.kelurahan || 'Tanjungpinang'}</span>
+                     {visit.kontak && (
+                       <span style={{ marginLeft: '8px', color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                         <MessageSquare size={14} /> {visit.kontak}
+                       </span>
+                     )}
                   </div>
                 </div>
                 <div className="visit-badge-container">
-                  <div className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : (visit.visitType === 'Perbaikan Akun' ? 'danger' : 'urgent')}`} style={visit.visitType === 'Verval Bahan' ? {backgroundColor: '#8b5cf6', color: 'white'} : (visit.visitType === 'Perbaikan Akun' ? {backgroundColor: '#ef4444', color: 'white'} : {})}>
-                    {visit.visitType}
-                  </div>
+                   <div className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : (visit.visitType === 'Perbaikan Akun' ? 'danger' : 'urgent')}`} style={visit.visitType === 'Verval Bahan' ? {backgroundColor: '#8b5cf6', color: 'white'} : (visit.visitType === 'Perbaikan Akun' ? {backgroundColor: '#ef4444', color: 'white'} : {})}>
+                     {visit.visitType}
+                   </div>
+                   {visit.keterangan && (
+                     <div className="visit-keterangan" style={{ marginTop: '4px', fontSize: '0.78rem', color: '#64748b', whiteSpace: 'pre-wrap', maxHeight: '40px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                       {visit.keterangan}
+                     </div>
+                   )}
                   <div className="visit-countdown">
                     <Clock size={11} />
                     <CountdownTimer targetDate={visit.time} />

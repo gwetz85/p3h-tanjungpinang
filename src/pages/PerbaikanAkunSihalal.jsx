@@ -274,14 +274,15 @@ const PerbaikanAkunSihalal = () => {
                 <th style={{ width: '25%' }}>Pelaku Usaha</th>
                 <th style={{ width: '15%' }}>Kontak WA</th>
                 <th style={{ width: '20%', textAlign: 'center' }}>Petugas</th>
-                <th style={{ width: '30%' }}>Keterangan</th>
+                <th style={{ width: '20%' }}>Keterangan</th>
+                <th style={{ width: '5%' }}>Detail</th>
                 <th style={{ width: '15%', textAlign: 'center' }}>Jadwal & Status</th>
                 <th style={{ width: '10%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {data.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada catatan perbaikan.</td></tr>
+                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada catatan perbaikan.</td></tr>
               ) : (
                 data.map((item) => (
                   <tr key={item.id}>
@@ -299,8 +300,13 @@ const PerbaikanAkunSihalal = () => {
                         <User size={13} style={{ marginRight: '4px' }}/> {item.namaPetugas}
                       </span>
                     </td>
-                    <td style={{ maxWidth: '300px' }}>
-                      <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{item.keterangan}</p>
+                    <td style={{ maxWidth: '200px' }}>
+                      <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.keterangan}</p>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button className="btn-table-icon text-info" title="Lihat Detail" onClick={() => setViewDetailItem(item)}>
+                        <Eye size={16} />
+                      </button>
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
@@ -378,6 +384,29 @@ const PerbaikanAkunSihalal = () => {
                   <button onClick={() => setIsScheduleOpen(false)} className="btn btn-secondary">Batal</button>
                   <button onClick={handleSaveSchedule} className="btn btn-primary shadow-glow">Simpan Jadwal</button>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {viewDetailItem && (
+          <div className="modal-overlay" onClick={() => setViewDetailItem(null)}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.95 }} 
+              className="modal-content glass-card"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h2>Detail Keterangan</h2>
+                <button onClick={() => setViewDetailItem(null)} className="btn-close"><X size={20}/></button>
+              </div>
+              <div style={{ padding: '1.5rem' }}>
+                <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{viewDetailItem.keterangan}</p>
               </div>
             </motion.div>
           </div>
