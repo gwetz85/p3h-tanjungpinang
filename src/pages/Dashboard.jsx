@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
 import { ref, onValue, query, orderByChild, equalTo, limitToLast, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
+import WeatherBanner from '../components/WeatherBanner';
 import { 
   Briefcase, 
   CheckCircle, 
@@ -388,13 +389,8 @@ const Dashboard = () => {
 
   return (
     <div className="page-container">
-      {/* Welcome Bar */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="welcome-banner">
-        <div className="welcome-text">
-          <h1>Selamat Datang Kembali, {userData?.nama || currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Petugas'}!</h1>
-          <p>Berikut adalah ringkasan perkembangan sertifikasi halal di Kota Tanjungpinang hari ini.</p>
-        </div>
-      </motion.div>
+      {/* Weather Banner */}
+      <WeatherBanner />
 
       {/* 4 Stats Cards */}
       <div className="stats-grid">
