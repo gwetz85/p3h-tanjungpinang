@@ -21,6 +21,7 @@ import PerbaikanAkunSihalal from './pages/PerbaikanAkunSihalal';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
+import PopoutSettings from './pages/PopoutSettings';
 
 
 const PendingApproval = () => {
@@ -148,9 +149,10 @@ function App() {
             <Route path="arsip-sh" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
                 <ArsipSH />
-              </ProtectedRoute>
-            } />
-            <Route path="chat" element={<Chat />} />
+                </ProtectedRoute>
+              } />
+              <Route path="popout-settings" element={<ProtectedRoute allowedRoles={['superadmin']}><PopoutSettings /></ProtectedRoute>} />
+              <Route path="chat" element={<Chat />} />
           </Route>
         </Routes>
       </BrowserRouter>

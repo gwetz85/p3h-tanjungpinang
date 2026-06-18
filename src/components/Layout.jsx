@@ -1,4 +1,5 @@
 import React from 'react';
+import PopoutModal from './PopoutModal';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
@@ -31,6 +32,7 @@ const Layout = () => {
       </main>
 
       <RunningText />
+        <PopoutModal />
     </div>
   );
 };
