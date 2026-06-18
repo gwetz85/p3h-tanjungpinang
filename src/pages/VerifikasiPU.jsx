@@ -535,8 +535,6 @@ const VerifikasiPU = () => {
               </table>
             </div>
 
-            </div>
-
             {/* Mobile Card Layout – premium design */}
             <div className="mobile-card-list mobile-only">
               {sortedJobs.map((job) => {
