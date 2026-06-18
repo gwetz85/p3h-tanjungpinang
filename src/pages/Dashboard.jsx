@@ -134,9 +134,17 @@ const Dashboard = () => {
 
       // Upcoming visits from active jobs (they are lightweight already)
       const now = new Date();
-      const visits = activeJobs
-        .filter(j => j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now)
-        .sort((a, b) => new Date(a.jadwalKunjungan) - new Date(b.jadwalKunjungan))
+      const visitEvents = [];
+      activeJobs.forEach(j => {
+        if (j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now) {
+          visitEvents.push({ ...j, visitType: 'Kunjungan', time: j.jadwalKunjungan });
+        }
+        if (j.jadwalVerval && new Date(j.jadwalVerval) >= now) {
+          visitEvents.push({ ...j, visitType: 'Verval Bahan', time: j.jadwalVerval });
+        }
+      });
+      const visits = visitEvents
+        .sort((a, b) => new Date(a.time) - new Date(b.time))
         .slice(0, 4);
       setUpcomingVisits(visits);
 
@@ -578,8 +586,8 @@ const Dashboard = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="visit-time">
-                  <span className="date">{new Date(visit.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                  <span className="hour">{new Date(visit.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span className="date">{new Date(visit.time).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                  <span className="hour">{new Date(visit.time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <div className="visit-details">
                   <h4>{visit.nama}</h4>
@@ -594,12 +602,12 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="visit-badge-container">
-                  <div className="visit-badge urgent">
-                    Upcoming
+                  <div className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : 'urgent'}`} style={visit.visitType === 'Verval Bahan' ? {backgroundColor: '#8b5cf6', color: 'white'} : {}}>
+                    {visit.visitType === 'Verval Bahan' ? 'Verval Bahan' : 'Kunjungan'}
                   </div>
                   <div className="visit-countdown">
                     <Clock size={11} />
-                    <CountdownTimer targetDate={visit.jadwalKunjungan} />
+                    <CountdownTimer targetDate={visit.time} />
                   </div>
                 </div>
               </div>
