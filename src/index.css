@@ -2742,15 +2742,21 @@ select option {
 
   /* Hamburger button positioning */
   .mobile-menu-toggle {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
+    position: fixed !important;
+    top: 10px !important;
+    left: 1rem !important;
     width: 38px !important;
     height: 38px !important;
     border-radius: 10px !important;
+    background: transparent !important;
+    color: #334155 !important;
     box-shadow: none !important;
+    z-index: 2200 !important;
     flex-shrink: 0;
-    z-index: auto !important;
+  }
+
+  .topbar-left {
+    margin-left: 2.5rem !important; /* Make room for the hamburger */
   }
 
   /* main content padding below topbar */
