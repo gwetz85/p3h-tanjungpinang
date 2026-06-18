@@ -717,11 +717,17 @@ const Dashboard = () => {
                   </div>
 
                   <div className="info-item full">
-                    <label>Alamat Domisili</label>
-                    <p>{selectedVisit.alamat || '-'}</p>
-                  </div>
+                     <label>Alamat Domisili</label>
+                     <p>{selectedVisit.alamat || '-'}</p>
+                   </div>
 
-                  {selectedVisit.alamatUsaha && (
+                   {/* Nama Petugas */}
+                   <div className="info-item">
+                     <label>Nama Petugas</label>
+                     <p>{selectedVisit.namaPetugas || '-'} </p>
+                   </div>
+
+                   {selectedVisit.alamatUsaha && (
                     <div className="info-item full">
                       <label>Alamat Usaha / Lokasi Produksi</label>
                       <p>{selectedVisit.alamatUsaha || '-'}</p>
