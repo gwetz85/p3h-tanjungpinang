@@ -156,6 +156,7 @@ const Dashboard = () => {
               kelurahan: j.alamat,
               // Include WhatsApp contact and keterangan for widget display
               kontak: j.kontak,
+              wa: j.kontak,
               keterangan: j.keterangan
             });
           }
@@ -700,19 +701,19 @@ const Dashboard = () => {
                   
                   <div className="info-item">
                     <label>Kontak WhatsApp</label>
-                    <div className="whatsapp-link-container">
-                      <p>{selectedVisit.wa || '-'}</p>
-                      {selectedVisit.wa && (
-                        <a 
-                          href={`https://wa.me/${selectedVisit.wa.replace(/\D/g, '')}`} 
-                          target="_blank" 
-                          rel="noreferrer" 
-                          className="wa-btn"
-                        >
-                          <MessageSquare size={14} />
-                        </a>
-                      )}
-                    </div>
+                     <div className="whatsapp-link-container">
+                       <p>{selectedVisit.kontak || selectedVisit.wa || '-'}</p>
+                       {(selectedVisit.kontak || selectedVisit.wa) && (
+                         <a
+                           href={`https://wa.me/${(selectedVisit.kontak || selectedVisit.wa).replace(/\D/g, '')}`}
+                           target="_blank"
+                           rel="noreferrer"
+                           className="wa-btn"
+                         >
+                           <MessageSquare size={14} />
+                         </a>
+                       )}
+                     </div>
                   </div>
 
                   <div className="info-item full">
