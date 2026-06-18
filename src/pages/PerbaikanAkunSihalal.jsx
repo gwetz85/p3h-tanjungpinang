@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit3, Trash2, Calendar, CheckCircle2, User, MapPin, MessageSquare, X, Clock } from 'lucide-react';
+import { Plus, Edit3, Trash2, Calendar, CheckCircle2, User, MapPin, MessageSquare, X, Clock, Eye } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const PerbaikanAkunSihalal = () => {
@@ -10,6 +10,7 @@ const PerbaikanAkunSihalal = () => {
   const [data, setData] = useState([]);
   const [pelakuUsahaList, setPelakuUsahaList] = useState([]);
   const [petugasList, setPetugasList] = useState([]);
+  const [viewDetailItem, setViewDetailItem] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Form states
