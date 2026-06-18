@@ -718,7 +718,7 @@ const Dashboard = () => {
                     <label>Sisa Waktu Kunjungan</label>
                     <div className="countdown-badge">
                       <Timer size={13} />
-                      <CountdownTimer targetDate={selectedVisit.jadwalKunjungan} />
+                      <CountdownTimer targetDate={selectedVisit.time || selectedVisit.jadwalKunjungan || selectedVisit.jadwalVerval} />
                     </div>
                   </div>
 
