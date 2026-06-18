@@ -551,8 +551,8 @@ const CekPekerjaan = () => {
                         </div>
                       </td>
                       <td>
-                        <span className={`status-pill ${job.status === 'Returned' ? 'returned' : job.status === 'Pending' ? 'pending' : 'proses'}`}>
-                          {job.status === 'Returned' ? 'Perlu Perbaikan' : job.status}
+                        <span className={`status-pill ${job.status === 'Returned' ? 'returned' : (job.jadwalVerval ? '' : (job.status === 'Pending' ? 'pending' : 'proses'))}`} style={job.jadwalVerval && job.status !== 'Returned' ? {backgroundColor: '#ede9fe', color: '#8b5cf6', border: '1px solid #c4b5fd'} : {}}>
+                          {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.jadwalVerval ? 'Verval Bahan' : job.status)}
                         </span>
                       </td>
                       <td>
@@ -647,8 +647,8 @@ const CekPekerjaan = () => {
                     </div>
                   </div>
                   <div className="visit-actions" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-end', marginTop: '10px' }}>
-                    <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : job.status === 'Pending' ? 'pending' : 'urgent'}`} style={{ marginRight: 'auto', alignSelf: 'center' }}>
-                      {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.status ? job.status.toUpperCase() : 'PENDING')}
+                    <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : (job.jadwalVerval ? '' : (job.status === 'Pending' ? 'pending' : 'urgent'))}`} style={job.jadwalVerval && job.status !== 'Returned' ? { marginRight: 'auto', alignSelf: 'center', backgroundColor: '#8b5cf6', color: 'white' } : { marginRight: 'auto', alignSelf: 'center' }}>
+                      {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.jadwalVerval ? 'VERVAL BAHAN' : (job.status ? job.status.toUpperCase() : 'PENDING'))}
                     </div>
                     {role !== 'Admin' && (
                       <>
