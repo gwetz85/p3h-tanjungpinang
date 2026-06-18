@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send, ClipboardCheck } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -44,6 +44,8 @@ const VerifikasiPU = () => {
   const [showHalal, setShowHalal] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
+  const [showVervalSchedule, setShowVervalSchedule] = useState(false);
+  const [vervalScheduleDate, setVervalScheduleDate] = useState('');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [jobToCancel, setJobToCancel] = useState(null);
@@ -174,7 +176,6 @@ const VerifikasiPU = () => {
     try {
       await update(ref(rtdb, `pekerjaan/${selectedJob.id}`), {
         jadwalKunjungan: scheduleDate,
-        status: 'Proses'
       });
       setShowSchedule(false);
       setSelectedJob(null);
@@ -182,6 +183,24 @@ const VerifikasiPU = () => {
       alert('Gagal set jadwal');
     }
   };
+
+  const handleSetVervalSchedule = async (e) => {
+    e.preventDefault();
+    if (!vervalScheduleDate) {
+      alert('Harap pilih tanggal verval bahan.');
+      return;
+    }
+    try {
+      await update(ref(rtdb, `pekerjaan/${selectedJob.id}`), {
+        jadwalVerval: vervalScheduleDate,
+      });
+      setShowVervalSchedule(false);
+      setSelectedJob(null);
+    } catch (err) {
+      alert('Gagal set jadwal verval bahan');
+    }
+  };
+
 
   const handleDOBChange = (dob) => {
     const birthDate = new Date(dob);
@@ -404,8 +423,9 @@ const VerifikasiPU = () => {
                   {sortedJobs.map((job) => (
                     <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row">
                       <td>
-                        {job.jadwalKunjungan ? (
+                        {job.jadwalKunjungan && (
                           <div className="schedule-cell">
+                            <small className="text-muted" style={{fontSize: '0.65rem', display: 'block', marginBottom: '2px', fontWeight: 'bold'}}>Kunjungan:</small>
                             <div className="date-time">
                               <span className="date">
                                 {new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
@@ -415,7 +435,21 @@ const VerifikasiPU = () => {
                               </span>
                             </div>
                           </div>
-                        ) : (
+                        )}
+                        {job.jadwalVerval && (
+                          <div className="schedule-cell" style={{marginTop: job.jadwalKunjungan ? '8px' : '0'}}>
+                            <small className="text-primary" style={{fontSize: '0.65rem', display: 'block', marginBottom: '2px', fontWeight: 'bold'}}>Verval Bahan:</small>
+                            <div className="date-time">
+                              <span className="date">
+                                {new Date(job.jadwalVerval).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
+                              </span>
+                              <span className="time" style={{color: '#8b5cf6'}}>
+                                {new Date(job.jadwalVerval).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {!job.jadwalKunjungan && !job.jadwalVerval && (
                           <span className="text-muted italic">Belum diset</span>
                         )}
                       </td>
@@ -452,8 +486,11 @@ const VerifikasiPU = () => {
                             >
                               <Send size={16} />
                             </button>
-                            <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                            <button className="btn-table-icon text-accent" title="Set Jadwal Kunjungan" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                               <Calendar size={16} />
+                            </button>
+                            <button className="btn-table-icon" style={{ color: '#8b5cf6' }} title="Set Jadwal Verval Bahan" onClick={() => { setSelectedJob(job); setShowVervalSchedule(true); setVervalScheduleDate(job.jadwalVerval || ''); }}>
+                              <ClipboardCheck size={16} />
                             </button>
                             {job.jadwalKunjungan && (
                               <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
@@ -503,12 +540,20 @@ const VerifikasiPU = () => {
               {sortedJobs.map((job) => (
                 <div key={job.id} className="visit-card-compact" onClick={() => setSelectedJob(job)}>
                   <div className="visit-time">
-                    {job.jadwalKunjungan ? (
+                    {job.jadwalKunjungan && (
                       <>
                         <span className="date">{new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
                         <span className="hour">{new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
                       </>
-                    ) : (
+                    )}
+                    {job.jadwalVerval && (
+                      <div style={{marginTop: job.jadwalKunjungan ? '4px' : '0', color: '#8b5cf6', fontSize: '0.75rem', fontWeight: 'bold'}}>
+                        <span style={{display: 'block', fontSize: '0.6rem'}}>VERVAL</span>
+                        <span className="date">{new Date(job.jadwalVerval).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
+                        <span className="hour">{new Date(job.jadwalVerval).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                    )}
+                    {!job.jadwalKunjungan && !job.jadwalVerval && (
                       <span className="date text-muted" style={{ fontStyle: 'italic', opacity: 0.6, fontSize: '0.8rem' }}>Belum<br/>diset</span>
                     )}
                   </div>
@@ -532,8 +577,11 @@ const VerifikasiPU = () => {
                         >
                           <Send size={16} />
                         </button>
-                        <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                        <button className="btn-table-icon text-accent" title="Set Jadwal Kunjungan" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
                           <Calendar size={16} />
+                        </button>
+                        <button className="btn-table-icon" style={{ color: '#8b5cf6' }} title="Set Jadwal Verval Bahan" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowVervalSchedule(true); setVervalScheduleDate(job.jadwalVerval || ''); }}>
+                          <ClipboardCheck size={16} />
                         </button>
                         {job.jadwalKunjungan && (
                           <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(job.id); }}>
@@ -826,6 +874,27 @@ const VerifikasiPU = () => {
                 </div>
                 <div className="modal-actions">
                   <button type="button" onClick={() => { setShowSchedule(false); setSelectedJob(null); }} className="btn-secondary">Batal</button>
+                  <button type="submit" className="btn-primary">Simpan Jadwal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {selectedJob && showVervalSchedule && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="modal-content glass-card" style={{ maxWidth: '400px' }}>
+              <div className="modal-header">
+                <h2>Set Jadwal Verval Bahan</h2>
+                <button onClick={() => { setShowVervalSchedule(false); setSelectedJob(null); }} className="btn-close"><X /></button>
+              </div>
+              <form onSubmit={handleSetVervalSchedule} className="edit-form">
+                <div className="input-group">
+                  <label>Tanggal & Waktu Verval</label>
+                  <input type="datetime-local" value={vervalScheduleDate} onChange={(e) => setVervalScheduleDate(e.target.value)} required />
+                </div>
+                <div className="modal-actions">
+                  <button type="button" onClick={() => { setShowVervalSchedule(false); setSelectedJob(null); }} className="btn-secondary">Batal</button>
                   <button type="submit" className="btn-primary">Simpan Jadwal</button>
                 </div>
               </form>

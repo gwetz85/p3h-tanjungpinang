@@ -672,20 +672,39 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  <div className="info-item full">
-                    <label>Jadwal Kunjungan Lapangan</label>
-                    <p className="primary-text">
-                      <Calendar size={15} />
-                      {new Date(selectedVisit.jadwalKunjungan).toLocaleString('id-ID', { 
-                        weekday: 'long', 
-                        day: 'numeric', 
-                        month: 'long', 
-                        year: 'numeric', 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
-                  </div>
+                  {selectedVisit.jadwalKunjungan && (
+                    <div className="info-item full">
+                      <label>Jadwal Kunjungan Lapangan</label>
+                      <p className="primary-text">
+                        <Calendar size={15} />
+                        {new Date(selectedVisit.jadwalKunjungan).toLocaleString('id-ID', { 
+                          weekday: 'long', 
+                          day: 'numeric', 
+                          month: 'long', 
+                          year: 'numeric', 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedVisit.jadwalVerval && (
+                    <div className="info-item full">
+                      <label>Jadwal Verval Bahan</label>
+                      <p className="primary-text" style={{color: '#8b5cf6'}}>
+                        <Calendar size={15} />
+                        {new Date(selectedVisit.jadwalVerval).toLocaleString('id-ID', { 
+                          weekday: 'long', 
+                          day: 'numeric', 
+                          month: 'long', 
+                          year: 'numeric', 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="info-item">
                     <label>Sisa Waktu Kunjungan</label>
