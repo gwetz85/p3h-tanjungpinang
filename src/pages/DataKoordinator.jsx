@@ -214,13 +214,15 @@ const DataKoordinator = () => {
                   </div>
                 </div>
               </div>
-              
-              <div className="mobile-card-row" style={{marginBottom: 0}}>
-                <Phone size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
-                <span className="mobile-card-wa" onClick={(e) => {e.stopPropagation(); window.open(`https://wa.me/${coord.phone.replace(/\D/g, '')}`);}}>
-                  {coord.phone}
-                </span>
-              </div>
+
+              {coord.phone && (
+                <div className="mobile-card-row" style={{marginBottom: 0}}>
+                  <Phone size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
+                  <span className="mobile-card-wa" onClick={(e) => {e.stopPropagation(); window.open(`https://wa.me/${coord.phone.replace(/\D/g, '')}`);} }>
+                    {coord.phone}
+                  </span>
+                </div>
+              )}
               
               {['Admin', 'superadmin'].includes(role) && (
                 <div className="mobile-card-footer" style={{ justifyContent: 'flex-end' }}>

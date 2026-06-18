@@ -386,7 +386,7 @@ const PerbaikanAkunSihalal = () => {
                       <span style={{color: '#334155', fontWeight: 500}}>{item.keterangan || '-'}</span>
                     </div>
                     {item.kontak && (
-                      <span className="mobile-card-wa" style={{marginLeft:'auto', display: 'flex', alignItems: 'center', gap: '4px'}} onClick={(e) => {e.stopPropagation(); window.open(`https://wa.me/${item.kontak.replace(/\D/g,'')}`);}}>
+                      <span className="mobile-card-wa" style={{marginLeft:'auto', display: 'flex', alignItems: 'center', gap: '4px'}} onClick={(e) => {e.stopPropagation(); window.open(`https://wa.me/${item.kontak.replace(/\D/g,'')}`); }}>
                         <MessageSquare size={13} /> {item.kontak}
                       </span>
                     )}

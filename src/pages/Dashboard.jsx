@@ -629,11 +629,6 @@ const Dashboard = () => {
                   <div className="visit-meta">
                      <span><User size={13} /> {visit.jenisPekerjaan}</span>
                      <span><MapPin size={13} /> {visit.kelurahan || 'Tanjungpinang'}</span>
-                     {visit.kontak && (
-                       <span style={{ marginLeft: '8px', color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                         <MessageSquare size={14} /> {visit.kontak}
-                       </span>
-                     )}
                   </div>
                 </div>
                 <div className="visit-badge-container">
