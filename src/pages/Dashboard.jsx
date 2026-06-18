@@ -640,9 +640,17 @@ const Dashboard = () => {
               </div>
 
               <div className="job-detail-modern">
-                <div className="detail-header-section" style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
-                  <h2 style={{ margin: '0 0 6px 0', fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>{selectedVisit.nama}</h2>
-                  <span className="badge-type-large" style={{ background: '#eff6ff', color: '#2563eb', padding: '6px 12px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600, display: 'inline-block' }}>{selectedVisit.jenisPekerjaan}</span>
+                <div className="detail-header-section" style={{ textAlign: 'left', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <h2 style={{ margin: '0', fontSize: '1.6rem', fontWeight: 800, color: '#0f172a' }}>{selectedVisit.nama}</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span className="badge-type-large" style={{ background: '#eff6ff', color: '#2563eb', padding: '6px 12px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 600, display: 'inline-block' }}>{selectedVisit.jenisPekerjaan}</span>
+                    {(selectedVisit.time || selectedVisit.jadwalKunjungan || selectedVisit.jadwalVerval) && (
+                      <div className="countdown-badge" style={{ position: 'static', margin: 0, boxShadow: 'none', border: '1px solid #fef3c7', background: '#fffbeb', color: '#d97706' }}>
+                        <Timer size={13} />
+                        <CountdownTimer targetDate={selectedVisit.time || selectedVisit.jadwalKunjungan || selectedVisit.jadwalVerval} />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="detail-info-grid" style={{ textAlign: 'left' }}>
@@ -713,14 +721,6 @@ const Dashboard = () => {
                       </p>
                     </div>
                   )}
-
-                  <div className="info-item">
-                    <label>Sisa Waktu Kunjungan</label>
-                    <div className="countdown-badge">
-                      <Timer size={13} />
-                      <CountdownTimer targetDate={selectedVisit.time || selectedVisit.jadwalKunjungan || selectedVisit.jadwalVerval} />
-                    </div>
-                  </div>
 
                   <div className="info-item">
                     <label>Tanggal Registrasi</label>
