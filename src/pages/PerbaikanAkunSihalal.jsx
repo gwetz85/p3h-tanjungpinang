@@ -268,14 +268,14 @@ const PerbaikanAkunSihalal = () => {
 
       <div className="glass-card" style={{ padding: '1.5rem' }}>
         <div className="table-responsive">
-          <table className="modern-table">
+          <table className="verification-table">
             <thead>
               <tr>
-                <th>Pelaku Usaha</th>
-                <th>Petugas</th>
-                <th>Keterangan</th>
-                <th>Jadwal & Status</th>
-                <th>Aksi</th>
+                <th style={{ width: '25%' }}>Pelaku Usaha</th>
+                <th style={{ width: '20%', textAlign: 'center' }}>Petugas</th>
+                <th style={{ width: '30%' }}>Keterangan</th>
+                <th style={{ width: '15%', textAlign: 'center' }}>Jadwal & Status</th>
+                <th style={{ width: '10%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -288,18 +288,18 @@ const PerbaikanAkunSihalal = () => {
                       <div style={{ fontWeight: 'bold' }}>{item.namaPelaku}</div>
                       {item.namaUsaha && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{item.namaUsaha}</div>}
                     </td>
-                    <td>
-                      <span className="badge-type-large" style={{ background: '#f8fafc', color: '#334155' }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <span className="badge-type-large" style={{ background: '#f8fafc', color: '#334155', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <User size={13} style={{ marginRight: '4px' }}/> {item.namaPetugas}
                       </span>
                     </td>
-                    <td style={{ maxWidth: '250px' }}>
-                      <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap' }}>{item.keterangan}</p>
+                    <td style={{ maxWidth: '300px' }}>
+                      <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{item.keterangan}</p>
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
                         <span className={`status-pill ${item.status === 'Selesai' ? 'success' : 'proses'}`}>
-                          {item.status}
+                          {item.status.toUpperCase()}
                         </span>
                         {item.jadwalKunjungan && (
                           <span style={{ fontSize: '0.75rem', color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -308,8 +308,8 @@ const PerbaikanAkunSihalal = () => {
                         )}
                       </div>
                     </td>
-                    <td>
-                      <div className="table-actions">
+                    <td style={{ textAlign: 'center' }}>
+                      <div className="table-actions" style={{ justifyContent: 'center' }}>
                         {item.status !== 'Selesai' && (
                           <>
                             <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => handleOpenSchedule(item)}>
