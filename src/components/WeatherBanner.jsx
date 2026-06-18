@@ -131,31 +131,34 @@ const gradients = {
 
 // ── Main component ─────────────────────────────────────────────────────────
 const WeatherBanner = () => {
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [today, setToday] = useState('');
+  const [weather, setWeather]     = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [today, setToday]         = useState('');
+  const [lastUpdated, setLastUpdated] = useState('');
 
-  useEffect(() => {
-    // Format today's date in Indonesian
-    const now = new Date();
+  // Tanjungpinang coordinates
+  const LAT = 0.9177;
+  const LON = 104.4525;
+
+  const updateDate = () => {
+    const now    = new Date();
     const days   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli',
+                    'Agustus','September','Oktober','November','Desember'];
     setToday(`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`);
+  };
 
-    // Tanjungpinang coordinates
-    const lat  = 0.9177;   // 0°55'N
-    const lon  = 104.4525; // 104°27'E
-
+  const fetchWeather = () => {
     fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
       `&current=temperature_2m,weathercode,relative_humidity_2m,windspeed_10m` +
       `&daily=temperature_2m_max,temperature_2m_min,weathercode` +
       `&timezone=Asia%2FJakarta&forecast_days=1`
     )
       .then(r => r.json())
       .then(data => {
-        const code    = data.current.weathercode;
-        const info    = getWeatherInfo(code);
+        const code = data.current.weathercode;
+        const info = getWeatherInfo(code);
         setWeather({
           temp:      Math.round(data.current.temperature_2m),
           humidity:  data.current.relative_humidity_2m,
@@ -165,13 +168,40 @@ const WeatherBanner = () => {
           label:     info.label,
           condition: info.condition,
         });
+        // Record last-updated time
+        const now = new Date();
+        const hh  = String(now.getHours()).padStart(2, '0');
+        const mm  = String(now.getMinutes()).padStart(2, '0');
+        setLastUpdated(`${hh}:${mm}`);
         setLoading(false);
       })
       .catch(() => {
-        // Fallback if fetch fails
         setWeather({ temp: '--', humidity: '--', wind: '--', tempMax: '--', tempMin: '--', label: 'Data Tidak Tersedia', condition: 'cloudy' });
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    // Initial load
+    updateDate();
+    fetchWeather();
+
+    // Refresh weather every 5 minutes (300 000 ms)
+    const weatherInterval = setInterval(() => {
+      fetchWeather();
+    }, 5 * 60 * 1000);
+
+    // Refresh date label every minute (in case user keeps page open past midnight)
+    const dateInterval = setInterval(() => {
+      updateDate();
+    }, 60 * 1000);
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(weatherInterval);
+      clearInterval(dateInterval);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const condition = weather?.condition || 'cloudy';
@@ -196,7 +226,7 @@ const WeatherBanner = () => {
         <div className="weather-date">{today}</div>
 
         {loading ? (
-          <div className="weather-loading">Memuat data cuaca...</div>
+          <div className="weather-loading">⏳ Memuat data cuaca...</div>
         ) : (
           <>
             <div className="weather-condition-label">{weather.label}</div>
@@ -216,6 +246,11 @@ const WeatherBanner = () => {
               <span>💧 {weather.humidity}%</span>
               <span>💨 {weather.wind} km/j</span>
             </div>
+            {lastUpdated && (
+              <div className="weather-updated">
+                🔄 Diperbarui pukul {lastUpdated} · tiap 5 menit
+              </div>
+            )}
           </>
         )}
       </div>
