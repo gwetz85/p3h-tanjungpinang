@@ -17,6 +17,7 @@ import PendaftaranSihalal from './pages/PendaftaranSihalal';
 import GudangBahan from './pages/GudangBahan';
 import CatatanAkunSihalal from './pages/CatatanAkunSihalal';
 import ArsipSH from './pages/ArsipSH';
+import PerbaikanAkunSihalal from './pages/PerbaikanAkunSihalal';
 import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
@@ -134,6 +135,11 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="selesai" element={<Selesai />} />
+            <Route path="perbaikan-akun" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+                <PerbaikanAkunSihalal />
+              </ProtectedRoute>
+            } />
             <Route path="catatan-akun" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
                 <CatatanAkunSihalal />

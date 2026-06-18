@@ -15,7 +15,8 @@ import {
   Layers,
   Package,
   FileText,
-  Archive
+  Archive,
+  Wrench
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -37,6 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Verifikasi PU', path: '/verifikasi-pu', icon: ClipboardCheck, roles: ['superadmin', 'Petugas'] },
     { name: 'Pendaftaran SIHALAL', path: '/pendaftaran', icon: FileSearch, roles: ['superadmin', 'Admin'] },
     { name: 'Gudang Bahan', path: '/gudang-bahan', icon: Package, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
+    { name: 'Perbaikan Akun', path: '/perbaikan-akun', icon: Wrench, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Riwayat Selesai', path: '/selesai', icon: History, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'Catatan Akun Sihalal', path: '/catatan-akun', icon: FileText, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
     { name: 'ARSIP SH', path: '/arsip-sh', icon: Archive, roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },

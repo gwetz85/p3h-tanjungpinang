@@ -119,6 +119,7 @@ const Dashboard = () => {
     let selesaiCount = 0;
     let reviewJobs = [];
     let adminProcJobs = [];
+    let perbaikanJobs = [];
 
     const refreshCounts = () => {
       const activeJobs = [...prosesJobs, ...pendingJobs, ...returnedJobs, ...reviewJobs, ...adminProcJobs];
@@ -143,6 +144,13 @@ const Dashboard = () => {
           visitEvents.push({ ...j, visitType: 'Verval Bahan', time: j.jadwalVerval });
         }
       });
+
+      perbaikanJobs.forEach(j => {
+        if (j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now) {
+          visitEvents.push({ ...j, nama: j.namaPelaku, visitType: 'Perbaikan Akun', time: j.jadwalKunjungan, jenisPekerjaan: 'Perbaikan Akun', kelurahan: j.alamat });
+        }
+      });
+
       const visits = visitEvents
         .sort((a, b) => new Date(a.time) - new Date(b.time))
         .slice(0, 4);
@@ -185,6 +193,17 @@ const Dashboard = () => {
     listenStatus('Returned', (list) => { returnedJobs = list; refreshCounts(); });
     listenStatus('Review', (list) => { reviewJobs = list; refreshCounts(); });
     listenStatus('AdminProcessing', (list) => { adminProcJobs = list; refreshCounts(); });
+
+    const unsubPerbaikan = onValue(ref(rtdb, 'perbaikan_akun'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        perbaikanJobs = Object.keys(data).map(k => ({ id: k, ...data[k] })).filter(j => j.status === 'Proses');
+      } else {
+        perbaikanJobs = [];
+      }
+      refreshCounts();
+    }, (err) => { console.error(err); });
+    unsubscribers.push(unsubPerbaikan);
 
     // For "Selesai", we only need the count — use limitToLast(1) just to check existence,
     // but to get accurate count we listen to the full selesai set (metadata only, no halalData needed in display)
@@ -602,8 +621,8 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="visit-badge-container">
-                  <div className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : 'urgent'}`} style={visit.visitType === 'Verval Bahan' ? {backgroundColor: '#8b5cf6', color: 'white'} : {}}>
-                    {visit.visitType === 'Verval Bahan' ? 'Verval Bahan' : 'Kunjungan'}
+                  <div className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : (visit.visitType === 'Perbaikan Akun' ? 'danger' : 'urgent')}`} style={visit.visitType === 'Verval Bahan' ? {backgroundColor: '#8b5cf6', color: 'white'} : (visit.visitType === 'Perbaikan Akun' ? {backgroundColor: '#ef4444', color: 'white'} : {})}>
+                    {visit.visitType}
                   </div>
                   <div className="visit-countdown">
                     <Clock size={11} />
