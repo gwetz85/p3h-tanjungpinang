@@ -259,46 +259,53 @@ const GudangBahan = () => {
       </div>
 
       {/* Mobile Card Layout */}
-      <div className="mobile-job-cards mobile-only">
+      <div className="mobile-card-list mobile-only" style={{ marginTop: '1rem' }}>
         {initialLoading ? (
-          [1, 2, 3].map(n => (
-             <div key={n} className="visit-card-compact glass-card skeleton-pulse" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div className="skeleton" style={{ width: '150px', height: '16px' }}></div>
-                <div className="skeleton" style={{ width: '100px', height: '14px' }}></div>
-             </div>
-          ))
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Memuat...</div>
         ) : filteredBahan.length === 0 ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
             {searchTerm ? 'Tidak ada bahan.' : 'Belum ada data bahan.'}
           </div>
         ) : (
           filteredBahan.map((bahan) => (
-            <div key={bahan.id} className="visit-card-compact glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {/* Merek - full width, always visible */}
-              <h4 style={{ margin: '0', fontSize: '1.05rem', fontWeight: '700', color: 'var(--text, #0f172a)', lineHeight: '1.3' }}>
-                {bahan.merek || '-'}
-              </h4>
-              {/* Sertifikat badge row */}
-              {bahan.sertifikatHalal ? (
-                <span style={{ alignSelf: 'flex-start', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: '500' }}>
-                  🏷️ {bahan.sertifikatHalal}
-                </span>
-              ) : null}
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Factory size={14} /> {bahan.produsen || '-'}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><Calendar size={14} /> Exp: {bahan.expiredDate || '-'}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Truck size={14} /> Sup: {bahan.supplier || '-'}</div>
+            <div key={bahan.id} className="mobile-data-card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="mobile-card-name">{bahan.merek || '-'}</div>
+              
+              <div className="mobile-card-row" style={{ marginTop: '10px' }}>
+                <span className="mobile-card-label" style={{width: '75px'}}>Produsen:</span>
+                <span style={{color: '#475569', fontWeight: 500}}>{bahan.produsen || '-'}</span>
               </div>
-              {role === 'superadmin' && (
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
-                  <button onClick={() => handleEdit(bahan)} className="btn-primary-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
-                    <Edit3 size={16} /> Edit
-                  </button>
-                  <button onClick={() => handleDelete(bahan.id)} className="btn-danger-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem', justifyContent: 'center' }}>
-                    <Trash2 size={16} /> Hapus
-                  </button>
-                </div>
-              )}
+              
+              <div className="mobile-card-row">
+                <span className="mobile-card-label" style={{width: '75px'}}>Expired:</span>
+                <span style={{color: '#475569', fontWeight: 500}}>{bahan.expiredDate || '-'}</span>
+              </div>
+
+              <div className="mobile-card-row">
+                <span className="mobile-card-label" style={{width: '75px'}}>Supplier:</span>
+                <span style={{color: '#475569', fontWeight: 500}}>{bahan.supplier || '-'}</span>
+              </div>
+
+              <div className="mobile-card-footer" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                {bahan.sertifikatHalal ? (
+                  <span className="mobile-card-badge blue" style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                    <FileText size={12} /> {bahan.sertifikatHalal}
+                  </span>
+                ) : (
+                  <span className="mobile-card-badge gray">NO SERTIFIKAT</span>
+                )}
+                
+                {role === 'superadmin' && (
+                  <div style={{display:'flex', gap:'6px'}}>
+                    <button onClick={() => handleEdit(bahan)} className="btn-table-icon text-accent" title="Edit">
+                      <Edit3 size={15} />
+                    </button>
+                    <button onClick={() => handleDelete(bahan.id)} className="btn-table-icon text-danger" title="Hapus">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))
         )}

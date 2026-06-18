@@ -351,6 +351,79 @@ const PerbaikanAkunSihalal = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card Layout */}
+        <div className="mobile-card-list mobile-only" style={{ marginTop: '1rem' }}>
+          {data.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Belum ada catatan perbaikan.</div>
+          ) : (
+            data.map((item) => {
+              const badgeClass = item.status === 'Selesai' ? 'green' : 'red'; // Using red to match screenshot "PERBAIKAN AKUN" vibe
+              return (
+                <div key={item.id} className="mobile-data-card" onClick={() => setViewDetailItem(item)}>
+                  {/* Date row */}
+                  <div className="mobile-card-date">
+                    <Calendar size={13} style={{marginRight: '2px'}}/>
+                    {item.jadwalKunjungan ? new Date(item.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Belum diset'}
+                    {item.jadwalKunjungan && <span className="time" style={{marginLeft: 'auto'}}>{new Date(item.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>}
+                  </div>
+                  
+                  {/* Name */}
+                  <div className="mobile-card-name" style={{marginTop: '0.8rem'}}>{item.namaPelaku}</div>
+                  
+                  {/* Business */}
+                  {item.namaUsaha && (
+                    <div className="mobile-card-business" style={{color: '#2563eb'}}>
+                      <span style={{fontSize:'0.9rem'}}>🏪</span> {item.namaUsaha}
+                    </div>
+                  )}
+
+                  {/* Keterangan / Info (Matches the address area style in screenshot) */}
+                  <div className="mobile-card-row" style={{marginTop: '0.6rem'}}>
+                    <User size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                      <span style={{fontSize: '0.75rem', color: '#64748b'}}>Perbaikan Akun / {item.namaPetugas}</span>
+                      <span style={{color: '#334155', fontWeight: 500}}>{item.keterangan || '-'}</span>
+                    </div>
+                    {item.kontak && (
+                      <span className="mobile-card-wa" style={{marginLeft:'auto', display: 'flex', alignItems: 'center', gap: '4px'}} onClick={(e) => {e.stopPropagation(); window.open(`https://wa.me/${item.kontak.replace(/\D/g,'')}`);}}>
+                        <MessageSquare size={13} /> {item.kontak}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mobile-card-footer" onClick={e => e.stopPropagation()}>
+                    <span className={`mobile-card-badge ${badgeClass}`}>{item.status === 'Selesai' ? 'SELESAI' : 'PERBAIKAN AKUN'}</span>
+                    
+                    <div style={{display:'flex', gap:'6px'}}>
+                      {item.status !== 'Selesai' && (
+                        <>
+                          <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => handleOpenSchedule(item)}>
+                            <Calendar size={15} />
+                          </button>
+                          <button className="btn-table-icon text-success" title="Tandai Selesai" onClick={() => handleSetSelesai(item.id)}>
+                            <CheckCircle2 size={15} />
+                          </button>
+                        </>
+                      )}
+                      {(role === 'superadmin' || role === 'Admin') && (
+                        <>
+                          <button className="btn-table-icon text-primary" title="Edit" onClick={() => handleOpenForm(item)}>
+                            <Edit3 size={15} />
+                          </button>
+                          <button className="btn-table-icon text-danger" title="Hapus" onClick={() => handleDelete(item.id)}>
+                            <Trash2 size={15} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Schedule Modal */}

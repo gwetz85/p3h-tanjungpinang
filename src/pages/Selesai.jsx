@@ -120,41 +120,45 @@ const Selesai = () => {
       </div>
 
       {/* Mobile Card Layout */}
-      <div className="mobile-job-cards mobile-only">
+      <div className="mobile-card-list mobile-only" style={{ marginTop: '1rem' }}>
         {loading ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>Memuat...</div>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Memuat...</div>
         ) : filteredJobs.length === 0 ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>Belum ada data.</div>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Belum ada data.</div>
         ) : (
           filteredJobs.map((job) => (
-            <div key={job.id} className="visit-card-compact glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: '100%' }}>
-                <div className="visit-time" style={{ borderRight: 'none', paddingRight: '0', flexShrink: 0, minWidth: '50px' }}>
-                  <span className="date" style={{ fontSize: '1.2rem' }}>{new Date(job.tanggalInput).getDate()}</span>
-                  <span className="hour" style={{ fontSize: '0.85rem' }}>{new Date(job.tanggalInput).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}</span>
-                </div>
-                <div style={{ flex: 1, borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '15px' }}>
-                  <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: 'white' }}>{job.nama}</h4>
-                  <div className="visit-meta" style={{ flexDirection: 'column', gap: '4px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Briefcase size={14} /> {job.jenisPekerjaan}</span>
-                    {job.keterangan && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontStyle: 'italic', opacity: 0.8 }}><Info size={14} /> {job.keterangan}</span>
-                    )}
-                  </div>
-                </div>
+            <div key={job.id} className="mobile-data-card">
+              {/* Header: Date */}
+              <div className="mobile-card-date">
+                <Calendar size={13} style={{marginRight: '4px'}}/>
+                {new Date(job.tanggalInput).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
               </div>
               
-              <div style={{ display: 'flex', gap: '10px', marginTop: '15px', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px', alignItems: 'center' }}>
-                <span className="visit-badge" style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary)', border: '1px solid rgba(16, 185, 129, 0.2)' }}><CheckCircle2 size={14} /> Selesai</span>
+              {/* Name */}
+              <div className="mobile-card-name" style={{marginTop: '0.8rem'}}>{job.nama}</div>
+              
+              {/* Type / Job */}
+              <div className="mobile-card-business" style={{color: '#2563eb'}}>
+                <Briefcase size={13} style={{marginRight: '4px'}}/> {job.jenisPekerjaan}
+              </div>
+
+              {/* Keterangan */}
+              <div className="mobile-card-row" style={{marginTop: '0.6rem'}}>
+                <Info size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
+                <span style={{color: '#475569'}}>{job.keterangan || '-'}</span>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="mobile-card-footer">
+                <span className="mobile-card-badge green" style={{display: 'flex', alignItems: 'center', gap: '4px'}}><CheckCircle2 size={13} /> SELESAI</span>
                 
                 {isSuperAdmin && (
                   <button 
                     onClick={() => handleRestore(job.id)} 
-                    className="btn-primary-outline" 
+                    className="btn-table-icon text-accent" 
                     title="Kembalikan ke Proses"
-                    style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                   >
-                    <RotateCcw size={16} /> Restore
+                    <RotateCcw size={15} />
                   </button>
                 )}
               </div>

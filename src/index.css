@@ -2698,3 +2698,349 @@ select option {
     padding-left: 0;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE CARD UI  – Matches screenshot design for all menus
+   (max-width: 768px)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Topbar mobile: hamburger left · title center · icons right ── */
+@media (max-width: 768px) {
+  .topbar {
+    left: 0 !important;
+    padding: 0 1rem !important;
+    height: 58px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07) !important;
+  }
+
+  .topbar-title {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    flex: 1;
+    text-align: center;
+  }
+
+  .topbar-center { display: none !important; }
+
+  .topbar-right {
+    gap: 0.5rem !important;
+    flex-shrink: 0;
+  }
+
+  .topbar-icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .user-profile-details,
+  .chevron-down-icon { display: none !important; }
+
+  /* Hamburger button positioning */
+  .mobile-menu-toggle {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    flex-shrink: 0;
+    z-index: auto !important;
+  }
+
+  /* main content padding below topbar */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0.75rem 0.75rem calc(40px + 1rem) !important;
+    padding-top: 4.5rem !important;
+  }
+
+  /* ── Welcome banner ── */
+  .welcome-banner {
+    padding: 1.1rem 1.2rem !important;
+    border-radius: 14px !important;
+    margin-bottom: 1rem !important;
+  }
+  .welcome-banner h1 { font-size: 1.15rem !important; }
+  .welcome-banner p  { font-size: 0.8rem !important; }
+
+  /* ── Stats cards: 2-column grid on mobile ── */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .stat-card {
+    padding: 1rem !important;
+    gap: 0.75rem !important;
+    border-radius: 12px !important;
+  }
+  .stat-card-value { font-size: 1.3rem !important; }
+  .stat-card-title { font-size: 0.7rem !important; }
+  .stat-icon-wrapper { width: 36px !important; height: 36px !important; }
+
+  /* ── Dashboard grid: single column ── */
+  .dashboard-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+  .dashboard-card { height: auto !important; min-height: 260px !important; }
+
+  /* ── Mobile job card list (all menus) ── */
+  .job-list {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  /* ── Table → card conversion for all data tables ── */
+  .table-wrapper, .table-container {
+    overflow-x: hidden !important;
+    padding: 0 !important;
+  }
+
+  /* Hide desktop table; show mobile cards via .mobile-card-list */
+  .verification-table,
+  .custom-table {
+    display: none !important;
+  }
+
+  /* ── Mobile data card ── */
+  .mobile-card-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .mobile-data-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+    position: relative;
+  }
+
+  .mobile-data-card:active {
+    transform: scale(0.985);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  /* Date / time strip at top of card */
+  .mobile-card-date {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mobile-card-date .time {
+    font-weight: 500;
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  /* Applicant name */
+  .mobile-card-name {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 2px;
+  }
+
+  /* Business / usaha name */
+  .mobile-card-business {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Detail row (label + value inline) */
+  .mobile-card-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+    color: #475569;
+    line-height: 1.4;
+  }
+
+  .mobile-card-row svg { flex-shrink: 0; margin-top: 1px; }
+
+  .mobile-card-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    margin-right: 2px;
+  }
+
+  /* WA contact highlight */
+  .mobile-card-wa {
+    color: #16a34a;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+
+  /* Bottom footer of card: badge left · time right */
+  .mobile-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid #f1f5f9;
+    gap: 0.5rem;
+  }
+
+  .mobile-card-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+
+  .mobile-card-badge.red   { background: #ef4444; color: #fff; }
+  .mobile-card-badge.green { background: #10b981; color: #fff; }
+  .mobile-card-badge.blue  { background: #2563eb; color: #fff; }
+  .mobile-card-badge.amber { background: #f59e0b; color: #fff; }
+  .mobile-card-badge.gray  { background: #64748b; color: #fff; }
+
+  /* Keterangan / note text */
+  .mobile-card-keterangan {
+    font-size: 0.78rem;
+    color: #475569;
+    line-height: 1.45;
+    flex: 1;
+  }
+
+  /* Clock time stamp on card */
+  .mobile-card-time {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #10b981;
+    background: rgba(16,185,129,0.08);
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Upcoming visits widget mobile ── */
+  .upcoming-section {
+    padding: 1rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .visit-card-compact {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.7rem !important;
+    padding: 0.9rem 1rem !important;
+    border-radius: 12px !important;
+  }
+
+  .visit-time {
+    flex-direction: row !important;
+    gap: 8px !important;
+    border-right: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0.5rem !important;
+    width: 100% !important;
+    min-width: auto !important;
+  }
+
+  .visit-badge-container {
+    align-self: flex-end !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+  }
+
+  /* ── Modal: full screen on mobile ── */
+  .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+  .modal-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin: 0 !important;
+  }
+  .modal-header { padding: 1rem 1.1rem !important; }
+
+  /* ── Verification table mobile ── */
+  .verification-table th:nth-child(n+3),
+  .verification-table td:nth-child(n+3) {
+    display: none !important;
+  }
+
+  /* ── Search bar mobile ── */
+  .search-bar { padding: 0.4rem 1rem !important; }
+  .search-section { margin-bottom: 1rem !important; }
+
+  /* ── Page header mobile ── */
+  .page-header { margin-bottom: 1rem !important; }
+  .page-header h2 { font-size: 1.1rem !important; }
+
+  /* ── Glass card mobile padding ── */
+  .glass-card { padding: 1rem !important; border-radius: 14px !important; }
+
+  /* ── Stats summary mobile ── */
+  .stats-summary-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+  .stat-summary-value { font-size: 1.5rem !important; }
+
+  /* ── form / input mobile ── */
+  input, select, textarea { font-size: 16px !important; /* Prevent iOS zoom */ }
+
+  /* ── Buttons fullwidth mobile ── */
+  .btn-primary {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 13px 16px !important;
+  }
+
+  /* ── Running text bar mobile ── */
+  .running-text-bar { left: 0 !important; width: 100% !important; }
+
+  /* ── Activity feed condensed ── */
+  .activity-item { padding: 6px 8px !important; }
+  .activity-main-info h4 { font-size: 0.8rem !important; }
+  .activity-main-info p  { font-size: 0.68rem !important; }
+}
+
+/* ── Extra small (< 480px) ── */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.6rem !important;
+  }
+  .stat-card-value { font-size: 1.15rem !important; }
+  .stats-summary-grid { grid-template-columns: 1fr !important; }
+  .mobile-card-footer { flex-direction: column; align-items: flex-start; }
+  .mobile-card-time { align-self: flex-end; }
+}

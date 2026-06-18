@@ -371,6 +371,62 @@ const ArsipSH = () => {
         </table>
       </div>
 
+      {/* Mobile Card Layout */}
+      <div className="mobile-card-list mobile-only" style={{ marginTop: '1rem' }}>
+        {data.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Belum ada data arsip.</div>
+        ) : (
+          data.map((item) => {
+            return (
+              <div key={item.id} className="mobile-data-card" onClick={() => item.berkasUrl && handleViewPdf(item.berkasUrl)}>
+                {/* Header: Sertifikat */}
+                <div className="mobile-card-date">
+                  <FileText size={13} style={{marginRight: '4px'}}/>
+                  {item.nomorSertifikat || 'Belum ada nomor'}
+                </div>
+                
+                {/* Name */}
+                <div className="mobile-card-name" style={{marginTop: '0.8rem'}}>{item.namaUsaha}</div>
+                
+                {/* Keterangan */}
+                <div className="mobile-card-row" style={{marginTop: '0.6rem'}}>
+                  <Info size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
+                  <span style={{color: '#475569'}}>{item.keterangan || '-'}</span>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="mobile-card-footer" onClick={e => e.stopPropagation()}>
+                  <span className="mobile-card-badge blue">{item.berkasUrl ? 'BERKAS TERSEDIA' : 'BELUM ADA BERKAS'}</span>
+                  
+                  <div style={{display:'flex', gap:'6px', flexWrap: 'wrap', justifyContent: 'flex-end'}}>
+                    {item.berkasUrl && (
+                      <button onClick={() => handleViewPdf(item.berkasUrl)} className="btn-table-icon text-primary" title="View PDF">
+                        <Eye size={15} />
+                      </button>
+                    )}
+                    {shouldShowUpload(item) && (
+                      <button onClick={() => handleOpenUpload(item.id)} className="btn-table-icon" style={{color: '#8b5cf6'}} title="Upload Berkas">
+                        <Upload size={15} />
+                      </button>
+                    )}
+                    {canEditOrDelete && (
+                      <>
+                        <button onClick={() => handleOpenForm(item)} className="btn-table-icon text-accent" title="Edit">
+                          <Edit3 size={15} />
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} className="btn-table-icon text-danger" title="Hapus">
+                          <Trash2 size={15} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
       {/* Form Modal */}
       <AnimatePresence>
         {isFormModalOpen && (

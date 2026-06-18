@@ -222,6 +222,73 @@ const DataUser = () => {
               </table>
             )}
           </div>
+          
+          {/* Mobile Card Layout */}
+          {!loading && (
+            <div className="mobile-card-list mobile-only" style={{ marginTop: '1rem' }}>
+              {users.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Belum ada data user.</div>
+              ) : (
+                users.map((user) => (
+                  <div key={user.id} className="mobile-data-card" style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className="mobile-card-name">{user.nama || 'User'}</div>
+                    <div className="mobile-card-business" style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 500 }}>
+                      <User size={13} style={{marginRight: '4px'}}/> {user.email}
+                    </div>
+                    
+                    <div className="mobile-card-row" style={{ marginTop: '10px' }}>
+                      <span className="mobile-card-label" style={{width: '65px'}}>Sandi:</span>
+                      {user.password ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontFamily: 'monospace', fontSize: '0.85rem', fontWeight: 600, color: '#334155' }}>
+                            {visiblePasswords[user.id] ? user.password : '••••••••'}
+                          </span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); togglePassword(user.id); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', color: '#64748b' }}
+                          >
+                            {visiblePasswords[user.id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>Tidak tersimpan</span>
+                      )}
+                    </div>
+
+                    <div className="mobile-card-row" style={{ marginTop: '10px', alignItems: 'center' }}>
+                      <span className="mobile-card-label" style={{width: '65px'}}>Role:</span>
+                      <select 
+                        value={user.role} 
+                        onChange={(e) => handleUpdateRole(user.id, e.target.value)}
+                        style={{ 
+                          padding: '4px 8px', 
+                          fontSize: '0.75rem',
+                          backgroundColor: '#f8fafc',
+                          color: '#374151',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          outline: 'none',
+                          flex: 1
+                        }}
+                      >
+                        <option value="Pending">Pending Approval</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Petugas">Petugas</option>
+                        <option value="Monitoring">Monitoring</option>
+                      </select>
+                    </div>
+
+                    <div className="mobile-card-footer" style={{ justifyContent: 'flex-end', marginTop: '10px' }}>
+                      <button onClick={() => handleDelete(user.id)} className="btn-table-icon text-danger" title="Hapus">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
     </div>

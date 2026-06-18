@@ -535,84 +535,83 @@ const VerifikasiPU = () => {
               </table>
             </div>
 
-            {/* Mobile Card Layout */}
-            <div className="mobile-job-cards mobile-only">
-              {sortedJobs.map((job) => (
-                <div key={job.id} className="visit-card-compact" onClick={() => setSelectedJob(job)}>
-                  <div className="visit-time">
-                    {job.jadwalKunjungan && (
-                      <>
-                        <span className="date">{new Date(job.jadwalKunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                        <span className="hour">{new Date(job.jadwalKunjungan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
-                      </>
-                    )}
-                    {job.jadwalVerval && (
-                      <div style={{marginTop: job.jadwalKunjungan ? '4px' : '0', color: '#8b5cf6', fontSize: '0.75rem', fontWeight: 'bold'}}>
-                        <span style={{display: 'block', fontSize: '0.6rem'}}>VERVAL</span>
-                        <span className="date">{new Date(job.jadwalVerval).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}</span>
-                        <span className="hour">{new Date(job.jadwalVerval).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+
+            {/* Mobile Card Layout – premium design */}
+            <div className="mobile-card-list mobile-only">
+              {sortedJobs.map((job) => {
+                const jadwal = job.jadwalKunjungan || job.jadwalVerval;
+                const badgeClass = job.status === 'Returned' ? 'red' : job.jadwalVerval && job.status !== 'Returned' ? 'blue' : job.status === 'Pending' ? 'amber' : 'green';
+                const badgeLabel = job.status === 'Returned' ? 'Perlu Perbaikan' : job.jadwalVerval && job.status !== 'Returned' ? 'Verval Bahan' : (job.status || 'Pending');
+                return (
+                  <div key={job.id} className="mobile-data-card" onClick={() => setSelectedJob(job)}>
+                    {/* Date row */}
+                    {jadwal && (
+                      <div className="mobile-card-date">
+                        {new Date(jadwal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                        <span className="time">{new Date(jadwal).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                     )}
-                    {!job.jadwalKunjungan && !job.jadwalVerval && (
-                      <span className="date text-muted" style={{ fontStyle: 'italic', opacity: 0.6, fontSize: '0.8rem' }}>Belum<br/>diset</span>
-                    )}
-                  </div>
-                  <div className="visit-details" style={{ width: '100%' }}>
-                    <h4>{job.nama}</h4>
-                    <div className="visit-meta" style={{ flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14} /> {job.jenisPekerjaan} ({job.progress}%)</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} /> {job.kelurahan || '-'}</span>
+                    {/* Name */}
+                    <div className="mobile-card-name">{job.nama}</div>
+                    {/* Business / jenis */}
+                    <div className="mobile-card-business">
+                      <span style={{fontSize:'0.9rem'}}>🏪</span> {job.namaUsaha || job.jenisPekerjaan || '-'}
+                    </div>
+                    {/* Address */}
+                    <div className="mobile-card-row">
+                      <MapPin size={13} style={{color:'#94a3b8'}} />
+                      <span>{job.alamat || '-'}</span>
+                      {job.kontak && (
+                        <span className="mobile-card-wa" style={{marginLeft:'auto'}}>💬 {job.kontak}</span>
+                      )}
+                    </div>
+                    {/* Type + progress */}
+                    <div className="mobile-card-row">
+                      <span className="mobile-card-label">Jenis:</span>
+                      <span>{job.jenisPekerjaan} – {job.progress}%</span>
+                    </div>
+                    {/* Footer */}
+                    <div className="mobile-card-footer" onClick={e => e.stopPropagation()}>
+                      <span className={`mobile-card-badge ${badgeClass}`}>{badgeLabel}</span>
+                      <div style={{display:'flex', gap:'6px'}}>
+                        {role !== 'Admin' && (
+                          <>
+                            <button className="btn-table-icon text-success" title="Kirim ke Admin" onClick={() => handleKirimAdmin(job)}>
+                              <Send size={15} />
+                            </button>
+                            <button className="btn-table-icon text-accent" title="Set Jadwal Kunjungan" onClick={() => { setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
+                              <Calendar size={15} />
+                            </button>
+                            <button className="btn-table-icon" style={{color:'#8b5cf6'}} title="Set Jadwal Verval Bahan" onClick={() => { setSelectedJob(job); setShowVervalSchedule(true); setVervalScheduleDate(job.jadwalVerval || ''); }}>
+                              <ClipboardCheck size={15} />
+                            </button>
+                            {job.jadwalKunjungan && (
+                              <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
+                                <CalendarX size={15} />
+                              </button>
+                            )}
+                            {job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                              <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={() => { setSelectedJob(job); setShowHalal(true); }}>
+                                <FileText size={15} />
+                              </button>
+                            )}
+                            <button className="btn-table-icon" style={{color:'#8b5cf6'}} title="Edit Alamat Lokasi Usaha" onClick={(e) => handleEditAlamatClick(job, e)}>
+                              <Home size={15} />
+                            </button>
+                            <button className="btn-table-icon text-danger" title="Batalkan Pekerjaan" onClick={() => handleCancelClick(job)}>
+                              <X size={15} />
+                            </button>
+                          </>
+                        )}
+                        <button className="btn-table-icon" title="Detail" onClick={() => setSelectedJob(job)}>
+                          <Info size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="visit-actions" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-end', marginTop: '10px' }}>
-                    <div className={`visit-badge ${job.status === 'Returned' ? 'danger' : (job.jadwalVerval ? '' : (job.status === 'Pending' ? 'pending' : 'urgent'))}`} style={job.jadwalVerval && job.status !== 'Returned' ? { marginRight: 'auto', alignSelf: 'center', backgroundColor: '#8b5cf6', color: 'white' } : { marginRight: 'auto', alignSelf: 'center' }}>
-                      {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.jadwalVerval ? 'VERVAL BAHAN' : (job.status ? job.status.toUpperCase() : 'PENDING'))}
-                    </div>
-                    {role !== 'Admin' && (
-                      <>
-                        <button 
-                          className="btn-table-icon text-success"
-                          title="Kirim ke Admin"
-                          onClick={(e) => { e.stopPropagation(); handleKirimAdmin(job); }}
-                        >
-                          <Send size={16} />
-                        </button>
-                        <button className="btn-table-icon text-accent" title="Set Jadwal Kunjungan" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowSchedule(true); setScheduleDate(job.jadwalKunjungan || ''); }}>
-                          <Calendar size={16} />
-                        </button>
-                        <button className="btn-table-icon" style={{ color: '#8b5cf6' }} title="Set Jadwal Verval Bahan" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowVervalSchedule(true); setVervalScheduleDate(job.jadwalVerval || ''); }}>
-                          <ClipboardCheck size={16} />
-                        </button>
-                        {job.jadwalKunjungan && (
-                          <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={(e) => { e.stopPropagation(); handleDeleteSchedule(job.id); }}>
-                            <CalendarX size={16} />
-                          </button>
-                        )}
-                        {job.jenisPekerjaan === 'Sertifikasi Halal' && (
-                          <button className="btn-table-icon text-primary" title="Isi Form Halal" onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setShowHalal(true); }}>
-                            <FileText size={16} />
-                          </button>
-                        )}
-                        <button
-                          className="btn-table-icon"
-                          title="Edit Alamat Lokasi Usaha"
-                          onClick={(e) => handleEditAlamatClick(job, e)}
-                          style={{ color: '#8b5cf6' }}
-                        >
-                          <Home size={16} />
-                        </button>
-                        <button 
-                          className="btn-table-icon text-danger" 
-                          title="Batalkan Pekerjaan" 
-                          onClick={(e) => { e.stopPropagation(); handleCancelClick(job); }}
-                        >
-                          <X size={16} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

@@ -191,55 +191,49 @@ const DataKoordinator = () => {
       </div>
 
       {/* Mobile Card Layout */}
-      <div className="mobile-job-cards mobile-only">
+      <div className="mobile-card-list mobile-only" style={{ marginTop: '1rem' }}>
         {initialLoading ? (
-          [1, 2, 3].map(n => (
-            <div key={n} className="visit-card-compact glass-card skeleton-pulse" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <div className="skeleton" style={{ width: '50px', height: '50px', borderRadius: '50%' }}></div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div className="skeleton" style={{ width: '120px', height: '16px' }}></div>
-                  <div className="skeleton" style={{ width: '90px', height: '12px' }}></div>
-                  <div className="skeleton" style={{ width: '140px', height: '12px' }}></div>
-                </div>
-              </div>
-            </div>
-          ))
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Memuat...</div>
         ) : coordinators.length === 0 ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>
-            Belum ada data petugas lapangan.
-          </div>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>Belum ada data petugas lapangan.</div>
         ) : (
           coordinators.map((coord) => (
-            <div key={coord.id} className="visit-card-compact glass-card" style={{ padding: '1.2rem', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: '100%' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div key={coord.id} className="mobile-data-card" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
+                <div style={{ width: '45px', height: '45px', borderRadius: '50%', overflow: 'hidden', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {coord.photoURL ? (
                     <img src={coord.photoURL} alt={coord.nama} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <User size={24} style={{ color: 'var(--text-muted)' }} />
+                    <User size={22} style={{ color: '#94a3b8' }} />
                   )}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '0 0 5px 0', fontSize: '1.1rem', color: 'white' }}>{coord.nama}</h4>
-                  <div className="visit-meta" style={{ flexDirection: 'column', gap: '4px' }}>
-                    <a href={`https://wa.me/${coord.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', textDecoration: 'none', fontWeight: '500' }}>
-                      <Phone size={14} /> {coord.phone}
-                    </a>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} /> {coord.wilayah}</span>
+                <div>
+                  <div className="mobile-card-name">{coord.nama}</div>
+                  <div className="mobile-card-business" style={{ color: '#2563eb', margin: 0, fontSize: '0.8rem' }}>
+                    <MapPin size={12} style={{marginRight: '3px'}}/> {coord.wilayah}
                   </div>
                 </div>
               </div>
+              
+              <div className="mobile-card-row" style={{marginBottom: 0}}>
+                <Phone size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
+                <span className="mobile-card-wa" onClick={(e) => {e.stopPropagation(); window.open(`https://wa.me/${coord.phone.replace(/\D/g, '')}`);}}>
+                  {coord.phone}
+                </span>
+              </div>
+              
               {['Admin', 'superadmin'].includes(role) && (
-                <div style={{ display: 'flex', gap: '10px', marginTop: '15px', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px' }}>
-                  {role === 'superadmin' && (
-                    <button onClick={() => handleEdit(coord)} className="btn-primary-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}>
-                      <Edit3 size={16} /> Edit
+                <div className="mobile-card-footer" style={{ justifyContent: 'flex-end' }}>
+                  <div style={{display:'flex', gap:'6px'}}>
+                    {role === 'superadmin' && (
+                      <button onClick={() => handleEdit(coord)} className="btn-table-icon text-accent" title="Edit">
+                        <Edit3 size={15} />
+                      </button>
+                    )}
+                    <button onClick={() => handleDelete(coord.id)} className="btn-table-icon text-danger" title="Hapus">
+                      <Trash2 size={15} />
                     </button>
-                  )}
-                  <button onClick={() => handleDelete(coord.id)} className="btn-danger-outline" style={{ flex: 1, padding: '8px', fontSize: '0.9rem', justifyContent: 'center' }}>
-                    <Trash2 size={16} /> Hapus
-                  </button>
+                  </div>
                 </div>
               )}
             </div>
