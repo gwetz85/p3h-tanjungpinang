@@ -395,7 +395,7 @@ const PerbaikanAkunSihalal = () => {
                         )}
                       </div>
                     </td>
-                    <td style={{ textAlign: 'center', paddingRight: '1rem' }}>
+                    <td style={{ textAlign: 'center' }}>
                       <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(2, 28px)',
