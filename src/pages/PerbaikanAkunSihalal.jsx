@@ -330,14 +330,14 @@ const PerbaikanAkunSihalal = () => {
           <table className="verification-table">
             <thead>
               <tr>
-                <th style={{ width: '22%' }}>Pelaku Usaha</th>
+                <th style={{ width: '19%' }}>Pelaku Usaha</th>
                 <th style={{ width: '13%' }}>Kontak WA</th>
-                <th style={{ width: '13%', textAlign: 'center' }}>Jenis Pekerjaan</th>
-                <th style={{ width: '15%', textAlign: 'center' }}>Petugas</th>
-                <th style={{ width: '16%' }}>Keterangan</th>
-                <th style={{ width: '5%' }}>Detail</th>
-                <th style={{ width: '12%', textAlign: 'center' }}>Jadwal & Status</th>
-                <th style={{ width: '10%', textAlign: 'center' }}>Aksi</th>
+                <th style={{ width: '12%', textAlign: 'center' }}>Jenis Pekerjaan</th>
+                <th style={{ width: '13%', textAlign: 'center' }}>Petugas</th>
+                <th style={{ width: '17%' }}>Keterangan</th>
+                <th style={{ width: '4%', textAlign: 'center' }}>Detail</th>
+                <th style={{ width: '13%', textAlign: 'center' }}>Jadwal & Status</th>
+                <th style={{ width: '9%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -396,24 +396,30 @@ const PerbaikanAkunSihalal = () => {
                       </div>
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <div className="table-actions" style={{ justifyContent: 'center' }}>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 28px)',
+                        gap: '5px',
+                        justifyContent: 'center',
+                        margin: '0 auto'
+                      }}>
                         {item.status !== 'Selesai' && (
                           <>
                             <button className="btn-table-icon text-accent" title="Set Jadwal" onClick={() => handleOpenSchedule(item)}>
-                              <Calendar size={16} />
+                              <Calendar size={15} />
                             </button>
                             <button className="btn-table-icon text-success" title="Tandai Selesai" onClick={() => handleSetSelesai(item.id)}>
-                              <CheckCircle2 size={16} />
+                              <CheckCircle2 size={15} />
                             </button>
                           </>
                         )}
                         {(role === 'superadmin' || role === 'Admin') && (
                           <>
                             <button className="btn-table-icon text-primary" title="Edit" onClick={() => handleOpenForm(item)}>
-                              <Edit3 size={16} />
+                              <Edit3 size={15} />
                             </button>
                             <button className="btn-table-icon text-danger" title="Hapus" onClick={() => handleDelete(item.id)}>
-                              <Trash2 size={16} />
+                              <Trash2 size={15} />
                             </button>
                           </>
                         )}
