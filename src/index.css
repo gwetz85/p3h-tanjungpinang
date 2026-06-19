@@ -1627,8 +1627,11 @@ select option {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  max-width: 126px;
+  width: 127px;
+  min-width: 127px;
   align-content: flex-start;
+  justify-content: center;
+  margin: 0 auto;
 }
 
 .btn-table-icon {
