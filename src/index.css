@@ -1491,7 +1491,7 @@ select option {
 }
 
 .verification-table th {
-  padding: 1rem 1.2rem;
+  padding: 0.75rem 0.9rem;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1500,10 +1500,20 @@ select option {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.verification-table th:last-child {
+  width: 130px;
+  min-width: 130px;
+}
+
 .verification-table td {
-  padding: 1rem 1.2rem;
+  padding: 0.75rem 0.9rem;
   border-bottom: 1px solid var(--glass-border);
   vertical-align: middle;
+}
+
+.verification-table td:last-child {
+  width: 130px;
+  min-width: 130px;
 }
 
 .table-row {
@@ -1625,27 +1635,32 @@ select option {
 /* Table Actions */
 .table-actions {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: 126px;
+  align-content: flex-start;
 }
 
 .btn-table-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 7px;
   background: rgba(15, 23, 42, 0.05);
   border: 1px solid var(--surface-border);
   color: var(--text-muted);
   cursor: pointer;
   transition: var(--transition);
+  flex-shrink: 0;
 }
 
 .btn-table-icon:hover {
   background: rgba(15, 23, 42, 0.1);
   color: var(--primary);
   transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 /* Color Utilities */
