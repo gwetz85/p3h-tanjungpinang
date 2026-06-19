@@ -165,6 +165,23 @@ const PerbaikanAkunSihalal = () => {
     }
   };
 
+  const handleDeleteSchedule = async () => {
+    if (!selectedItem) return;
+    if (window.confirm(`Hapus jadwal kunjungan untuk ${selectedItem.namaPelaku}? Ini akan menghapus jadwal yang sudah diset.`)) {
+      try {
+        await update(ref(rtdb, `perbaikan_akun/${selectedItem.id}`), {
+          jadwalKunjungan: null
+        });
+        setIsScheduleOpen(false);
+        setSelectedItem(null);
+        setScheduleDate('');
+      } catch (error) {
+        console.error(error);
+        alert("Gagal menghapus jadwal!");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -445,6 +462,12 @@ const PerbaikanAkunSihalal = () => {
                 <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: '#64748b' }}>
                   Atur jadwal kunjungan untuk <strong>{selectedItem?.namaPelaku}</strong>. Jadwal akan tampil di widget Dashboard.
                 </p>
+                {selectedItem?.jadwalKunjungan && (
+                  <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#c2410c' }}>
+                    <Calendar size={15} />
+                    <span>Jadwal aktif: <strong>{new Date(selectedItem.jadwalKunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></span>
+                  </div>
+                )}
                 <div className="form-group">
                   <label>Tanggal & Waktu</label>
                   <input 
@@ -454,9 +477,23 @@ const PerbaikanAkunSihalal = () => {
                     onChange={(e) => setScheduleDate(e.target.value)}
                   />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1.5rem' }}>
-                  <button onClick={() => setIsScheduleOpen(false)} className="btn btn-secondary">Batal</button>
-                  <button onClick={handleSaveSchedule} className="btn btn-primary shadow-glow">Simpan Jadwal</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginTop: '1.5rem' }}>
+                  {selectedItem?.jadwalKunjungan ? (
+                    <button
+                      onClick={handleDeleteSchedule}
+                      className="btn btn-secondary"
+                      style={{ color: '#dc2626', borderColor: '#fecaca', background: '#fff1f2', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      title="Hapus jadwal karena pelaku usaha belum bisa dikunjungi"
+                    >
+                      <Trash2 size={15} /> Hapus Jadwal
+                    </button>
+                  ) : (
+                    <span />
+                  )}
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => setIsScheduleOpen(false)} className="btn btn-secondary">Batal</button>
+                    <button onClick={handleSaveSchedule} className="btn btn-primary shadow-glow">Simpan Jadwal</button>
+                  </div>
                 </div>
               </div>
             </motion.div>
