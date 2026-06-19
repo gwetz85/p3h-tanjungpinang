@@ -3,7 +3,7 @@ import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { supabase, STORAGE_BUCKET } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit3, Trash2, Upload, FileText, X, Eye } from 'lucide-react';
+import { Plus, Edit3, Trash2, Upload, FileText, X, Eye, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const CatatanAkunSihalal = () => {
