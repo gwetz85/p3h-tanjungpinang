@@ -19,7 +19,8 @@ const PerbaikanAkunSihalal = () => {
   const [formData, setFormData] = useState({
     pelakuUsahaId: '',
     petugasId: '',
-    keterangan: ''
+    keterangan: '',
+    jenisPekerjaan: 'Verval Si Halal'
   });
 
   // Modal Schedule states
@@ -78,11 +79,12 @@ const PerbaikanAkunSihalal = () => {
       setFormData({
         pelakuUsahaId: record.pelakuUsahaId,
         petugasId: record.petugasId,
-        keterangan: record.keterangan
+        keterangan: record.keterangan,
+        jenisPekerjaan: record.jenisPekerjaan || 'Verval Si Halal'
       });
       setEditingId(record.id);
     } else {
-      setFormData({ pelakuUsahaId: '', petugasId: '', keterangan: '' });
+      setFormData({ pelakuUsahaId: '', petugasId: '', keterangan: '', jenisPekerjaan: 'Verval Si Halal' });
       setEditingId(null);
     }
     setIsFormOpen(true);
@@ -114,6 +116,7 @@ const PerbaikanAkunSihalal = () => {
       petugasId: petugas.id,
       namaPetugas: petugas.nama || '',
       keterangan: formData.keterangan,
+      jenisPekerjaan: formData.jenisPekerjaan || 'Verval Si Halal',
       status: 'Proses',
       tanggalInput: Date.now()
     };
@@ -262,6 +265,44 @@ const PerbaikanAkunSihalal = () => {
                   </select>
 
                   <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                    <label>Jenis Pekerjaan</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      {['Verval Si Halal', 'Perbaikan Si Halal'].map(jenis => (
+                        <label
+                          key={jenis}
+                          style={{
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '0.65rem 1rem',
+                            borderRadius: '10px',
+                            border: `2px solid ${formData.jenisPekerjaan === jenis ? (jenis === 'Verval Si Halal' ? '#3b82f6' : '#f59e0b') : '#e2e8f0'}`,
+                            background: formData.jenisPekerjaan === jenis ? (jenis === 'Verval Si Halal' ? 'rgba(59,130,246,0.08)' : 'rgba(245,158,11,0.08)') : '#f8fafc',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            color: formData.jenisPekerjaan === jenis ? (jenis === 'Verval Si Halal' ? '#2563eb' : '#d97706') : '#64748b',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="jenisPekerjaan"
+                            value={jenis}
+                            checked={formData.jenisPekerjaan === jenis}
+                            onChange={(e) => setFormData({...formData, jenisPekerjaan: e.target.value})}
+                            style={{ display: 'none' }}
+                          />
+                          <span>{jenis === 'Verval Si Halal' ? '🔵' : '🟠'}</span>
+                          {jenis}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '1.5rem' }}>
                     <label>Keterangan / Informasi Perbaikan</label>
                     <textarea 
                       value={formData.keterangan} 
@@ -289,18 +330,19 @@ const PerbaikanAkunSihalal = () => {
           <table className="verification-table">
             <thead>
               <tr>
-                <th style={{ width: '25%' }}>Pelaku Usaha</th>
-                <th style={{ width: '15%' }}>Kontak WA</th>
-                <th style={{ width: '20%', textAlign: 'center' }}>Petugas</th>
-                <th style={{ width: '20%' }}>Keterangan</th>
+                <th style={{ width: '22%' }}>Pelaku Usaha</th>
+                <th style={{ width: '13%' }}>Kontak WA</th>
+                <th style={{ width: '13%', textAlign: 'center' }}>Jenis Pekerjaan</th>
+                <th style={{ width: '15%', textAlign: 'center' }}>Petugas</th>
+                <th style={{ width: '16%' }}>Keterangan</th>
                 <th style={{ width: '5%' }}>Detail</th>
-                <th style={{ width: '15%', textAlign: 'center' }}>Jadwal & Status</th>
+                <th style={{ width: '12%', textAlign: 'center' }}>Jadwal & Status</th>
                 <th style={{ width: '10%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {data.length === 0 ? (
-                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada catatan perbaikan.</td></tr>
+                <tr><td colSpan="8" style={{ textAlign: 'center', padding: '2rem' }}>Belum ada catatan perbaikan.</td></tr>
               ) : (
                 data.map((item) => (
                   <tr key={item.id}>
@@ -312,6 +354,21 @@ const PerbaikanAkunSihalal = () => {
                       <a href={`https://wa.me/${item.kontak.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="whatsapp-link" style={{ color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <MessageSquare size={14} /> {item.kontak}
                       </a>
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '3px 10px',
+                        borderRadius: '20px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.3px',
+                        background: (item.jenisPekerjaan === 'Perbaikan Si Halal') ? 'rgba(245,158,11,0.12)' : 'rgba(59,130,246,0.12)',
+                        color: (item.jenisPekerjaan === 'Perbaikan Si Halal') ? '#d97706' : '#2563eb',
+                        border: `1px solid ${(item.jenisPekerjaan === 'Perbaikan Si Halal') ? 'rgba(245,158,11,0.3)' : 'rgba(59,130,246,0.3)'}`
+                      }}>
+                        {(item.jenisPekerjaan === 'Perbaikan Si Halal') ? '🟠' : '🔵'} {item.jenisPekerjaan || 'Verval Si Halal'}
+                      </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>
                       <span className="badge-type-large" style={{ background: '#f8fafc', color: '#334155', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>

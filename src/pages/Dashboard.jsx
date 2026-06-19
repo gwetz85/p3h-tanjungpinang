@@ -148,12 +148,13 @@ const Dashboard = () => {
 
         perbaikanJobs.forEach(j => {
           if (j.jadwalKunjungan && new Date(j.jadwalKunjungan) >= now) {
+            const jenis = j.jenisPekerjaan || 'Verval Si Halal';
             visitEvents.push({
               ...j,
               nama: j.namaPelaku,
-              visitType: 'Perbaikan Akun',
+              visitType: jenis,
               time: j.jadwalKunjungan,
-              jenisPekerjaan: 'Perbaikan Akun',
+              jenisPekerjaan: jenis,
               kelurahan: j.alamat,
               // Include WhatsApp contact and keterangan for widget display
               kontak: j.kontak,
@@ -628,7 +629,16 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="visit-badge-container">
-                   <div className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : (visit.visitType === 'Perbaikan Akun' ? 'danger' : 'urgent')}`} style={visit.visitType === 'Verval Bahan' ? {backgroundColor: '#8b5cf6', color: 'white'} : (visit.visitType === 'Perbaikan Akun' ? {backgroundColor: '#ef4444', color: 'white'} : {})}>
+                   <div 
+                     className={`visit-badge ${visit.visitType === 'Verval Bahan' ? '' : (visit.visitType === 'Kunjungan' ? 'urgent' : '')}`} 
+                     style={{
+                       ...(visit.visitType === 'Verval Bahan' && { backgroundColor: '#8b5cf6', color: 'white' }),
+                       ...(visit.visitType === 'Verval Si Halal' && { backgroundColor: '#2563eb', color: 'white' }),
+                       ...(visit.visitType === 'Perbaikan Si Halal' && { backgroundColor: '#f59e0b', color: 'white' }),
+                       ...(visit.visitType === 'Kunjungan' && {}),
+                     }}
+                   >
+                     {visit.visitType === 'Verval Si Halal' ? '🔵 ' : visit.visitType === 'Perbaikan Si Halal' ? '🟠 ' : ''}
                      {visit.visitType}
                    </div>
                    {visit.keterangan && (
