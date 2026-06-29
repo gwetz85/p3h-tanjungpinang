@@ -52,6 +52,12 @@ const VerifikasiPU = () => {
   const [showEditAlamat, setShowEditAlamat] = useState(false);
   const [editAlamatJob, setEditAlamatJob] = useState(null);
   const [newAlamatUsaha, setNewAlamatUsaha] = useState('');
+  // WhatsApp invitation modal state
+  const [showWAModal, setShowWAModal] = useState(false);
+  const [waJob, setWAJob] = useState(null);
+  const [waHari, setWAHari] = useState('');
+  const [waTanggal, setWATanggal] = useState('');
+  const [waPukul, setWAPukul] = useState('');
 
   const downloadImage = (dataUrl, filename) => {
     if (!dataUrl) return;
@@ -270,6 +276,56 @@ const VerifikasiPU = () => {
       alert('Gagal memproses pembatalan.');
     }
   };
+  const handleKirimWA = (job, e) => {
+    if (e) e.stopPropagation();
+    setWAJob(job);
+    setWAHari('');
+    setWATanggal('');
+    setWAPukul('');
+    setShowWAModal(true);
+  };
+
+  const handleSendWA = (e) => {
+    e.preventDefault();
+    if (!waJob) return;
+    const nama = waJob.nama || '-';
+    const alamat = waJob.alamat || '-';
+    const noWA = (waJob.wa || '').replace(/\D/g, '');
+    if (!noWA) {
+      alert('Nomor WhatsApp pelaku usaha tidak tersedia.');
+      return;
+    }
+    const tanggalFormatted = waTanggal
+      ? new Date(waTanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+      : waTanggal;
+    const pukulFormatted = waPukul ? waPukul.replace(':', '.') + ' WIB' : waPukul;
+    const pesan =
+`Assalamu 'alaikum
+Perkenalkan Bapak/Ibu Pelaku Usaha kami tim dari AKA BOGOR Kota Tanjungpinang , berdasarkan data yang sebelumnya sudah di input melalui Link kami di : https://s.id/reghalaltpi . dengan ini kami akan melakukan kunjungan untuk Verifikasi dan Pendataan Bahan yang digunakan dalam Proses Produksi Produk Bapak/Ibu.
+Adapun jadwal kunjungan kami adalah pada :
+Hari : ${waHari}
+Tanggal : ${tanggalFormatted}
+Pukul : ${pukulFormatted}
+Demi mempermudah dalam kami melakukan kunjungan mohon konfirmasi data dibawah ini terlebih dahulu :
+Nama Pelaku Usaha : ${nama}
+Alamat : ${alamat}
+
+Dalam kunjungan ini , ada beberapa hal yang perlu disiapkan pelaku usaha guna memperlancar dalam proses pendataan pendampingan proses produksi Bapak/Ibu . adapun hal-hal tersebut adalah :
+1. Mempersiapkan semua bahan yang digunakan , tanpa terkecuali
+2. Mempersiapkan catatan produksi yang di tulis secara rinci
+3. Produk yang sudah siap untuk dipasarkan
+4. KTP Pelaku Usaha 
+5. NIB 
+
+Demikian informasi ini kami sampaikan dan silahkan konfirmasi ulang apabila di Tanggal diatas bapak/ibu sedang tidak bisa kami kunjungi .
+
+TIM AKA BOGOR KOTA TANJUNGPINANG`;
+    const encoded = encodeURIComponent(pesan);
+    window.open(`https://wa.me/${noWA}?text=${encoded}`, '_blank');
+    setShowWAModal(false);
+    setWAJob(null);
+  };
+
   const handleEditAlamatClick = (job, e) => {
     if (e) e.stopPropagation();
     setEditAlamatJob(job);
@@ -479,6 +535,14 @@ const VerifikasiPU = () => {
                       <td>
                         {role !== 'Admin' ? (
                           <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                             <button
+                               className="btn-table-icon"
+                               title="Kirim Undangan WhatsApp"
+                               onClick={(e) => handleKirimWA(job, e)}
+                               style={{ color: '#25D366' }}
+                             >
+                               <MessageSquare size={16} />
+                             </button>
                             <button 
                               className="btn-table-icon text-success"
                               title="Kirim ke Admin"
@@ -575,6 +639,14 @@ const VerifikasiPU = () => {
                       <div style={{display:'flex', gap:'6px'}}>
                         {role !== 'Admin' && (
                           <>
+                            <button
+                              className="btn-table-icon"
+                              title="Kirim Undangan WhatsApp"
+                              onClick={(e) => handleKirimWA(job, e)}
+                              style={{ color: '#25D366' }}
+                            >
+                              <MessageSquare size={15} />
+                            </button>
                             <button className="btn-table-icon text-success" title="Kirim ke Admin" onClick={() => handleKirimAdmin(job)}>
                               <Send size={15} />
                             </button>
@@ -749,6 +821,13 @@ const VerifikasiPU = () => {
                   <div className="modal-footer-actions">
                     {role !== 'Admin' && (
                       <>
+                        <button
+                          onClick={(e) => { handleKirimWA(selectedJob, e); }}
+                          className="btn-primary-outline"
+                          style={{ borderColor: '#25D366', color: '#25D366', background: 'rgba(37,211,102,0.08)' }}
+                        >
+                          <MessageSquare size={18} /> Kirim Undangan WA
+                        </button>
                         {selectedJob.jenisPekerjaan === 'Sertifikasi Halal' && (
                           <button onClick={() => setShowHalal(true)} className="btn-primary-outline">
                             <FileText size={18} /> Isi Form Halal
@@ -957,6 +1036,116 @@ const VerifikasiPU = () => {
                   <button type="button" onClick={() => { setShowEditAlamat(false); setEditAlamatJob(null); }} className="btn-secondary">Batal</button>
                   <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
                     <Save size={16} /> Simpan Alamat
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* WhatsApp Invitation Modal */}
+        {showWAModal && waJob && (
+          <div className="modal-overlay">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="modal-content glass-card"
+              style={{ maxWidth: '500px' }}
+            >
+              <div className="modal-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #25D366, #128C7E)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MessageSquare size={18} color="white" />
+                  </div>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: '1rem' }}>Kirim Undangan WhatsApp</h2>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{waJob.nama}</p>
+                  </div>
+                </div>
+                <button onClick={() => { setShowWAModal(false); setWAJob(null); }} className="btn-close"><X /></button>
+              </div>
+
+              <form onSubmit={handleSendWA} className="edit-form" style={{ padding: '1.5rem' }}>
+                {/* Info pelaku usaha */}
+                <div style={{ marginBottom: '1.25rem', padding: '12px 14px', background: 'rgba(37, 211, 102, 0.08)', border: '1px solid rgba(37, 211, 102, 0.25)', borderRadius: '10px', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--text-muted)', minWidth: '90px' }}>Pelaku Usaha</span>
+                    <span style={{ fontWeight: 600 }}>: {waJob.nama || '-'}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--text-muted)', minWidth: '90px' }}>Alamat</span>
+                    <span>: {waJob.alamat || '-'}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <span style={{ color: 'var(--text-muted)', minWidth: '90px' }}>No. WA</span>
+                    <span style={{ color: '#25D366', fontWeight: 600 }}>: {waJob.wa || '-'}</span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1rem', marginTop: 0 }}>
+                  Isi jadwal kunjungan yang akan disertakan dalam pesan undangan:
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  <div className="input-group" style={{ margin: 0 }}>
+                    <label>Hari</label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Senin"
+                      value={waHari}
+                      onChange={(e) => setWAHari(e.target.value)}
+                      required
+                      list="hari-options"
+                    />
+                    <datalist id="hari-options">
+                      {['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Ahad'].map(h => <option key={h} value={h} />)}
+                    </datalist>
+                  </div>
+                  <div className="input-group" style={{ margin: 0 }}>
+                    <label>Pukul</label>
+                    <input
+                      type="time"
+                      value={waPukul}
+                      onChange={(e) => setWAPukul(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <label>Tanggal</label>
+                  <input
+                    type="date"
+                    value={waTanggal}
+                    onChange={(e) => {
+                      setWATanggal(e.target.value);
+                      if (e.target.value) {
+                        const d = new Date(e.target.value);
+                        const hariNames = ['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+                        setWAHari(hariNames[d.getDay()]);
+                      }
+                    }}
+                    required
+                  />
+                </div>
+
+                {/* Preview pesan */}
+                {(waHari || waTanggal || waPukul) && (
+                  <div style={{ marginTop: '0.5rem', padding: '12px 14px', background: 'rgba(0,0,0,0.15)', borderRadius: '10px', fontSize: '0.78rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.6, maxHeight: '180px', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ color: '#25D366', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Preview Pesan:</span>
+                    {`Assalamu 'alaikum\nPerkenalkan Bapak/Ibu Pelaku Usaha kami tim dari AKA BOGOR Kota Tanjungpinang , berdasarkan data yang sebelumnya sudah di input melalui Link kami di : https://s.id/reghalaltpi . dengan ini kami akan melakukan kunjungan untuk Verifikasi dan Pendataan Bahan yang digunakan dalam Proses Produksi Produk Bapak/Ibu.\nAdapun jadwal kunjungan kami adalah pada :\nHari : ${waHari || '...'}\nTanggal : ${waTanggal ? new Date(waTanggal).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'}) : '...'}\nPukul : ${waPukul || '...'}`}
+                  </div>
+                )}
+
+                <div className="modal-actions" style={{ marginTop: '1.25rem' }}>
+                  <button type="button" onClick={() => { setShowWAModal(false); setWAJob(null); }} className="btn-secondary">Batal</button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)', border: 'none' }}
+                  >
+                    <MessageSquare size={16} /> Buka WhatsApp
                   </button>
                 </div>
               </form>
