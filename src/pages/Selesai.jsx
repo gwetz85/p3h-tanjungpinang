@@ -2,15 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { Search, CheckCircle2, Calendar, User, Briefcase, RotateCcw, Info } from 'lucide-react';
+import { Search, CheckCircle2, Calendar, User, Briefcase, RotateCcw, Info, Download, FileText } from 'lucide-react';
+import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
 const Selesai = () => {
   const { currentUser, role } = useAuth();
   const isSuperAdmin = role === 'superadmin';
+  const canDownload = role === 'Admin' || role === 'Petugas' || role === 'superadmin' || role === 'admin' || role === 'petugas';
   const [completedJobs, setCompletedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showHalal, setShowHalal] = useState(false);
 
   useEffect(() => {
     // Only fetch jobs that are 'Selesai' and limit to the most recent 100 to significantly improve loading speed
@@ -84,14 +88,14 @@ const Selesai = () => {
               <th><User size={16} /> Nama</th>
               <th>Status</th>
               <th>Keterangan</th>
-              {isSuperAdmin && <th>Aksi</th>}
+              {(isSuperAdmin || canDownload) && <th>Aksi</th>}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={isSuperAdmin ? "6" : "5"} className="text-center">Memuat...</td></tr>
+              <tr><td colSpan={(isSuperAdmin || canDownload) ? "6" : "5"} className="text-center">Memuat...</td></tr>
             ) : filteredJobs.length === 0 ? (
-              <tr><td colSpan={isSuperAdmin ? "6" : "5"} className="text-center">Belum ada data.</td></tr>
+              <tr><td colSpan={(isSuperAdmin || canDownload) ? "6" : "5"} className="text-center">Belum ada data.</td></tr>
             ) : (
               filteredJobs.map((job) => (
                 <motion.tr key={job.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -100,16 +104,30 @@ const Selesai = () => {
                   <td className="font-bold">{job.nama}</td>
                   <td><span className="badge-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '20px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold' }}><CheckCircle2 size={14} /> Selesai</span></td>
                   <td className="text-muted">{job.keterangan || '-'}</td>
-                  {isSuperAdmin && (
+                  {(isSuperAdmin || canDownload) && (
                     <td>
-                      <button 
-                        onClick={() => handleRestore(job.id)} 
-                        className="btn-table-icon text-accent" 
-                        title="Kembalikan ke Proses"
-                        style={{ background: 'rgba(59, 130, 246, 0.1)', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
-                      >
-                        <RotateCcw size={16} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {canDownload && job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                          <button 
+                            onClick={() => { setSelectedJob(job); setShowHalal(true); }}
+                            className="btn-table-icon text-primary"
+                            title="Download Form Halal"
+                            style={{ background: 'rgba(16, 185, 129, 0.1)', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', color: '#10b981' }}
+                          >
+                            <Download size={16} />
+                          </button>
+                        )}
+                        {isSuperAdmin && (
+                          <button 
+                            onClick={() => handleRestore(job.id)} 
+                            className="btn-table-icon text-accent" 
+                            title="Kembalikan ke Proses"
+                            style={{ background: 'rgba(59, 130, 246, 0.1)', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
+                          >
+                            <RotateCcw size={16} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   )}
                 </motion.tr>
@@ -152,20 +170,37 @@ const Selesai = () => {
               <div className="mobile-card-footer">
                 <span className="mobile-card-badge green" style={{display: 'flex', alignItems: 'center', gap: '4px'}}><CheckCircle2 size={13} /> SELESAI</span>
                 
-                {isSuperAdmin && (
-                  <button 
-                    onClick={() => handleRestore(job.id)} 
-                    className="btn-table-icon text-accent" 
-                    title="Kembalikan ke Proses"
-                  >
-                    <RotateCcw size={15} />
-                  </button>
-                )}
+                <div style={{display: 'flex', gap: '8px'}}>
+                  {canDownload && job.jenisPekerjaan === 'Sertifikasi Halal' && (
+                    <button 
+                      onClick={() => { setSelectedJob(job); setShowHalal(true); }}
+                      className="btn-table-icon text-primary"
+                      title="Download Form Halal"
+                      style={{ background: 'rgba(16, 185, 129, 0.1)', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#10b981' }}
+                    >
+                      <Download size={15} />
+                    </button>
+                  )}
+                  {isSuperAdmin && (
+                    <button 
+                      onClick={() => handleRestore(job.id)} 
+                      className="btn-table-icon text-accent" 
+                      title="Kembalikan ke Proses"
+                      style={{ background: 'rgba(59, 130, 246, 0.1)', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      <RotateCcw size={15} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {selectedJob && showHalal && (
+        <HalalForm job={selectedJob} onClose={() => { setShowHalal(false); setSelectedJob(null); }} />
+      )}
     </div>
   );
 };
