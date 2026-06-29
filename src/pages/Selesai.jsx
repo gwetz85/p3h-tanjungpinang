@@ -57,8 +57,9 @@ const Selesai = () => {
   };
 
   const filteredJobs = completedJobs.filter(job => 
-    job.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.jenisPekerjaan.toLowerCase().includes(searchTerm.toLowerCase())
+    job.reviewStartedAt &&
+    (job.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.jenisPekerjaan.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
