@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { Search, CheckCircle2, Calendar, User, Briefcase, RotateCcw, Info, Download, FileText } from 'lucide-react';
+import { Search, CheckCircle2, Calendar, User, Briefcase, RotateCcw, Info, Download, FileText, MapPin, Send } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -83,11 +83,11 @@ const Selesai = () => {
         <table className="custom-table">
           <thead>
             <tr>
-              <th><Calendar size={16} /> Tanggal</th>
-              <th><Briefcase size={16} /> Jenis</th>
-              <th><User size={16} /> Nama</th>
-              <th>Status</th>
-              <th>Keterangan</th>
+              <th><User size={16} /> Nama Pelaku Usaha</th>
+              <th><Send size={16} /> Tanggal Dikirim ke Admin</th>
+              <th><CheckCircle2 size={16} /> Tanggal Dipindahkan Ke Menu Selesai</th>
+              <th><Briefcase size={16} /> Nama Usaha</th>
+              <th><MapPin size={16} /> Alamat</th>
               {(isSuperAdmin || canDownload) && <th>Aksi</th>}
             </tr>
           </thead>
@@ -99,11 +99,11 @@ const Selesai = () => {
             ) : (
               filteredJobs.map((job) => (
                 <motion.tr key={job.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td>{new Date(job.tanggalInput).toLocaleDateString()}</td>
-                  <td><span className="badge-type">{job.jenisPekerjaan}</span></td>
-                  <td className="font-bold">{job.nama}</td>
-                  <td><span className="badge-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '20px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 'bold' }}><CheckCircle2 size={14} /> Selesai</span></td>
-                  <td className="text-muted">{job.keterangan || '-'}</td>
+                  <td className="font-bold">{job.nama || '-'}</td>
+                  <td>{job.reviewStartedAt ? new Date(job.reviewStartedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
+                  <td>{job.verifiedAt ? new Date(job.verifiedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
+                  <td>{job.namaUsaha || '-'}</td>
+                  <td className="text-muted">{job.alamat || '-'}</td>
                   {(isSuperAdmin || canDownload) && (
                     <td>
                       <div style={{ display: 'flex', gap: '8px' }}>
@@ -146,28 +146,34 @@ const Selesai = () => {
         ) : (
           filteredJobs.map((job) => (
             <div key={job.id} className="mobile-data-card">
-              {/* Header: Date */}
-              <div className="mobile-card-date">
-                <Calendar size={13} style={{marginRight: '4px'}}/>
-                {new Date(job.tanggalInput).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {/* Header: Name */}
+              <div className="mobile-card-name" style={{marginTop: '0'}}>{job.nama || '-'}</div>
+
+              {/* Nama Usaha */}
+              <div className="mobile-card-business" style={{color: '#2563eb', marginTop: '0.4rem'}}>
+                <Briefcase size={13} style={{marginRight: '4px'}}/> {job.namaUsaha || '-'}
               </div>
               
-              {/* Name */}
-              <div className="mobile-card-name" style={{marginTop: '0.8rem'}}>{job.nama}</div>
-              
-              {/* Type / Job */}
-              <div className="mobile-card-business" style={{color: '#2563eb'}}>
-                <Briefcase size={13} style={{marginRight: '4px'}}/> {job.jenisPekerjaan}
+              {/* Alamat */}
+              <div className="mobile-card-row" style={{marginTop: '0.4rem'}}>
+                <MapPin size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
+                <span style={{color: '#475569'}}>{job.alamat || '-'}</span>
               </div>
 
-              {/* Keterangan */}
-              <div className="mobile-card-row" style={{marginTop: '0.6rem'}}>
-                <Info size={13} style={{color:'#94a3b8', marginTop: '2px'}} />
-                <span style={{color: '#475569'}}>{job.keterangan || '-'}</span>
+              {/* Dates */}
+              <div className="mobile-card-row" style={{marginTop: '0.6rem', display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                   <Send size={13} style={{color: '#f59e0b'}}/> 
+                   <span style={{fontSize: '0.8rem', color: '#64748b'}}>Dikirim ke Admin: <strong>{job.reviewStartedAt ? new Date(job.reviewStartedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</strong></span>
+                </div>
+                <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                   <CheckCircle2 size={13} style={{color: '#10b981'}}/> 
+                   <span style={{fontSize: '0.8rem', color: '#64748b'}}>Dipindah ke Selesai: <strong>{job.verifiedAt ? new Date(job.verifiedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</strong></span>
+                </div>
               </div>
 
               {/* Footer Actions */}
-              <div className="mobile-card-footer">
+              <div className="mobile-card-footer" style={{marginTop: '0.8rem'}}>
                 <span className="mobile-card-badge green" style={{display: 'flex', alignItems: 'center', gap: '4px'}}><CheckCircle2 size={13} /> SELESAI</span>
                 
                 <div style={{display: 'flex', gap: '8px'}}>
