@@ -81,8 +81,19 @@ const GudangBahan = () => {
           
           // Deduplicate by produsen (keep only the newest)
           const seenProdusen = new Set();
+          const seenEmpty = new Set(); // For tracking duplicates when produsen is empty
+          
           g.variants = g.variants.filter(v => {
             const produsenName = (v.produsen || '').toLowerCase().trim();
+            
+            if (produsenName === '') {
+              // If produsen is empty, deduplicate using supplier and sertifikat so we don't accidentally hide different items
+              const emptyKey = `${(v.supplier || '').toLowerCase().trim()}|${(v.sertifikatHalal || '').toLowerCase().trim()}`;
+              if (seenEmpty.has(emptyKey)) return false;
+              seenEmpty.add(emptyKey);
+              return true;
+            }
+
             if (seenProdusen.has(produsenName)) {
               return false;
             }
