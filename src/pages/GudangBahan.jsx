@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Search, PlusCircle, Edit3, Trash2, Calendar, FileText, Factory, Truck, X, Eye, Clock } from 'lucide-react';
+import { Package, Search, PlusCircle, Edit3, Trash2, Calendar, FileText, Factory, Truck, X, Eye, Clock, Barcode } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const GudangBahan = () => {
@@ -154,6 +154,8 @@ const GudangBahan = () => {
         await update(ref(rtdb, `gudang_bahan/${editingId}`), dataToSave);
         setEditingId(null);
       } else {
+        const uniqueId = Math.random().toString(36).substring(2, 6).toUpperCase();
+        dataToSave.kodeBarang = `GB-${Date.now().toString().slice(-4)}${uniqueId}`;
         dataToSave.tanggalInput = Date.now();
         await push(ref(rtdb, 'gudang_bahan'), dataToSave);
       }
@@ -320,6 +322,10 @@ const GudangBahan = () => {
                      style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '16px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.08)' }}
                    >
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: role === 'superadmin' ? '1.5rem' : '0' }}>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Barcode size={14} style={{ marginRight: '6px' }}/> Kode Barang</span>
+                           <strong style={{ fontSize: '1.1rem', color: '#60a5fa', letterSpacing: '1px' }}>{bahan.kodeBarang || `GB-${bahan.id.substring(1, 7).toUpperCase()}`}</strong>
+                         </div>
                          <div>
                            <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Factory size={14} style={{ marginRight: '6px' }}/> Produsen / Pabrik</span>
                            <strong style={{ fontSize: '1.1rem', color: '#e2e8f0' }}>{bahan.produsen || '-'}</strong>

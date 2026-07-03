@@ -215,7 +215,9 @@ const HalalForm = ({ job, onClose }) => {
         
         for (const b of validBahan) {
           const supplierName = b.supplier === 'Swalayan' && b.namaSwalayan ? `${b.supplier} (${b.namaSwalayan})` : (b.supplier || '');
+          const uniqueId = Math.random().toString(36).substring(2, 6).toUpperCase();
           const newBahanData = {
+            kodeBarang: `GB-${Date.now().toString().slice(-4)}${uniqueId}`,
             merek: b.merk || '',
             produsen: b.produsen || '',
             sertifikatHalal: b.sertifikat || '',
