@@ -45,7 +45,8 @@ const GudangBahan = () => {
           if (wordsA.length === 0 || wordsB.length === 0) return false;
           
           const common = wordsA.filter(w => wordsB.includes(w));
-          if (common.length >= 2) return true;
+          const overlapRatio = common.length / Math.max(wordsA.length, wordsB.length);
+          if (overlapRatio >= 0.6) return true;
           if (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0]) return true;
 
           const normA = (a.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
