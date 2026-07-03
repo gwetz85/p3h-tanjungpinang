@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
-import { motion } from 'framer-motion';
-import { Package, Search, PlusCircle, Edit3, Trash2, Calendar, FileText, Factory, Truck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Package, Search, PlusCircle, Edit3, Trash2, Calendar, FileText, Factory, Truck, X, Eye, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const GudangBahan = () => {
@@ -10,6 +10,7 @@ const GudangBahan = () => {
   const [bahanList, setBahanList] = useState([]);
   const [filteredBahan, setFilteredBahan] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMerek, setSelectedMerek] = useState(null);
   
   const [formData, setFormData] = useState({
     merek: '',
@@ -30,26 +31,14 @@ const GudangBahan = () => {
       if (data) {
         const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         
-        // Grouping logic to remove duplicates and keep the most complete data
+        // Grouping logic based on Merek similarity
         const grouped = [];
         
-        const getScore = (item) => {
-          let score = 0;
-          if (item.merek) score += 1;
-          if (item.produsen) score += 2;
-          if (item.sertifikatHalal) score += 3;
-          if (item.expiredDate) score += 1;
-          if (item.supplier) score += 1;
-          return score;
-        };
-
         const getWords = (str) => {
           return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2 && !['merk', 'merek', 'cap', 'dan', 'pt', 'cv'].includes(w));
         };
 
         const isSimilar = (a, b) => {
-          if (a.sertifikatHalal && b.sertifikatHalal && a.sertifikatHalal === b.sertifikatHalal) return true;
-          
           const wordsA = getWords(a.merek);
           const wordsB = getWords(b.merek);
           
@@ -76,23 +65,19 @@ const GudangBahan = () => {
           }
           
           if (foundIdx === -1) {
-            grouped.push({ ...item });
+            grouped.push({
+              id: item.id,
+              merek: item.merek || 'Tanpa Merek',
+              variants: [item]
+            });
           } else {
-            const existingScore = getScore(grouped[foundIdx]);
-            const newScore = getScore(item);
-            
-            if (newScore > existingScore) {
-              // Keep the new more complete item, but preserve original ID for DB operations
-              const oldId = grouped[foundIdx].id;
-              grouped[foundIdx] = { ...item, id: oldId };
-            } else if (newScore === existingScore) {
-              // Merge missing fields just in case
-              if (!grouped[foundIdx].produsen && item.produsen) grouped[foundIdx].produsen = item.produsen;
-              if (!grouped[foundIdx].expiredDate && item.expiredDate) grouped[foundIdx].expiredDate = item.expiredDate;
-              if (!grouped[foundIdx].supplier && item.supplier) grouped[foundIdx].supplier = item.supplier;
-              if (!grouped[foundIdx].sertifikatHalal && item.sertifikatHalal) grouped[foundIdx].sertifikatHalal = item.sertifikatHalal;
-            }
+            grouped[foundIdx].variants.push(item);
           }
+        });
+        
+        // Sort variants by date inside each group
+        grouped.forEach(g => {
+          g.variants.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
         });
 
         // Sort alphabetically by merek
@@ -103,6 +88,7 @@ const GudangBahan = () => {
           if (merekA > merekB) return 1;
           return 0;
         });
+        
         setBahanList(grouped);
         setFilteredBahan(grouped);
       } else {
@@ -120,12 +106,14 @@ const GudangBahan = () => {
   useEffect(() => {
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
-      const filtered = bahanList.filter(bahan => 
-        (bahan.merek && bahan.merek.toLowerCase().includes(lowercasedTerm)) ||
-        (bahan.produsen && bahan.produsen.toLowerCase().includes(lowercasedTerm)) ||
-        (bahan.sertifikatHalal && bahan.sertifikatHalal.toLowerCase().includes(lowercasedTerm)) ||
-        (bahan.supplier && bahan.supplier.toLowerCase().includes(lowercasedTerm))
-      );
+      const filtered = bahanList.filter(group => {
+        if (group.merek && group.merek.toLowerCase().includes(lowercasedTerm)) return true;
+        return group.variants.some(v => 
+          (v.produsen && v.produsen.toLowerCase().includes(lowercasedTerm)) ||
+          (v.sertifikatHalal && v.sertifikatHalal.toLowerCase().includes(lowercasedTerm)) ||
+          (v.supplier && v.supplier.toLowerCase().includes(lowercasedTerm))
+        );
+      });
       setFilteredBahan(filtered);
     } else {
       setFilteredBahan(bahanList);
@@ -171,7 +159,13 @@ const GudangBahan = () => {
       supplier: bahan.supplier || '' 
     });
     setEditingId(bahan.id);
+    setSelectedMerek(null); // Close modal when editing
+    
+    // Scroll to form if on desktop
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
+
+  const activeGroup = selectedMerek ? bahanList.find(g => g.merek === selectedMerek) : null;
 
   return (
     <div className="page-container">
@@ -179,7 +173,7 @@ const GudangBahan = () => {
         <h1 className="title-gradient" style={{ marginBottom: 0 }}>Gudang Bahan</h1>
         {!initialLoading && (
           <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: '500', fontSize: '0.9rem' }}>
-            Total Data: {filteredBahan.length}
+            Total Merek: {filteredBahan.length}
           </div>
         )}
       </div>
@@ -202,55 +196,39 @@ const GudangBahan = () => {
           <thead>
             <tr>
               <th><Package size={16} /> Merek Bahan</th>
-              <th><Factory size={16} /> Produsen</th>
-              <th><FileText size={16} /> Sertifikat Halal</th>
-              <th><Calendar size={16} /> Expired Date</th>
-              <th><Truck size={16} /> Supplier</th>
-              {role === 'superadmin' && <th style={{ textAlign: 'center' }}>Aksi</th>}
+              <th><Factory size={16} /> Jumlah Varian Produsen</th>
+              <th style={{ textAlign: 'center' }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {initialLoading ? (
               [1, 2, 3].map(n => (
                 <tr key={n} className="skeleton-pulse">
-                  <td><div className="skeleton" style={{ width: '120px', height: '14px' }}></div></td>
+                  <td><div className="skeleton" style={{ width: '150px', height: '14px' }}></div></td>
                   <td><div className="skeleton" style={{ width: '100px', height: '14px' }}></div></td>
-                  <td><div className="skeleton" style={{ width: '120px', height: '14px' }}></div></td>
-                  <td><div className="skeleton" style={{ width: '80px', height: '14px' }}></div></td>
-                  <td><div className="skeleton" style={{ width: '100px', height: '14px' }}></div></td>
-                  {role === 'superadmin' && <td><div className="skeleton" style={{ width: '60px', height: '14px', margin: '0 auto' }}></div></td>}
+                  <td><div className="skeleton" style={{ width: '80px', height: '14px', margin: '0 auto' }}></div></td>
                 </tr>
               ))
             ) : filteredBahan.length === 0 ? (
               <tr>
-                <td colSpan={role === 'superadmin' ? 6 : 5} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
+                <td colSpan={3} style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
                   {searchTerm ? 'Tidak ada bahan yang cocok dengan pencarian.' : 'Belum ada data bahan.'}
                 </td>
               </tr>
             ) : (
-              filteredBahan.map((bahan) => (
-                <motion.tr key={bahan.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td><strong>{bahan.merek || '-'}</strong></td>
-                  <td>{bahan.produsen || '-'}</td>
+              filteredBahan.map((group) => (
+                <motion.tr key={group.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ cursor: 'pointer' }} onClick={() => setSelectedMerek(group.merek)} className="hover-row">
+                  <td><strong style={{ fontSize: '1.1rem' }}>{group.merek}</strong></td>
                   <td>
-                    {bahan.sertifikatHalal ? (
-                      <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem' }}>
-                        {bahan.sertifikatHalal}
-                      </span>
-                    ) : '-'}
+                    <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', padding: '4px 10px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 500 }}>
+                      {group.variants.length} Varian
+                    </span>
                   </td>
-                  <td>{bahan.expiredDate || '-'}</td>
-                  <td>{bahan.supplier || '-'}</td>
-                  {role === 'superadmin' && (
-                    <td style={{ textAlign: 'center' }}>
-                      <button onClick={() => handleEdit(bahan)} className="btn-icon text-accent" title="Edit" style={{ marginRight: '0.5rem' }}>
-                        <Edit3 size={18} />
-                      </button>
-                      <button onClick={() => handleDelete(bahan.id)} className="btn-delete" title="Hapus">
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  )}
+                  <td style={{ textAlign: 'center' }}>
+                    <button onClick={(e) => { e.stopPropagation(); setSelectedMerek(group.merek); }} className="btn-icon text-accent" title="Lihat Detail" style={{ padding: '6px 12px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Eye size={16} /> Detail
+                    </button>
+                  </td>
                 </motion.tr>
               ))
             )}
@@ -267,87 +245,139 @@ const GudangBahan = () => {
             {searchTerm ? 'Tidak ada bahan.' : 'Belum ada data bahan.'}
           </div>
         ) : (
-          filteredBahan.map((bahan) => (
-            <div key={bahan.id} className="mobile-data-card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="mobile-card-name">{bahan.merek || '-'}</div>
-              
-              <div className="mobile-card-row" style={{ marginTop: '10px' }}>
-                <span className="mobile-card-label" style={{width: '75px'}}>Produsen:</span>
-                <span style={{color: '#475569', fontWeight: 500}}>{bahan.produsen || '-'}</span>
+          filteredBahan.map((group) => (
+            <div key={group.id} className="mobile-data-card hover-row" onClick={() => setSelectedMerek(group.merek)} style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="mobile-card-name" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{group.merek}</span>
+                <span style={{ fontSize: '0.85rem', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '12px', fontWeight: 500 }}>
+                  {group.variants.length} Varian
+                </span>
               </div>
-              
-              <div className="mobile-card-row">
-                <span className="mobile-card-label" style={{width: '75px'}}>Expired:</span>
-                <span style={{color: '#475569', fontWeight: 500}}>{bahan.expiredDate || '-'}</span>
-              </div>
-
-              <div className="mobile-card-row">
-                <span className="mobile-card-label" style={{width: '75px'}}>Supplier:</span>
-                <span style={{color: '#475569', fontWeight: 500}}>{bahan.supplier || '-'}</span>
-              </div>
-
-              <div className="mobile-card-footer" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                {bahan.sertifikatHalal ? (
-                  <span className="mobile-card-badge blue" style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                    <FileText size={12} /> {bahan.sertifikatHalal}
-                  </span>
-                ) : (
-                  <span className="mobile-card-badge gray">NO SERTIFIKAT</span>
-                )}
-                
-                {role === 'superadmin' && (
-                  <div style={{display:'flex', gap:'6px'}}>
-                    <button onClick={() => handleEdit(bahan)} className="btn-table-icon text-accent" title="Edit">
-                      <Edit3 size={15} />
-                    </button>
-                    <button onClick={() => handleDelete(bahan.id)} className="btn-table-icon text-danger" title="Hapus">
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                )}
+              <div style={{ fontSize: '0.9rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Eye size={14} /> Ketuk untuk melihat detail produsen
               </div>
             </div>
           ))
         )}
       </div>
 
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {activeGroup && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+            onClick={() => setSelectedMerek(null)}
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+              className="glass-card" 
+              style={{ width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', position: 'relative', background: 'linear-gradient(145deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)', border: '1px solid rgba(255,255,255,0.1)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={() => setSelectedMerek(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '50%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}>
+                <X size={20} />
+              </button>
+              
+              <h2 className="title-gradient" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.8rem' }}>
+                <Package size={28} color="#60a5fa" /> {activeGroup.merek}
+              </h2>
+              <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Menampilkan semua varian produsen untuk merek ini</p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {activeGroup.variants.map((bahan, idx) => (
+                   <motion.div 
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ delay: idx * 0.05 }}
+                     key={bahan.id} 
+                     style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '16px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.08)' }}
+                   >
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: role === 'superadmin' ? '1.5rem' : '0' }}>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Factory size={14} style={{ marginRight: '6px' }}/> Produsen / Pabrik</span>
+                           <strong style={{ fontSize: '1.1rem', color: '#e2e8f0' }}>{bahan.produsen || '-'}</strong>
+                         </div>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><FileText size={14} style={{ marginRight: '6px' }}/> Sertifikat Halal</span>
+                           {bahan.sertifikatHalal ? (
+                             <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '4px 10px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 500 }}>
+                               {bahan.sertifikatHalal}
+                             </span>
+                           ) : <span style={{ color: '#94a3b8' }}>-</span>}
+                         </div>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Calendar size={14} style={{ marginRight: '6px' }}/> Expired Date</span>
+                           <span style={{ color: '#e2e8f0' }}>{bahan.expiredDate || '-'}</span>
+                         </div>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Truck size={14} style={{ marginRight: '6px' }}/> Supplier / Swalayan</span>
+                           <span style={{ color: '#e2e8f0' }}>{bahan.supplier || '-'}</span>
+                         </div>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Clock size={14} style={{ marginRight: '6px' }}/> Terakhir Diinput/Digunakan</span>
+                           <span style={{ color: '#e2e8f0' }}>{bahan.tanggalInput ? new Date(bahan.tanggalInput).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</span>
+                         </div>
+                      </div>
+                      {role === 'superadmin' && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.25rem' }}>
+                          <button onClick={() => handleEdit(bahan)} className="btn-icon text-accent" title="Edit Data" style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
+                            <Edit3 size={16} style={{ marginRight: '8px' }} /> Edit
+                          </button>
+                          <button onClick={() => handleDelete(bahan.id)} className="btn-delete" title="Hapus Data" style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
+                            <Trash2 size={16} style={{ marginRight: '8px' }} /> Hapus
+                          </button>
+                        </div>
+                      )}
+                   </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {role === 'superadmin' && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="form-card glass-card mt-8" style={{ maxWidth: '800px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>{editingId ? 'Edit Data Bahan' : 'Tambah Bahan Baru'}</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="form-card glass-card mt-8" style={{ maxWidth: '800px', marginTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.4rem' }}>{editingId ? 'Edit Data Bahan' : 'Tambah Bahan Baru'}</h3>
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' }); }} className="text-muted" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Batal</button>
+              <button type="button" onClick={() => { setEditingId(null); setFormData({ merek: '', produsen: '', sertifikatHalal: '', expiredDate: '', supplier: '' }); }} className="text-muted" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', fontSize: '0.9rem', padding: '6px 12px', borderRadius: '6px' }}>Batal Edit</button>
             )}
           </div>
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             
             <div className="input-group" style={{ gridColumn: 'span 2' }}>
               <label>Merek Bahan</label>
-              <input type="text" placeholder="Contoh: Tepung Segitiga Biru" value={formData.merek} onChange={(e) => setFormData({...formData, merek: e.target.value})} required />
+              <input type="text" placeholder="Contoh: Tepung Segitiga Biru" value={formData.merek} onChange={(e) => setFormData({...formData, merek: e.target.value})} required style={{ background: 'rgba(0,0,0,0.2)' }} />
             </div>
             
             <div className="input-group">
               <label>Produsen / Pabrik</label>
-              <input type="text" placeholder="Contoh: PT Bogasari" value={formData.produsen} onChange={(e) => setFormData({...formData, produsen: e.target.value})} required />
+              <input type="text" placeholder="Contoh: PT Bogasari" value={formData.produsen} onChange={(e) => setFormData({...formData, produsen: e.target.value})} required style={{ background: 'rgba(0,0,0,0.2)' }} />
             </div>
 
             <div className="input-group">
               <label>Nomor Sertifikat Halal</label>
-              <input type="text" placeholder="Contoh: ID1234567890" value={formData.sertifikatHalal} onChange={(e) => setFormData({...formData, sertifikatHalal: e.target.value})} required />
+              <input type="text" placeholder="Contoh: ID1234567890" value={formData.sertifikatHalal} onChange={(e) => setFormData({...formData, sertifikatHalal: e.target.value})} required style={{ background: 'rgba(0,0,0,0.2)' }} />
             </div>
 
             <div className="input-group">
               <label>Expired Date</label>
-              <input type="date" value={formData.expiredDate} onChange={(e) => setFormData({...formData, expiredDate: e.target.value})} required />
+              <input type="date" value={formData.expiredDate} onChange={(e) => setFormData({...formData, expiredDate: e.target.value})} required style={{ background: 'rgba(0,0,0,0.2)' }} />
             </div>
 
             <div className="input-group">
               <label>Supplier / Toko Pembelian</label>
-              <input type="text" placeholder="Contoh: Toko Berkah" value={formData.supplier} onChange={(e) => setFormData({...formData, supplier: e.target.value})} required />
+              <input type="text" placeholder="Contoh: Toko Berkah" value={formData.supplier} onChange={(e) => setFormData({...formData, supplier: e.target.value})} required style={{ background: 'rgba(0,0,0,0.2)' }} />
             </div>
 
-            <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', marginTop: '0.5rem' }} disabled={loading}>
-              <PlusCircle size={18} /> {loading ? 'Menyimpan...' : (editingId ? 'Update Data Bahan' : 'Simpan Data Bahan')}
+            <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', marginTop: '0.5rem', padding: '12px', fontSize: '1.05rem', justifyContent: 'center' }} disabled={loading}>
+              <PlusCircle size={20} style={{ marginRight: '8px' }} /> {loading ? 'Menyimpan...' : (editingId ? 'Update Data Bahan' : 'Simpan Data Bahan')}
             </button>
           </form>
         </motion.div>
