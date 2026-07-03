@@ -78,6 +78,17 @@ const GudangBahan = () => {
         // Sort variants by date inside each group
         grouped.forEach(g => {
           g.variants.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
+          
+          // Deduplicate by produsen (keep only the newest)
+          const seenProdusen = new Set();
+          g.variants = g.variants.filter(v => {
+            const produsenName = (v.produsen || '').toLowerCase().trim();
+            if (seenProdusen.has(produsenName)) {
+              return false;
+            }
+            seenProdusen.add(produsenName);
+            return true;
+          });
         });
 
         // Sort alphabetically by merek
