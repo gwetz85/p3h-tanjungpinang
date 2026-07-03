@@ -3,8 +3,6 @@ import { rtdb } from '../firebase';
 import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool } from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -471,6 +469,8 @@ body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; background:
 .sign-img-wrap img { max-height: 90px; max-width: 220px; object-fit: contain; display: block; }
 .sign-name { text-align: center; font-weight: bold; font-size: 12pt; margin-bottom: 2px; }
 .sign-line { text-align: center; font-size: 12pt; }
+@page { size: A4 portrait; margin: 20mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style></head><body>
 <div class="wrapper">
   <div class="title">KEBIJAKAN HALAL</div>
@@ -516,6 +516,8 @@ table td:first-child { font-weight: bold; width: 32%; white-space: nowrap; }
 .doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
 .identity-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px 14px; margin-bottom: 18px; }
 .identity-box table td:first-child { width: 28%; }
+@page { size: A4 portrait; margin: 18mm 15mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style></head><body>
 <div class="doc-header">
   <img class="doc-header-logo" src="${baseUrl}/logo-halal-center.png" alt="Halal Center" onerror="this.style.display='none'" />
@@ -582,93 +584,32 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
 </body></html>`;
   };
 
-  const printViaBlobUrl = async (htmlContent, filename) => {
-    setLoading(true);
-    try {
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.top = '-9999px';
-      container.style.left = '-9999px';
-      container.style.width = '794px'; // A4 width at 96dpi
-      container.style.background = '#fff';
-      container.style.zIndex = '-1';
-
-      const iframe = document.createElement('iframe');
-      iframe.style.width = '794px';
-      iframe.style.border = 'none';
-      iframe.style.height = '0';
-      container.appendChild(iframe);
-      document.body.appendChild(container);
-
-      await new Promise((resolve) => {
-        iframe.onload = resolve;
-        iframe.srcdoc = htmlContent;
-      });
-
-      // Wait for images inside iframe
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      const imgs = Array.from(iframeDoc.images);
-      if (imgs.length > 0) {
-        await Promise.all(imgs.map(img =>
-          img.complete
-            ? Promise.resolve()
-            : new Promise(res => { img.onload = res; img.onerror = res; })
-        ));
-      }
-
-      iframe.style.height = iframe.contentDocument.body.scrollHeight + 'px';
-
-      const canvas = await html2canvas(iframe.contentDocument.body, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        windowWidth: 794,
-      });
-
-      document.body.removeChild(container);
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const margin = 10;
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfW = pdf.internal.pageSize.getWidth() - margin * 2;
-      const pdfH = pdf.internal.pageSize.getHeight() - margin * 2;
-      const imgRatio = imgProps.height / imgProps.width;
-      const imgH = pdfW * imgRatio;
-      let heightLeft = imgH;
-      let position = margin;
-
-      pdf.addImage(imgData, 'JPEG', margin, position, pdfW, imgH);
-      heightLeft -= pdfH;
-
-      while (heightLeft > 0) {
-        position = margin - (imgH - heightLeft);
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', margin, position, pdfW, imgH);
-        heightLeft -= pdfH;
-      }
-
-      pdf.save(filename);
-    } catch (err) {
-      alert('Gagal membuat PDF: ' + err.message);
-      console.error(err);
-    } finally {
-      setLoading(false);
+  const openPrintWindow = (htmlContent) => {
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (!win) {
+      alert('Popup diblokir browser. Silakan izinkan popup untuk situs ini lalu coba lagi.');
+      URL.revokeObjectURL(url);
+      return;
     }
+    win.onload = () => {
+      setTimeout(() => {
+        win.focus();
+        win.print();
+        URL.revokeObjectURL(url);
+      }, 500);
+    };
   };
 
   const generatePDF = () => {
     const html = buildHtmlContent(false);
-    const filename = `FormHalal_${(formData.namaUsaha || job.nama || 'Dokumen').replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
-    printViaBlobUrl(html, filename);
+    openPrintWindow(html);
   };
 
   const generatePernyataanHalalPDF = () => {
     const html = buildHtmlContent(true);
-    const namaPelakuUsaha = formData.namaPelakuUsaha || job.nama || 'Dokumen';
-    const filename = `PernyataanHalal_${namaPelakuUsaha.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
-    printViaBlobUrl(html, filename);
+    openPrintWindow(html);
   };
 
   return (
