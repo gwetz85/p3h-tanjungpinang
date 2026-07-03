@@ -283,7 +283,7 @@ const GudangBahan = () => {
                 <X size={20} />
               </button>
               
-              <h2 className="title-gradient" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.8rem' }}>
+              <h2 style={{ color: '#f8fafc', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '1.8rem', fontWeight: 'bold' }}>
                 <Package size={28} color="#60a5fa" /> {activeGroup.merek}
               </h2>
               <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Menampilkan semua varian produsen untuk merek ini</p>
