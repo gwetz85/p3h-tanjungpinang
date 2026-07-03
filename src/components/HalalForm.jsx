@@ -246,16 +246,7 @@ const HalalForm = ({ job, onClose }) => {
                if (item.sertifikatHalal && newBahanData.sertifikatHalal && item.sertifikatHalal === newBahanData.sertifikatHalal) {
                  matchingItem = item; break;
                }
-               
                let nameSimilar = false;
-               const wordsA = getWords(item.merek);
-               const wordsB = getWords(newBahanData.merek);
-               if (wordsA.length > 0 && wordsB.length > 0) {
-                 const common = wordsA.filter(w => wordsB.includes(w));
-                 if (common.length >= 2 || (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0])) {
-                   nameSimilar = true;
-                 }
-               }
                const normA = (item.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
                const normB = (newBahanData.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
                if (normA && normB && normA === normB) {

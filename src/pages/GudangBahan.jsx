@@ -79,25 +79,26 @@ const GudangBahan = () => {
         grouped.forEach(g => {
           g.variants.sort((a, b) => (b.tanggalInput || 0) - (a.tanggalInput || 0));
           
-          // Deduplicate by produsen (keep only the newest)
-          const seenProdusen = new Set();
-          const seenEmpty = new Set(); // For tracking duplicates when produsen is empty
+          // Deduplicate by produsen AND merek (keep only the newest)
+          const seenKeys = new Set();
           
           g.variants = g.variants.filter(v => {
             const produsenName = (v.produsen || '').toLowerCase().trim();
+            const normMerek = (v.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
             
             if (produsenName === '') {
-              // If produsen is empty, deduplicate using supplier and sertifikat so we don't accidentally hide different items
-              const emptyKey = `${(v.supplier || '').toLowerCase().trim()}|${(v.sertifikatHalal || '').toLowerCase().trim()}`;
-              if (seenEmpty.has(emptyKey)) return false;
-              seenEmpty.add(emptyKey);
+              // If produsen is empty, include supplier and sertifikat in the deduplication key
+              const emptyKey = `empty|${normMerek}|${(v.supplier || '').toLowerCase().trim()}|${(v.sertifikatHalal || '').toLowerCase().trim()}`;
+              if (seenKeys.has(emptyKey)) return false;
+              seenKeys.add(emptyKey);
               return true;
             }
 
-            if (seenProdusen.has(produsenName)) {
+            const key = `${normMerek}|${produsenName}`;
+            if (seenKeys.has(key)) {
               return false;
             }
-            seenProdusen.add(produsenName);
+            seenKeys.add(key);
             return true;
           });
         });
@@ -325,6 +326,10 @@ const GudangBahan = () => {
                          <div>
                            <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Barcode size={14} style={{ marginRight: '6px' }}/> Kode Barang</span>
                            <strong style={{ fontSize: '1.1rem', color: '#60a5fa', letterSpacing: '1px' }}>{bahan.kodeBarang || `GB-${bahan.id.substring(1, 7).toUpperCase()}`}</strong>
+                         </div>
+                         <div>
+                           <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Package size={14} style={{ marginRight: '6px' }}/> Nama Merek Spesifik</span>
+                           <strong style={{ fontSize: '1.1rem', color: '#e2e8f0' }}>{bahan.merek}</strong>
                          </div>
                          <div>
                            <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Factory size={14} style={{ marginRight: '6px' }}/> Produsen / Pabrik</span>
