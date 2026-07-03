@@ -102,6 +102,15 @@ const GudangBahan = () => {
             seenKeys.add(key);
             return true;
           });
+
+          // Compute common name if multiple variants
+          if (g.variants.length > 1) {
+            const wordsArray = g.variants.map(v => (v.merek || '').toUpperCase().split(/\s+/));
+            const commonWords = wordsArray[0].filter(w => wordsArray.every(wa => wa.includes(w)));
+            if (commonWords.length > 0) {
+              g.merek = commonWords.join(' ');
+            }
+          }
         });
 
         // Sort alphabetically by merek
