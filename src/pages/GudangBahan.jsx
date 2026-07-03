@@ -350,6 +350,16 @@ const GudangBahan = () => {
                            <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Clock size={14} style={{ marginRight: '6px' }}/> Terakhir Diinput/Digunakan</span>
                            <span style={{ color: '#e2e8f0' }}>{bahan.tanggalInput ? new Date(bahan.tanggalInput).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                          </div>
+                         {bahan.sub && bahan.sub.length > 0 && (
+                           <div style={{ gridColumn: '1 / -1' }}>
+                             <span style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', marginBottom: '6px' }}><Package size={14} style={{ marginRight: '6px' }}/> Sub Varian / Lainnya</span>
+                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                               {bahan.sub.map((s, i) => (
+                                 <span key={i} style={{ background: 'rgba(255,255,255,0.1)', color: '#f8fafc', padding: '4px 12px', borderRadius: '16px', fontSize: '0.85rem' }}>{s}</span>
+                               ))}
+                             </div>
+                           </div>
+                         )}
                       </div>
                       {role === 'superadmin' && (
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.25rem' }}>

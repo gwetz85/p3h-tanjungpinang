@@ -223,6 +223,7 @@ const HalalForm = ({ job, onClose }) => {
             sertifikatHalal: b.sertifikat || '',
             expiredDate: b.expired || '',
             supplier: supplierName,
+            sub: b.sub || [],
             tanggalInput: Date.now()
           };
           
@@ -301,7 +302,8 @@ const HalalForm = ({ job, onClose }) => {
                   produsen: newBahanData.produsen || matchingItem.produsen,
                   sertifikatHalal: newBahanData.sertifikatHalal || matchingItem.sertifikatHalal,
                   expiredDate: newBahanData.expiredDate || matchingItem.expiredDate,
-                  supplier: newBahanData.supplier || matchingItem.supplier
+                  supplier: newBahanData.supplier || matchingItem.supplier,
+                  sub: newBahanData.sub && newBahanData.sub.length > 0 ? newBahanData.sub : (matchingItem.sub || [])
                 };
                 shouldUpdate = true;
               } else {
@@ -310,6 +312,13 @@ const HalalForm = ({ job, onClose }) => {
                 if (!matchingItem.expiredDate && newBahanData.expiredDate) { updates.expiredDate = newBahanData.expiredDate; shouldUpdate = true; }
                 if (!matchingItem.supplier && newBahanData.supplier) { updates.supplier = newBahanData.supplier; shouldUpdate = true; }
                 if (!matchingItem.sertifikatHalal && newBahanData.sertifikatHalal) { updates.sertifikatHalal = newBahanData.sertifikatHalal; shouldUpdate = true; }
+                
+                // Merge sub variants
+                const combinedSub = Array.from(new Set([...(matchingItem.sub || []), ...(newBahanData.sub || [])])).filter(s => s && s.trim() !== '');
+                if (combinedSub.length > (matchingItem.sub || []).length) {
+                  updates.sub = combinedSub;
+                  shouldUpdate = true;
+                }
               }
               
               if (shouldUpdate) {
