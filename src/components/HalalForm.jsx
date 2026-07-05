@@ -904,7 +904,7 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Photo Produk</p></div>
             )}
-            <input type="file" accept="image/*" onChange={handleImageUpload} />
+            <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} />
           </div>
 
           <div className="section-title mt-4">Foto KTP Pelaku Usaha</div>
@@ -924,7 +924,7 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto KTP</p></div>
             )}
-            <input type="file" accept="image/*" onChange={handleKTPUpload} />
+            <input type="file" accept="image/*" capture="environment" onChange={handleKTPUpload} />
           </div>
 
           <div className="input-group glass-card p-4 mb-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>

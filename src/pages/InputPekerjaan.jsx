@@ -40,6 +40,7 @@ const InputPekerjaan = () => {
     jenisUsaha: 'Makanan',
     tahunBerdiri: '',
     alamatUsaha: '',
+    linkMaps: '',
     photoPengajuan: ''
   });
   const [loading, setLoading] = useState(false);
@@ -85,6 +86,7 @@ const InputPekerjaan = () => {
         jenisUsaha: 'Makanan',
         tahunBerdiri: '',
         alamatUsaha: '',
+        linkMaps: '',
         photoPengajuan: ''
       });
       setTimeout(() => setSuccess(false), 3000);
@@ -187,6 +189,11 @@ const InputPekerjaan = () => {
             <div className="input-group full-width">
               <label>Alamat Usaha / Lokasi Produksi</label>
               <textarea placeholder="Alamat lengkap tempat usaha" rows="2" value={formData.alamatUsaha} onChange={(e) => setFormData({...formData, alamatUsaha: e.target.value})} required ></textarea>
+            </div>
+            <div className="input-group full-width">
+              <label><MapPin size={16} /> Link Google Maps / Sharelokasi Usaha (Opsional)</label>
+              <input type="url" placeholder="Contoh: https://maps.app.goo.gl/..." value={formData.linkMaps} onChange={(e) => setFormData({...formData, linkMaps: e.target.value})} />
+              <small className="text-muted" style={{ fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>Copy link (tautan) dari aplikasi Google Maps dan tempelkan di sini agar petugas mudah menemukan lokasi.</small>
             </div>
             <div className="input-group full-width">
               <label>Photo Produk Pengajuan (Upload)</label>

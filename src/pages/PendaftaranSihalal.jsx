@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, ExternalLink, PlayCircle } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, ExternalLink, PlayCircle, MapPin } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -280,6 +280,20 @@ const PendaftaranSihalal = () => {
                         <label>Wilayah</label>
                         <p>{selectedJob.kelurahan || '-'}</p>
                       </div>
+                      {selectedJob.linkMaps && (
+                        <div className="info-item full">
+                          <label>Lokasi Usaha (Maps)</label>
+                          <a 
+                            href={selectedJob.linkMaps} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="btn-primary-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '0.9rem', marginTop: '4px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '6px', textDecoration: 'none' }}
+                          >
+                            <MapPin size={16} /> Buka di Google Maps
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {selectedJob.halalData?.surveyDriveLink && (

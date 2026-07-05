@@ -768,7 +768,20 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                         </div>
                         <div className="info-item full">
                           <label>Alamat Usaha</label>
-                          <p>{selectedJob.alamatUsaha}</p>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                            <p style={{ margin: 0 }}>{selectedJob.alamatUsaha}</p>
+                            {selectedJob.linkMaps && (
+                              <a 
+                                href={selectedJob.linkMaps} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="action-btn"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 500 }}
+                              >
+                                <MapPin size={14} /> Navigasi ke Lokasi (Maps)
+                              </a>
+                            )}
+                          </div>
                         </div>
                         {(selectedJobPhoto || selectedJob.photoPengajuan) && (
                           <div className="info-item full">
