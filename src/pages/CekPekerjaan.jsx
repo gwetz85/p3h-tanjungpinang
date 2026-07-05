@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send, ClipboardCheck } from 'lucide-react';
+import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send, ClipboardCheck, Navigation, Map } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -883,24 +883,23 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                         </div>
                         <div className="info-item full">
                           <label>Alamat Usaha & Lokasi Maps</label>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
                             <p style={{ margin: 0 }}>{selectedJob.alamatUsaha}</p>
                             {selectedJob.linkMaps ? (
-                              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap' }}>
                                 <a 
                                   href={selectedJob.linkMaps} 
                                   target="_blank" 
                                   rel="noreferrer" 
-                                  className="action-btn"
-                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 500 }}
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)' }}
                                 >
-                                  <MapPin size={14} /> Navigasi ke Lokasi
+                                  <Navigation size={16} /> Buka Navigasi
                                 </a>
-                                <button onClick={handleEditMapsClick} className="btn-icon" style={{ padding: '6px' }} title="Edit Tautan Lokasi"><Edit3 size={14} /></button>
+                                <button onClick={handleEditMapsClick} className="btn-icon" style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }} title="Edit Tautan Lokasi"><Edit3 size={16} /></button>
                               </div>
                             ) : (
-                              <button onClick={handleEditMapsClick} className="btn-primary-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.85rem' }}>
-                                <MapPin size={14} /> Input Sharelokasi (Maps)
+                              <button onClick={handleEditMapsClick} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '0.85rem', whiteSpace: 'nowrap', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px dashed #3b82f6', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+                                <Map size={16} /> + Input Sharelokasi
                               </button>
                             )}
                           </div>
