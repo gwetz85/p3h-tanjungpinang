@@ -52,6 +52,8 @@ const VerifikasiPU = () => {
   const [showEditAlamat, setShowEditAlamat] = useState(false);
   const [editAlamatJob, setEditAlamatJob] = useState(null);
   const [newAlamatUsaha, setNewAlamatUsaha] = useState('');
+  const [showEditMaps, setShowEditMaps] = useState(false);
+  const [newLinkMaps, setNewLinkMaps] = useState('');
   // WhatsApp invitation modal state
   const [showWAModal, setShowWAModal] = useState(false);
   const [waJob, setWAJob] = useState(null);
@@ -353,6 +355,28 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
     } catch (err) {
       console.error(err);
       alert('Gagal menyimpan alamat.');
+    }
+  };
+
+  const handleEditMapsClick = (e) => {
+    if (e) e.stopPropagation();
+    setNewLinkMaps(selectedJob.linkMaps || '');
+    setShowEditMaps(true);
+  };
+
+  const handleSaveMaps = async (e) => {
+    e.preventDefault();
+    try {
+      await update(ref(rtdb, `pekerjaan/${selectedJob.id}`), {
+        linkMaps: newLinkMaps.trim()
+      });
+      setJobs(prev => prev.map(j => j.id === selectedJob.id ? { ...j, linkMaps: newLinkMaps.trim() } : j));
+      setSelectedJob(prev => ({ ...prev, linkMaps: newLinkMaps.trim() }));
+      alert('Link Maps berhasil diperbarui!');
+      setShowEditMaps(false);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menyimpan link maps.');
     }
   };
 
@@ -767,19 +791,26 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                           <p>{selectedJob.tahunBerdiri}</p>
                         </div>
                         <div className="info-item full">
-                          <label>Alamat Usaha</label>
+                          <label>Alamat Usaha & Lokasi Maps</label>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
                             <p style={{ margin: 0 }}>{selectedJob.alamatUsaha}</p>
-                            {selectedJob.linkMaps && (
-                              <a 
-                                href={selectedJob.linkMaps} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="action-btn"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 500 }}
-                              >
-                                <MapPin size={14} /> Navigasi ke Lokasi (Maps)
-                              </a>
+                            {selectedJob.linkMaps ? (
+                              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <a 
+                                  href={selectedJob.linkMaps} 
+                                  target="_blank" 
+                                  rel="noreferrer" 
+                                  className="action-btn"
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)', padding: '6px 12px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 500 }}
+                                >
+                                  <MapPin size={14} /> Navigasi ke Lokasi
+                                </a>
+                                <button onClick={handleEditMapsClick} className="btn-icon" style={{ padding: '6px' }} title="Edit Tautan Lokasi"><Edit3 size={14} /></button>
+                              </div>
+                            ) : (
+                              <button onClick={handleEditMapsClick} className="btn-primary-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '0.85rem' }}>
+                                <MapPin size={14} /> Input Sharelokasi (Maps)
+                              </button>
                             )}
                           </div>
                         </div>
@@ -1160,6 +1191,35 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                   >
                     <MessageSquare size={16} /> Buka WhatsApp
                   </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+        {showEditMaps && selectedJob && (
+          <div className="modal-overlay">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="modal-content glass-card" style={{ maxWidth: '400px' }}>
+              <div className="modal-header">
+                <h2>{selectedJob.linkMaps ? 'Edit Tautan Maps' : 'Input Sharelokasi'}</h2>
+                <button onClick={() => setShowEditMaps(false)} className="btn-close"><X /></button>
+              </div>
+              <form onSubmit={handleSaveMaps} style={{ padding: '20px' }}>
+                <p className="text-muted mb-4" style={{ fontSize: '0.9rem' }}>
+                  Masukkan tautan (link) Google Maps dari lokasi usaha yang dikirimkan oleh Pelaku Usaha.
+                </p>
+                <div className="input-group">
+                  <label>Link Google Maps / Sharelokasi</label>
+                  <textarea 
+                    value={newLinkMaps} 
+                    onChange={e => setNewLinkMaps(e.target.value)} 
+                    placeholder="Contoh: https://maps.app.goo.gl/..."
+                    rows="3"
+                    className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white"
+                  ></textarea>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
+                  <button type="button" onClick={() => setShowEditMaps(false)} className="btn-secondary">Batal</button>
+                  <button type="submit" className="btn-primary">Simpan Lokasi</button>
                 </div>
               </form>
             </motion.div>
