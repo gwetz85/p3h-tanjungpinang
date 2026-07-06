@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool } from 'lucide-react';
+import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool, Sparkles } from 'lucide-react';
+import FloatingTatacara from './FloatingTatacara';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [gudangBahanList, setGudangBahanList] = useState([]);
   const sigCanvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [showFloatingTatacara, setShowFloatingTatacara] = useState(false);
 
   const defaultData = {
     nib: '', kbli: '', usahaNib: '', namaUsaha: '', modalUsaha: '', lokasiUsaha: '', pendapatan: '',
@@ -1212,8 +1214,79 @@ const HalalForm = ({ job, onClose }) => {
             </div>
           </div>
 
-          <div className="section-title mt-4">Tatacara Pembuatan Produk</div>
-          <textarea rows="6" value={formData.tatacara} onChange={e => setFormData({...formData, tatacara: e.target.value})} placeholder="Uraikan sedetail mungkin..."></textarea>
+          <div 
+            className="section-title mt-4" 
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              cursor: 'pointer'
+            }}
+            onClick={() => setShowFloatingTatacara(true)}
+            title="Klik untuk membuka asisten pembuatan produk"
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              Tatacara Pembuatan Produk
+              <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: 'var(--primary)', background: 'rgba(37,99,235,0.08)', padding: '2px 8px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                <Sparkles size={11} /> Klik untuk membuka asisten
+              </span>
+            </span>
+            <button 
+              type="button" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFloatingTatacara(true);
+              }}
+              className="btn-primary"
+              style={{ 
+                padding: '4px 10px', 
+                fontSize: '0.75rem', 
+                background: 'linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%)',
+                border: 'none', 
+                borderRadius: '6px', 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontWeight: 600,
+                boxShadow: '0 4px 8px rgba(37,99,235,0.15)'
+              }}
+            >
+              <PenTool size={12} /> Asisten Tata Cara
+            </button>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <textarea 
+              rows="6" 
+              value={formData.tatacara} 
+              onChange={e => setFormData({...formData, tatacara: e.target.value})} 
+              placeholder="Uraikan sedetail mungkin cara pembuatan produk..."
+            ></textarea>
+            <div 
+              onClick={() => setShowFloatingTatacara(true)}
+              style={{
+                position: 'absolute',
+                bottom: '12px',
+                right: '12px',
+                background: 'rgba(37,99,235,0.08)',
+                border: '1px solid rgba(37,99,235,0.15)',
+                borderRadius: '6px',
+                padding: '4px 8px',
+                fontSize: '0.7rem',
+                color: 'var(--primary)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.2s',
+                userSelect: 'none'
+              }}
+              title="Buka asisten pengisian di sebelah kanan layar"
+            >
+              <Sparkles size={12} /> Gunakan Asisten
+            </div>
+          </div>
 
 
           <div className="section-title mt-4">Photo Produk Jadi</div>
@@ -1348,6 +1421,15 @@ const HalalForm = ({ job, onClose }) => {
         </div>
       </motion.div>
 
+      <FloatingTatacara
+        isOpen={showFloatingTatacara}
+        onClose={() => setShowFloatingTatacara(false)}
+        ingredients={formData.bahan}
+        pembersih={formData.pembersih}
+        kemasan={formData.kemasan}
+        currentText={formData.tatacara}
+        onApply={(newText) => setFormData({ ...formData, tatacara: newText })}
+      />
     </div>
   );
 };
