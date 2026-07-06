@@ -702,19 +702,37 @@ const Dashboard = () => {
                   
                   <div className="info-item">
                     <label>Kontak WhatsApp</label>
-                     <div className="whatsapp-link-container">
-                       <p>{selectedVisit.kontak || selectedVisit.wa || '-'}</p>
-                       {(selectedVisit.kontak || selectedVisit.wa) && (
-                         <a
-                           href={`https://wa.me/${(selectedVisit.kontak || selectedVisit.wa).replace(/\D/g, '')}`}
-                           target="_blank"
-                           rel="noreferrer"
-                           className="wa-btn"
-                         >
-                           <MessageSquare size={14} />
-                         </a>
-                       )}
-                     </div>
+                    <div className="whatsapp-link-container">
+                      <p>{selectedVisit.kontak || selectedVisit.wa || '-'}</p>
+                      {(selectedVisit.kontak || selectedVisit.wa) && (
+                        <a 
+                          href={
+                            (() => {
+                              const contact = selectedVisit.kontak || selectedVisit.wa;
+                              if (!contact) return '#';
+                              const phone = contact.replace(/\D/g, '');
+                              if (!phone) return '#';
+                              
+                              if (!selectedVisit.jadwalKunjungan) return `https://wa.me/${phone}`;
+                              
+                              const dateObj = new Date(selectedVisit.jadwalKunjungan);
+                              const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dateObj.getDay()];
+                              const tanggal = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                              const waktu = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                              
+                              const text = `Halo Bapak/Ibu ${selectedVisit.nama},\nKami dari Pendamping Proses Produk Halal (P3H) Kota Tanjungpinang menginformasikan bahwa kami akan melakukan kunjungan lapangan untuk verifikasi dokumen dan lokasi usaha.\n\nKunjungan dijadwalkan pada:\nHari: ${hari}\nTanggal: ${tanggal}\nWaktu: ${waktu} WIB\n\nMohon dipersiapkan dokumen terkait (KTP, NIB, dll) dan kesediaan waktunya. Terima kasih.`;
+                              return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                            })()
+                          } 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="wa-btn"
+                          title="Kirim Undangan WA"
+                        >
+                          <MessageSquare size={14} />
+                        </a>
+                      )}
+                    </div>
                   </div>
 
                   <div className="info-item full">

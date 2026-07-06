@@ -217,12 +217,15 @@ const HalalForm = ({ job, onClose }) => {
         
         for (const b of validBahan) {
           const supplierName = b.supplier === 'Swalayan' && b.namaSwalayan ? `${b.supplier} (${b.namaSwalayan})` : (b.supplier || '');
+          const uniqueId = Math.random().toString(36).substring(2, 6).toUpperCase();
           const newBahanData = {
+            kodeBarang: `GB-${Date.now().toString().slice(-4)}${uniqueId}`,
             merek: b.merk || '',
             produsen: b.produsen || '',
             sertifikatHalal: b.sertifikat || '',
             expiredDate: b.expired || '',
             supplier: supplierName,
+            sub: b.sub || [],
             tanggalInput: Date.now()
           };
           
@@ -245,17 +248,23 @@ const HalalForm = ({ job, onClose }) => {
                if (item.sertifikatHalal && newBahanData.sertifikatHalal && item.sertifikatHalal === newBahanData.sertifikatHalal) {
                  matchingItem = item; break;
                }
-               const wordsA = getWords(item.merek);
-               const wordsB = getWords(newBahanData.merek);
-               if (wordsA.length > 0 && wordsB.length > 0) {
-                 const common = wordsA.filter(w => wordsB.includes(w));
-                 if (common.length >= 2 || (wordsA.length === 1 && wordsB.length === 1 && wordsA[0] === wordsB[0])) {
-                   matchingItem = item; break;
-                 }
-               }
+               let nameSimilar = false;
                const normA = (item.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
                const normB = (newBahanData.merek || '').toLowerCase().replace(/[^a-z0-9]/g, '');
                if (normA && normB && normA === normB) {
+                 nameSimilar = true;
+               }
+
+               if (nameSimilar) {
+                 const prodA = (item.produsen || '').toLowerCase().trim();
+                 const prodB = (newBahanData.produsen || '').toLowerCase().trim();
+                 
+                 // If both have a produsen defined and they are different, they are DIFFERENT variants.
+                 // Do not match, so it will push as a new variant.
+                 if (prodA && prodB && prodA !== prodB) {
+                   continue;
+                 }
+                 
                  matchingItem = item; break;
                }
             }
@@ -286,7 +295,8 @@ const HalalForm = ({ job, onClose }) => {
                   produsen: newBahanData.produsen || matchingItem.produsen,
                   sertifikatHalal: newBahanData.sertifikatHalal || matchingItem.sertifikatHalal,
                   expiredDate: newBahanData.expiredDate || matchingItem.expiredDate,
-                  supplier: newBahanData.supplier || matchingItem.supplier
+                  supplier: newBahanData.supplier || matchingItem.supplier,
+                  sub: newBahanData.sub && newBahanData.sub.length > 0 ? newBahanData.sub : (matchingItem.sub || [])
                 };
                 shouldUpdate = true;
               } else {
@@ -295,6 +305,13 @@ const HalalForm = ({ job, onClose }) => {
                 if (!matchingItem.expiredDate && newBahanData.expiredDate) { updates.expiredDate = newBahanData.expiredDate; shouldUpdate = true; }
                 if (!matchingItem.supplier && newBahanData.supplier) { updates.supplier = newBahanData.supplier; shouldUpdate = true; }
                 if (!matchingItem.sertifikatHalal && newBahanData.sertifikatHalal) { updates.sertifikatHalal = newBahanData.sertifikatHalal; shouldUpdate = true; }
+                
+                // Merge sub variants
+                const combinedSub = Array.from(new Set([...(matchingItem.sub || []), ...(newBahanData.sub || [])])).filter(s => s && s.trim() !== '');
+                if (combinedSub.length > (matchingItem.sub || []).length) {
+                  updates.sub = combinedSub;
+                  shouldUpdate = true;
+                }
               }
               
               if (shouldUpdate) {
@@ -441,513 +458,177 @@ const HalalForm = ({ job, onClose }) => {
     };
   }, [isDrawing]);
 
-  const generatePDF = () => {
+  const buildHtmlContent = (forPernyataan = false) => {
     const bahanFilled = formData.bahan.filter(b => b.merk);
     const pembersihFilled = formData.pembersih.filter(p => p.merk);
     const kemasanFilled = formData.kemasan.filter(k => k.merk);
-
-    const printWindow = window.open('', '_blank', 'width=900,height=700');
-    if (!printWindow) {
-      alert('Popup diblokir browser. Izinkan popup untuk mencetak PDF.');
-      return;
-    }
-
     const baseUrl = window.location.origin;
-
-    printWindow.document.write(`
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <title>Halal TPI - ${formData.namaUsaha || 'Dokumen'}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 11pt;
-      color: #111;
-      background: #fff;
-      padding: 0;
-    }
-
-    /* ── Page setup ── */
-    @page {
-      size: A4 portrait;
-      margin: 18mm 15mm 18mm 15mm;
-    }
-
-    /* ── Section blocks — never split across pages ── */
-    .section {
-      page-break-inside: avoid;
-      break-inside: avoid;
-      margin-bottom: 18px;
-    }
-
-    /* ── Section heading ── */
-    .section-heading {
-      background: #e5e7eb;
-      padding: 7px 12px;
-      font-weight: bold;
-      font-size: 11pt;
-      border-left: 4px solid #10b981;
-      margin-bottom: 10px;
-      page-break-after: avoid;
-      break-after: avoid;
-    }
-
-    /* ── Data table ── */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    table td {
-      padding: 5px 8px;
-      vertical-align: top;
-      line-height: 1.5;
-    }
-    table td:first-child {
-      font-weight: bold;
-      width: 32%;
-      white-space: nowrap;
-    }
-
-    /* ── Bahan list ── */
-    .bahan-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 10pt;
-    }
-    .bahan-table th {
-      background: #f3f4f6;
-      padding: 5px 8px;
-      text-align: left;
-      border: 1px solid #d1d5db;
-      font-size: 10pt;
-    }
-    .bahan-table td {
-      padding: 5px 8px;
-      border: 1px solid #e5e7eb;
-      vertical-align: top;
-    }
-    .bahan-table tr {
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-
-    /* ── Images — fit inside one page, never split ── */
-    .img-section {
-      page-break-inside: avoid;
-      break-inside: avoid;
-      text-align: center;
-      margin-top: 8px;
-    }
-    .img-section img {
-      max-width: 100%;
-      max-height: 220mm;
-      object-fit: contain;
-      border: 1px solid #d1d5db;
-      padding: 4px;
-      display: block;
-      margin: 0 auto;
-    }
-
-    /* ── Header ── */
-    .doc-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 3px solid #10b981;
-      padding-bottom: 14px;
-      margin-bottom: 20px;
-      gap: 12px;
-    }
-    .doc-header-logo {
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-      flex-shrink: 0;
-    }
-    .doc-header-center {
-      flex: 1;
-      text-align: center;
-    }
-    .doc-header-center h1 { color: #10b981; font-size: 17pt; margin-bottom: 4px; }
-    .doc-header-center p  { font-size: 10pt; color: #374151; }
-    .doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
-
-    /* ── Identity block (pemohon) ── */
-    .identity-box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 4px;
-      padding: 10px 14px;
-      margin-bottom: 18px;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-    .identity-box table td:first-child { width: 28%; }
-
-    /* ── Signature block ── */
-    .sign-block {
-      margin-top: 36px;
-      text-align: right;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-    .sign-block p { line-height: 1.8; font-size: 10pt; }
-    .sign-line {
-      display: inline-block;
-      border-bottom: 1px solid #111;
-      width: 200px;
-      margin-top: 48px;
-    }
-
-    /* ── Print-only: hide browser chrome ── */
-    @media print {
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- HEADER -->
-  <div class="doc-header">
-    <img class="doc-header-logo" src="${baseUrl}/logo-halal-center.png" alt="Halal Center" onerror="this.style.display='none'" />
-    <div class="doc-header-center">
-      <h1>HALAL CENTRE TPI</h1>
-      <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
-      <p class="sub">Pendampingan Proses Produk Halal (P3H)</p>
-    </div>
-    <img class="doc-header-logo" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" />
-  </div>
-
-  <!-- IDENTITAS PEMOHON -->
-  <div class="identity-box">
-    <table>
-      <tr><td>Nama Pelaku Usaha</td><td>: <strong>${job.nama || '-'}</strong></td></tr>
-      <tr><td>NIK</td><td>: ${job.nik || '-'}</td></tr>
-      <tr><td>No. WhatsApp</td><td>: ${job.wa || '-'}</td></tr>
-      <tr><td>Kelurahan</td><td>: ${job.kelurahan || '-'}</td></tr>
-      <tr><td>Alamat Domisili</td><td>: ${job.alamat || '-'}</td></tr>
-    </table>
-  </div>
-
-  <!-- I. DATA USAHA -->
-  <div class="section">
-    <div class="section-heading">I. DATA USAHA</div>
-    <table>
-      <tr><td>Nomor NIB</td><td>: ${formData.nib || '-'}</td></tr>
-      <tr><td>KBLI</td><td>: ${formData.kbli || '-'}</td></tr>
-      <tr><td>Usaha Di NIB</td><td>: ${formData.usahaNib || '-'}</td></tr>
-      <tr><td>Nama Usaha</td><td>: ${formData.namaUsaha || '-'}</td></tr>
-      <tr><td>Modal Usaha</td><td>: ${formData.modalUsaha || '-'}</td></tr>
-      <tr><td>Lokasi Usaha</td><td>: ${formData.lokasiUsaha || '-'}</td></tr>
-      <tr><td>Titik Koordinat GPS</td><td>: ${formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : '-'}</td></tr>
-      <tr><td>Pendapatan</td><td>: ${formData.pendapatan || '-'}</td></tr>
-    </table>
-  </div>
-
-  <!-- II. AKUN SIHALAL -->
-  <div class="section">
-    <div class="section-heading">II. AKUN SIHALAL (RESMI)</div>
-    <table>
-      <tr><td>Email siHalal</td><td>: ${formData.siHalalEmail || '-'}</td></tr>
-      <tr><td>Kata Sandi siHalal</td><td>: ${formData.siHalalPassword || '-'}</td></tr>
-    </table>
-  </div>
-
-  <!-- III. DAFTAR BAHAN -->
-  <div class="section">
-    <div class="section-heading">III. DAFTAR BAHAN &amp; PROSES</div>
-
-    ${bahanFilled.length > 0 ? `
-    <p style="font-weight:bold; margin-bottom:6px;">A. Bahan Pembuatan Produk</p>
-    <table class="bahan-table">
-      <thead>
-        <tr>
-          <th>No</th><th>Merk / Nama Bahan</th><th>Produsen</th>
-          <th>Sertifikat Halal</th><th>Expired</th><th>Supplier</th><th>Bahan Pengganti</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${bahanFilled.map((b, i) => `
-        <tr>
-          <td style="text-align:center">${i + 1}</td>
-          <td>${b.merk || '-'}</td>
-          <td>${b.produsen || '-'}</td>
-          <td>${b.sertifikat || '-'}</td>
-          <td>${b.expired || '-'}</td>
-          <td>${b.supplier || '-'}${b.supplier === 'Swalayan' && b.namaSwalayan ? `<br><small>(${b.namaSwalayan})</small>` : ''}</td>
-          <td>${(b.sub || []).filter(s => s).join(', ') || '-'}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>` : '<p style="color:#6b7280; font-size:10pt;">Tidak ada bahan yang diisi.</p>'}
-
-    ${pembersihFilled.length > 0 ? `
-    <p style="font-weight:bold; margin:12px 0 6px;">B. Bahan Pembersih</p>
-    <table class="bahan-table">
-      <thead><tr><th>No</th><th>Item Pembersih</th><th>Bahan Pengganti</th></tr></thead>
-      <tbody>
-        ${pembersihFilled.map((p, i) => `
-        <tr>
-          <td style="text-align:center">${i + 1}</td>
-          <td>${p.merk || '-'}</td>
-          <td>${(p.sub || []).filter(s => s).join(', ') || '-'}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>` : ''}
-
-    ${kemasanFilled.length > 0 ? `
-    <p style="font-weight:bold; margin:12px 0 6px;">C. Kemasan</p>
-    <table class="bahan-table">
-      <thead><tr><th>No</th><th>Jenis Kemasan</th></tr></thead>
-      <tbody>
-        ${kemasanFilled.map((k, i) => `
-        <tr>
-          <td style="text-align:center">${i + 1}</td>
-          <td>${k.merk || '-'}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>` : ''}
-  </div>
-
-  <!-- IV. TATACARA -->
-  <div class="section">
-    <div class="section-heading">IV. TATACARA PEMBUATAN PRODUK</div>
-    <p style="white-space: pre-wrap; line-height: 1.7; font-size: 10.5pt;">${formData.tatacara || '-'}</p>
-  </div>
-
-  <!-- V. LINK SURVEY -->
-  ${formData.surveyDriveLink ? `
-  <div class="section">
-    <div class="section-heading">V. LINK FOTO SURVEY LAPANGAN</div>
-    <p style="word-break: break-all; color: #2563eb;">${formData.surveyDriveLink}</p>
-  </div>` : ''}
-
-  <!-- VI. FOTO PRODUK -->
-  ${formData.photo ? `
-  <div class="section">
-    <div class="section-heading">${formData.surveyDriveLink ? 'VI' : 'V'}. FOTO PRODUK</div>
-    <div class="img-section">
-      <img src="${formData.photo}" alt="Foto Produk" />
-    </div>
-  </div>` : ''}
-
-  <!-- VII. FOTO KTP -->
-  ${formData.photoKTP ? `
-  <div class="section">
-    <div class="section-heading">${formData.surveyDriveLink && formData.photo ? 'VII' : formData.surveyDriveLink || formData.photo ? 'VI' : 'V'}. FOTO KTP PELAKU USAHA</div>
-    <div class="img-section">
-      <img src="${formData.photoKTP}" alt="Foto KTP" />
-    </div>
-  </div>` : ''}
-
-  <!-- TANDA TANGAN -->
-  <div class="sign-block" style="margin-top: 36px; text-align: right; page-break-inside: avoid; break-inside: avoid;">
-    <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
-    <div style="display: inline-block; text-align: center; margin-top: 20px; min-width: 200px;">
-      <p style="margin-bottom: 10px; font-weight: bold;">PELAKU USAHA</p>
-      ${formData.tandaTanganPelakuUsaha ? `<img src="${formData.tandaTanganPelakuUsaha}" style="max-height: 80px; max-width: 200px; display: block; margin: 0 auto;" alt="Tanda Tangan" />` : '<div style="height: 80px;"></div>'}
-      <p style="margin-top: 5px; font-weight: bold; text-decoration: underline;">${job.nama || '-'}</p>
-    </div>
-  </div>
-
-</body>
-</html>`);
-
-    printWindow.document.close();
-    printWindow.focus();
-
-    // Tunggu semua gambar selesai dimuat sebelum print
-    const images = printWindow.document.images;
-    let loaded = 0;
-    const total = images.length;
-
-    const doPrint = () => {
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 300);
-    };
-
-    if (total === 0) {
-      doPrint();
-    } else {
-      Array.from(images).forEach(img => {
-        if (img.complete) {
-          loaded++;
-          if (loaded === total) doPrint();
-        } else {
-          img.onload = img.onerror = () => {
-            loaded++;
-            if (loaded === total) doPrint();
-          };
-        }
-      });
-    }
-  };
-
-  const generatePernyataanHalalPDF = () => {
     const namaPelakuUsaha = formData.namaPelakuUsaha || job.nama || '-';
-
     const now = new Date();
     const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
     const tanggalStr = `${String(now.getDate()).padStart(2,'0')} ${bulanId[now.getMonth()]} ${now.getFullYear()}`;
 
-    const printWindow = window.open('', '_blank', 'width=900,height=700');
-    if (!printWindow) {
-      alert('Popup diblokir browser. Izinkan popup untuk mencetak PDF.');
+    if (forPernyataan) {
+      return `<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; background: #fff; padding: 20mm; }
+.wrapper { border: 1.5px solid #111; padding: 40px 48px 48px 48px; }
+.title { text-align: center; font-weight: bold; font-size: 11pt; text-decoration: underline; margin-bottom: 8px; }
+.subtitle { text-align: center; font-size: 12pt; margin-bottom: 28px; }
+.body-text { text-align: justify; line-height: 1.9; margin-bottom: 14px; font-size: 12pt; }
+.numbered-list { margin: 0 0 30px 0; padding-left: 0; list-style: none; }
+.numbered-list li { display: flex; gap: 6px; text-align: justify; line-height: 1.9; margin-bottom: 4px; font-size: 12pt; }
+.numbered-list li .num { min-width: 22px; flex-shrink: 0; }
+.sign-area { margin-top: 30px; }
+.sign-location { text-align: center; font-weight: bold; font-size: 12pt; margin-bottom: 6px; }
+.sign-label { text-align: center; font-weight: bold; font-size: 12pt; margin-bottom: 0; }
+.sign-img-wrap { margin: 10px auto; height: 90px; display: flex; align-items: center; justify-content: center; }
+.sign-img-wrap img { max-height: 90px; max-width: 220px; object-fit: contain; display: block; }
+.sign-name { text-align: center; font-weight: bold; font-size: 12pt; margin-bottom: 2px; }
+.sign-line { text-align: center; font-size: 12pt; }
+@page { size: A4 portrait; margin: 20mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<div class="wrapper">
+  <div class="title">KEBIJAKAN HALAL</div>
+  <div class="subtitle">(${namaPelakuUsaha.toUpperCase()})</div>
+  <div class="body-text">Kami berkomitmen dan bertanggung jawab untuk menghasilkan produk halal secara konsisten dan berkesinambungan dengan melalukan tindakan:</div>
+  <ol class="numbered-list">
+    <li><span class="num">1.</span><span>Mentaati peraturan perundang-undangan terkait jaminan produk halal.</span></li>
+    <li><span class="num">2.</span><span>Menggunakan bahan halal dan melaksanakan proses produk halal (PPH) sesuai dengan ketentuannya yang berlaku.</span></li>
+    <li><span class="num">3.</span><span>Menyediakan sumber daya manusia yang mendukung pelaksanaan PPH di perusahaan.</span></li>
+    <li><span class="num">4.</span><span>Mensosialisasikan dan mengkomunikasikan kebijakan halal pada seluruh pihak terkait untuk memastikan semua personel menjaga integritas halal di perusahaan.</span></li>
+  </ol>
+  <div class="sign-area">
+    <div class="sign-location">KOTA TANJUNG PINANG, ${tanggalStr}</div>
+    <div class="sign-label">Penanggung Jawab,</div>
+    <div class="sign-img-wrap">${formData.tandaTanganPelakuUsaha ? `<img src="${formData.tandaTanganPelakuUsaha}" alt="Tanda Tangan" />` : '<div style="height:90px;"></div>'}</div>
+    <div class="sign-name">${namaPelakuUsaha}</div>
+    <div class="sign-line">(......................................)</div>
+  </div>
+</div>
+</body></html>`;
+    }
+
+    return `<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; font-size: 11pt; color: #111; background: #fff; padding: 18mm 15mm; }
+.section { page-break-inside: avoid; break-inside: avoid; margin-bottom: 18px; }
+.section-heading { background: #e5e7eb; padding: 7px 12px; font-weight: bold; font-size: 11pt; border-left: 4px solid #10b981; margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; }
+table td { padding: 5px 8px; vertical-align: top; line-height: 1.5; }
+table td:first-child { font-weight: bold; width: 32%; white-space: nowrap; }
+.bahan-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+.bahan-table th { background: #f3f4f6; padding: 5px 8px; text-align: left; border: 1px solid #d1d5db; font-size: 10pt; }
+.bahan-table td { padding: 5px 8px; border: 1px solid #e5e7eb; vertical-align: top; }
+.img-section { page-break-inside: avoid; break-inside: avoid; text-align: center; margin-top: 8px; }
+.img-section img { max-width: 100%; max-height: 220mm; object-fit: contain; border: 1px solid #d1d5db; padding: 4px; display: block; margin: 0 auto; }
+.doc-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #10b981; padding-bottom: 14px; margin-bottom: 20px; gap: 12px; }
+.doc-header-logo { width: 90px; height: 90px; object-fit: contain; flex-shrink: 0; }
+.doc-header-center { flex: 1; text-align: center; }
+.doc-header-center h1 { color: #10b981; font-size: 17pt; margin-bottom: 4px; }
+.doc-header-center p { font-size: 10pt; color: #374151; }
+.doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
+.identity-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px 14px; margin-bottom: 18px; }
+.identity-box table td:first-child { width: 28%; }
+@page { size: A4 portrait; margin: 18mm 15mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+<div class="doc-header">
+  <img class="doc-header-logo" src="${baseUrl}/logo-halal-center.png" alt="Halal Center" onerror="this.style.display='none'" />
+  <div class="doc-header-center">
+    <h1>HALAL CENTRE TPI</h1>
+    <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
+    <p class="sub">Pendampingan Proses Produk Halal (P3H)</p>
+  </div>
+  <img class="doc-header-logo" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" />
+</div>
+<div class="identity-box">
+  <table>
+    <tr><td>Nama Pelaku Usaha</td><td>: <strong>${job.nama || '-'}</strong></td></tr>
+    <tr><td>NIK</td><td>: ${job.nik || '-'}</td></tr>
+    <tr><td>No. WhatsApp</td><td>: ${job.wa || '-'}</td></tr>
+    <tr><td>Kelurahan</td><td>: ${job.kelurahan || '-'}</td></tr>
+    <tr><td>Alamat Domisili</td><td>: ${job.alamat || '-'}</td></tr>
+  </table>
+</div>
+<div class="section">
+  <div class="section-heading">I. DATA USAHA</div>
+  <table>
+    <tr><td>Nomor NIB</td><td>: ${formData.nib || '-'}</td></tr>
+    <tr><td>KBLI</td><td>: ${formData.kbli || '-'}</td></tr>
+    <tr><td>Usaha Di NIB</td><td>: ${formData.usahaNib || '-'}</td></tr>
+    <tr><td>Nama Usaha</td><td>: ${formData.namaUsaha || '-'}</td></tr>
+    <tr><td>Modal Usaha</td><td>: ${formData.modalUsaha || '-'}</td></tr>
+    <tr><td>Lokasi Usaha</td><td>: ${formData.lokasiUsaha || '-'}</td></tr>
+    <tr><td>Titik Koordinat GPS</td><td>: ${formData.location ? `${formData.location.lat.toFixed(6)}, ${formData.location.lng.toFixed(6)}` : '-'}</td></tr>
+    <tr><td>Pendapatan</td><td>: ${formData.pendapatan || '-'}</td></tr>
+  </table>
+</div>
+<div class="section">
+  <div class="section-heading">II. AKUN SIHALAL (RESMI)</div>
+  <table>
+    <tr><td>Email siHalal</td><td>: ${formData.siHalalEmail || '-'}</td></tr>
+    <tr><td>Kata Sandi siHalal</td><td>: ${formData.siHalalPassword || '-'}</td></tr>
+  </table>
+</div>
+<div class="section">
+  <div class="section-heading">III. DAFTAR BAHAN &amp; PROSES</div>
+  ${bahanFilled.length > 0 ? `
+  <p style="font-weight:bold; margin-bottom:6px;">A. Bahan Pembuatan Produk</p>
+  <table class="bahan-table"><thead><tr><th>No</th><th>Merk / Nama Bahan</th><th>Produsen</th><th>Sertifikat Halal</th><th>Expired</th><th>Supplier</th><th>Bahan Pengganti</th></tr></thead>
+  <tbody>${bahanFilled.map((b, i) => `<tr><td style="text-align:center">${i+1}</td><td>${b.merk||'-'}</td><td>${b.produsen||'-'}</td><td>${b.sertifikat||'-'}</td><td>${b.expired||'-'}</td><td>${b.supplier||'-'}${b.supplier==='Swalayan'&&b.namaSwalayan?`<br><small>(${b.namaSwalayan})</small>`:''}</td><td>${(b.sub||[]).filter(s=>s).join(', ')||'-'}</td></tr>`).join('')}</tbody></table>` : '<p style="color:#6b7280;font-size:10pt;">Tidak ada bahan yang diisi.</p>'}
+  ${pembersihFilled.length > 0 ? `<p style="font-weight:bold;margin:12px 0 6px;">B. Bahan Pembersih</p><table class="bahan-table"><thead><tr><th>No</th><th>Item Pembersih</th><th>Bahan Pengganti</th></tr></thead><tbody>${pembersihFilled.map((p,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${p.merk||'-'}</td><td>${(p.sub||[]).filter(s=>s).join(', ')||'-'}</td></tr>`).join('')}</tbody></table>` : ''}
+  ${kemasanFilled.length > 0 ? `<p style="font-weight:bold;margin:12px 0 6px;">C. Kemasan</p><table class="bahan-table"><thead><tr><th>No</th><th>Jenis Kemasan</th></tr></thead><tbody>${kemasanFilled.map((k,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${k.merk||'-'}</td></tr>`).join('')}</tbody></table>` : ''}
+</div>
+<div class="section">
+  <div class="section-heading">IV. TATACARA PEMBUATAN PRODUK</div>
+  <p style="white-space: pre-wrap; line-height: 1.7; font-size: 10.5pt;">${formData.tatacara || '-'}</p>
+</div>
+${formData.surveyDriveLink ? `<div class="section"><div class="section-heading">V. LINK FOTO SURVEY LAPANGAN</div><p style="word-break:break-all;color:#2563eb;">${formData.surveyDriveLink}</p></div>` : ''}
+${formData.photo ? `<div class="section"><div class="section-heading">${formData.surveyDriveLink ? 'VI' : 'V'}. FOTO PRODUK</div><div class="img-section"><img src="${formData.photo}" alt="Foto Produk" /></div></div>` : ''}
+${formData.photoKTP ? `<div class="section"><div class="section-heading">${formData.surveyDriveLink && formData.photo ? 'VII' : formData.surveyDriveLink || formData.photo ? 'VI' : 'V'}. FOTO KTP PELAKU USAHA</div><div class="img-section"><img src="${formData.photoKTP}" alt="Foto KTP" /></div></div>` : ''}
+<div style="margin-top: 36px; text-align: right;">
+  <p style="font-size:10pt;">Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+  <div style="display:inline-block;text-align:center;margin-top:20px;min-width:200px;">
+    <p style="margin-bottom:10px;font-weight:bold;">PELAKU USAHA</p>
+    ${formData.tandaTanganPelakuUsaha ? `<img src="${formData.tandaTanganPelakuUsaha}" style="max-height:80px;max-width:200px;display:block;margin:0 auto;" alt="Tanda Tangan" />` : '<div style="height:80px;"></div>'}
+    <p style="margin-top:5px;font-weight:bold;text-decoration:underline;">${job.nama || '-'}</p>
+  </div>
+</div>
+</body></html>`;
+  };
+
+  const openPrintWindow = (htmlContent) => {
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (!win) {
+      alert('Popup diblokir browser. Silakan izinkan popup untuk situs ini lalu coba lagi.');
+      URL.revokeObjectURL(url);
       return;
     }
+    win.onload = () => {
+      setTimeout(() => {
+        win.focus();
+        win.print();
+        URL.revokeObjectURL(url);
+      }, 500);
+    };
+  };
 
-    printWindow.document.write(`
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <title>KEBIJAKAN HALAL - ${namaPelakuUsaha}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      font-size: 12pt;
-      color: #111;
-      background: #fff;
-    }
-    @page {
-      size: A4 portrait;
-      margin: 20mm 20mm 20mm 20mm;
-    }
-    .wrapper {
-      border: 1.5px solid #111;
-      padding: 40px 48px 48px 48px;
-    }
-    .title {
-      text-align: center;
-      font-weight: bold;
-      font-size: 11pt;
-      text-decoration: underline;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      text-align: center;
-      font-size: 12pt;
-      margin-bottom: 28px;
-    }
-    .body-text {
-      text-align: justify;
-      line-height: 1.9;
-      margin-bottom: 14px;
-      font-size: 12pt;
-    }
-    .numbered-list {
-      margin: 0 0 30px 0;
-      padding-left: 0;
-      list-style: none;
-    }
-    .numbered-list li {
-      display: flex;
-      gap: 6px;
-      text-align: justify;
-      line-height: 1.9;
-      margin-bottom: 4px;
-      font-size: 12pt;
-    }
-    .numbered-list li .num {
-      min-width: 22px;
-      flex-shrink: 0;
-    }
-    .sign-area {
-      margin-top: 30px;
-    }
-    .sign-location {
-      text-align: center;
-      font-weight: bold;
-      font-size: 12pt;
-      margin-bottom: 6px;
-    }
-    .sign-label {
-      text-align: center;
-      font-weight: bold;
-      font-size: 12pt;
-      margin-bottom: 0;
-    }
-    .sign-img-wrap {
-      margin: 10px auto;
-      height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .sign-img-wrap img {
-      max-height: 90px;
-      max-width: 220px;
-      object-fit: contain;
-      display: block;
-    }
-    .sign-name {
-      text-align: center;
-      font-weight: bold;
-      font-size: 12pt;
-      margin-bottom: 2px;
-    }
-    .sign-line {
-      text-align: center;
-      font-size: 12pt;
-    }
-    @media print {
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="title">KEBIJAKAN HALAL</div>
-    <div class="subtitle">(${namaPelakuUsaha.toUpperCase()})</div>
+  const generatePDF = () => {
+    const html = buildHtmlContent(false);
+    openPrintWindow(html);
+  };
 
-    <div class="body-text">
-      Kami berkomitmen dan bertanggung jawab untuk menghasilkan produk halal secara konsisten dan berkesinambungan dengan melalukan tindakan:
-    </div>
-
-    <ol class="numbered-list">
-      <li><span class="num">1.</span><span>Mentaati peraturan perundang-undangan terkait jaminan produk halal.</span></li>
-      <li><span class="num">2.</span><span>Menggunakan bahan halal dan melaksanakan proses produk halal (PPH) sesuai dengan ketentuannya yang berlaku.</span></li>
-      <li><span class="num">3.</span><span>Menyediakan sumber daya manusia yang mendukung pelaksanaan PPH di perusahaan.</span></li>
-      <li><span class="num">4.</span><span>Mensosialisasikan dan mengkomunikasikan kebijakan halal pada seluruh pihak terkait untuk memastikan semua personel menjaga integritas halal di perusahaan.</span></li>
-    </ol>
-
-    <div class="sign-area">
-      <div class="sign-location">KOTA TANJUNG PINANG, ${tanggalStr}</div>
-      <div class="sign-label">Penanggung Jawab,</div>
-      <div class="sign-img-wrap">
-        ${formData.tandaTanganPelakuUsaha
-          ? `<img src="${formData.tandaTanganPelakuUsaha}" alt="Tanda Tangan" />`
-          : '<div style="height:90px;"></div>'
-        }
-      </div>
-      <div class="sign-name">${namaPelakuUsaha}</div>
-      <div class="sign-line">(......................................)</div>
-    </div>
-  </div>
-</body>
-</html>`);
-
-    printWindow.document.close();
-    printWindow.focus();
-
-    const images = printWindow.document.images;
-    let loaded = 0;
-    const total = images.length;
-    const doPrint = () => setTimeout(() => { printWindow.print(); printWindow.close(); }, 400);
-    if (total === 0) {
-      doPrint();
-    } else {
-      Array.from(images).forEach(img => {
-        if (img.complete) { loaded++; if (loaded === total) doPrint(); }
-        else { img.onload = img.onerror = () => { loaded++; if (loaded === total) doPrint(); }; }
-      });
-    }
+  const generatePernyataanHalalPDF = () => {
+    const html = buildHtmlContent(true);
+    openPrintWindow(html);
   };
 
   return (
@@ -1296,7 +977,7 @@ const HalalForm = ({ job, onClose }) => {
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Photo Produk</p></div>
             )}
-            <input type="file" accept="image/*" onChange={handleImageUpload} />
+            <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} />
           </div>
 
           <div className="section-title mt-4">Foto KTP Pelaku Usaha</div>
@@ -1316,7 +997,7 @@ const HalalForm = ({ job, onClose }) => {
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto KTP</p></div>
             )}
-            <input type="file" accept="image/*" onChange={handleKTPUpload} />
+            <input type="file" accept="image/*" capture="environment" onChange={handleKTPUpload} />
           </div>
 
           <div className="input-group glass-card p-4 mb-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>

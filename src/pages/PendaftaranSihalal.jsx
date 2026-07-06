@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, ExternalLink, PlayCircle } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Info, Search, X, MessageSquare, PhoneCall, Download, ExternalLink, PlayCircle, MapPin } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -249,13 +249,51 @@ const PendaftaranSihalal = () => {
                         <label>Kontak</label>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                           <p>{selectedJob.wa}</p>
-                          <a href={`https://wa.me/${selectedJob.wa.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-primary"><MessageSquare size={16} /></a>
+                          <a 
+                            href={
+                              (() => {
+                                if (!selectedJob.wa) return '#';
+                                const phone = selectedJob.wa.replace(/\D/g, '');
+                                if (!phone) return '#';
+                                
+                                if (!selectedJob.jadwalKunjungan) return `https://wa.me/${phone}`;
+                                
+                                const dateObj = new Date(selectedJob.jadwalKunjungan);
+                                const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dateObj.getDay()];
+                                const tanggal = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                                const waktu = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                                
+                                const text = `Halo Bapak/Ibu ${selectedJob.nama},\nKami dari Pendamping Proses Produk Halal (P3H) Kota Tanjungpinang menginformasikan bahwa kami akan melakukan kunjungan lapangan untuk verifikasi dokumen dan lokasi usaha.\n\nKunjungan dijadwalkan pada:\nHari: ${hari}\nTanggal: ${tanggal}\nWaktu: ${waktu} WIB\n\nMohon dipersiapkan dokumen terkait (KTP, NIB, dll) dan kesediaan waktunya. Terima kasih.`;
+                                return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                              })()
+                            } 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="text-primary"
+                            title="Kirim Undangan WA"
+                          >
+                            <MessageSquare size={16} />
+                          </a>
                         </div>
                       </div>
                       <div className="info-item">
                         <label>Wilayah</label>
                         <p>{selectedJob.kelurahan || '-'}</p>
                       </div>
+                      {selectedJob.linkMaps && (
+                        <div className="info-item full">
+                          <label>Lokasi Usaha (Maps)</label>
+                          <a 
+                            href={selectedJob.linkMaps} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="btn-primary-outline"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '0.9rem', marginTop: '4px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '6px', textDecoration: 'none' }}
+                          >
+                            <MapPin size={16} /> Buka di Google Maps
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     {selectedJob.halalData?.surveyDriveLink && (
