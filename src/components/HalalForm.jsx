@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { rtdb } from '../firebase';
 import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool, Sparkles } from 'lucide-react';
+import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool, Sparkles, Maximize2 } from 'lucide-react';
 import FloatingTatacara from './FloatingTatacara';
 
 const HalalForm = ({ job, onClose }) => {
@@ -904,12 +904,12 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
               cursor: 'pointer'
             }}
             onClick={() => setShowFloatingTatacara(true)}
-            title="Klik untuk membuka asisten pembuatan produk"
+            title="Klik untuk membuka editor tata cara pembuatan"
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               Tatacara Pembuatan Produk
               <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: 'var(--primary)', background: 'rgba(37,99,235,0.08)', padding: '2px 8px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                <Sparkles size={11} /> Klik untuk membuka asisten
+                <PenTool size={11} /> Klik untuk memperbesar editor
               </span>
             </span>
             <button 
@@ -933,7 +933,7 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
                 boxShadow: '0 4px 8px rgba(37,99,235,0.15)'
               }}
             >
-              <PenTool size={12} /> Asisten Tata Cara
+              <Maximize2 size={12} /> Perbesar Editor
             </button>
           </div>
           <div style={{ position: 'relative' }}>
@@ -963,9 +963,9 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
                 transition: 'all 0.2s',
                 userSelect: 'none'
               }}
-              title="Buka asisten pengisian di sebelah kanan layar"
+              title="Perbesar editor tata cara pembuatan produk"
             >
-              <Sparkles size={12} /> Gunakan Asisten
+              <Maximize2 size={12} /> Perbesar Editor
             </div>
           </div>
 
@@ -1105,9 +1105,6 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
       <FloatingTatacara
         isOpen={showFloatingTatacara}
         onClose={() => setShowFloatingTatacara(false)}
-        ingredients={formData.bahan}
-        pembersih={formData.pembersih}
-        kemasan={formData.kemasan}
         currentText={formData.tatacara}
         onApply={(newText) => setFormData({ ...formData, tatacara: newText })}
       />
