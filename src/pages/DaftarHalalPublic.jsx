@@ -203,7 +203,7 @@ const DaftarHalalPublic = () => {
           <p style={{ color: 'rgba(255,255,255,0.7)' }}>Self Declare - P3H Tanjungpinang</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="job-form">
+        <form onSubmit={handleSubmit} className="job-form dark-glass-form">
           <div className="section-divider full-width"><p>Data Pelaku Usaha</p></div>
           <div className="form-grid">
             <div className="input-group">

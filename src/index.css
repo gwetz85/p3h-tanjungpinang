@@ -3389,4 +3389,34 @@ select option {
     height: calc(100% - 50px);
   }
 }
+}
 
+/* Dark Glass Form specifically for Pendaftaran Publik */
+.dark-glass-form .input-group label {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.dark-glass-form input, 
+.dark-glass-form select, 
+.dark-glass-form textarea {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark-glass-form input:focus, 
+.dark-glass-form select:focus, 
+.dark-glass-form textarea:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+}
+
+.dark-glass-form select option {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+.dark-glass-form .section-divider p {
+  color: #10b981 !important;
+}
