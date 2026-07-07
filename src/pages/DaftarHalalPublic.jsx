@@ -187,18 +187,12 @@ const DaftarHalalPublic = () => {
   }
 
   return (
-    <div className="page-container" style={{ minHeight: '100vh', background: '#f0f2f5', padding: '20px', display: 'flex', justifyContent: 'center' }}>
-      
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        className="form-container"
-        style={{ position: 'relative', zIndex: 1, maxWidth: '800px', width: '100%', margin: '2rem auto', background: '#ffffff', borderRadius: '16px', padding: '2rem', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}
-      >
+    <div className="daftar-halal-page">
+      <div className="daftar-halal-card">
         <div className="form-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <img src="/logo-p3h.png" alt="P3H" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
-          <h2 className="title-gradient">Pendaftaran Sertifikasi Halal</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Self Declare - P3H Tanjungpinang</p>
+          <h2 style={{ color: '#059669', fontWeight: 700, fontSize: '1.5rem' }}>Pendaftaran Sertifikasi Halal</h2>
+          <p style={{ color: '#64748b' }}>Self Declare - P3H Tanjungpinang</p>
         </div>
 
         <form onSubmit={handleSubmit} className="job-form">
@@ -251,7 +245,7 @@ const DaftarHalalPublic = () => {
                 value={formData.kecamatan}
                 readOnly
                 placeholder="Otomatis terisi"
-                style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: formData.kecamatan ? '#10b981' : 'rgba(255,255,255,0.4)' }}
+                style={{ background: '#f1f5f9', cursor: 'not-allowed', color: formData.kecamatan ? '#059669' : '#94a3b8' }}
               />
             </div>
           </div>
@@ -308,13 +302,13 @@ const DaftarHalalPublic = () => {
                 value={formData.kecamatanUsaha}
                 readOnly
                 placeholder="Otomatis terisi"
-                style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: formData.kecamatanUsaha ? '#10b981' : 'rgba(255,255,255,0.4)' }}
+                style={{ background: '#f1f5f9', cursor: 'not-allowed', color: formData.kecamatanUsaha ? '#059669' : '#94a3b8' }}
               />
             </div>
 
             <div className="input-group full-width">
               <label><Navigation size={16} /> Titik Lokasi Usaha (Koordinat)</label>
-              <div className="glass-card p-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem', background: '#f8fafc' }}>
                 <button 
                   type="button" 
                   onClick={getLocation} 
@@ -329,7 +323,7 @@ const DaftarHalalPublic = () => {
                   </p>
                 )}
                 {formData.latitude && formData.longitude && (
-                  <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)', fontSize: '0.85rem', color: 'white' }}>
+                  <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(5, 150, 105, 0.1)', borderRadius: '8px', border: '1px solid rgba(5, 150, 105, 0.3)', fontSize: '0.85rem', color: '#1e293b' }}>
                     <strong>Latitude:</strong> {formData.latitude} <br/>
                     <strong>Longitude:</strong> {formData.longitude}
                   </div>
@@ -387,7 +381,7 @@ const DaftarHalalPublic = () => {
             </button>
           </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 };

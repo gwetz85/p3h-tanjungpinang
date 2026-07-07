@@ -3391,32 +3391,58 @@ select option {
 }
 }
 
-/* Dark Glass Form specifically for Pendaftaran Publik */
-.dark-glass-form .input-group label {
-  color: rgba(255, 255, 255, 0.85) !important;
+/* ========== Daftar Halal Public Page ========== */
+.daftar-halal-page {
+  min-height: 100vh !important;
+  background: #ffffff !important;
+  padding: 20px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
 }
 
-.dark-glass-form input, 
-.dark-glass-form select, 
-.dark-glass-form textarea {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: #f1f5f9 !important;
+.daftar-halal-card {
+  max-width: 800px !important;
+  width: 100% !important;
+  margin: 1rem auto !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  padding: 2rem !important;
+  box-shadow: none !important;
 }
 
-.dark-glass-form input:focus, 
-.dark-glass-form select:focus, 
-.dark-glass-form textarea:focus {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+.daftar-halal-card .input-group label {
+  color: #1e293b !important;
 }
 
-.dark-glass-form select option {
-  background-color: #0f172a !important;
-  color: #f1f5f9 !important;
+.daftar-halal-card input,
+.daftar-halal-card select,
+.daftar-halal-card textarea {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #0f172a !important;
 }
 
-.dark-glass-form .section-divider p {
-  color: #10b981 !important;
+.daftar-halal-card input:focus,
+.daftar-halal-card select:focus,
+.daftar-halal-card textarea:focus {
+  background: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+}
+
+.daftar-halal-card select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.daftar-halal-card .section-divider p {
+  color: #059669 !important;
+}
+
+.daftar-halal-card .glass-card {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
