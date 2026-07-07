@@ -71,10 +71,12 @@ const MenuDaftarHalal = () => {
           wa: reg.wa,
           namaUsaha: reg.namaUsaha,
           jenisUsaha: reg.jenisUsaha,
+          kbli: reg.kbli || '',
+          nib: reg.nib || '',
           tahunBerdiri: reg.tahunBerdiri,
           alamatUsaha: reg.lokasiUsaha,
           linkMaps: reg.linkMaps || '',
-          status: 'Pending', // Status awal di Pekerjaan
+          status: 'Pending',
           tanggalInput: Date.now(),
           progress: 0,
           keterangan: 'Pendaftaran Mandiri (Diteruskan Admin)'
@@ -191,6 +193,14 @@ const MenuDaftarHalal = () => {
                   <div className="info-item">
                     <label>Jenis Usaha</label>
                     <p>{selectedReg.jenisUsaha}</p>
+                  </div>
+                  <div className="info-item">
+                    <label>KBLI</label>
+                    <p>{selectedReg.kbli || '-'}</p>
+                  </div>
+                  <div className="info-item">
+                    <label>Nomor NIB</label>
+                    <p>{selectedReg.nib || '-'}</p>
                   </div>
                   <div className="info-item">
                     <label>Tahun Berdiri</label>

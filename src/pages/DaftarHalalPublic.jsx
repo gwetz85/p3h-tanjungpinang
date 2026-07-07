@@ -15,6 +15,8 @@ const DaftarHalalPublic = () => {
     wa: '',
     namaUsaha: '',
     jenisUsaha: 'Makanan',
+    kbli: '',
+    nib: '',
     lokasiUsaha: '',
     tahunBerdiri: '',
     latitude: null,
@@ -198,6 +200,14 @@ const DaftarHalalPublic = () => {
                 <option value="Makanan">Makanan</option>
                 <option value="Minuman">Minuman</option>
               </select>
+            </div>
+            <div className="input-group">
+              <label>KBLI</label>
+              <input type="text" placeholder="Kode KBLI" value={formData.kbli} onChange={(e) => setFormData({...formData, kbli: e.target.value})} required />
+            </div>
+            <div className="input-group">
+              <label>Nomor NIB</label>
+              <input type="text" placeholder="Nomor Induk Berusaha" value={formData.nib} onChange={(e) => setFormData({...formData, nib: e.target.value})} required />
             </div>
             
             <div className="input-group">
