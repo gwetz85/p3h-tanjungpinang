@@ -24,7 +24,7 @@ import { auth } from './firebase';
 import PopoutSettings from './pages/PopoutSettings';
 import DaftarHalalPublic from './pages/DaftarHalalPublic';
 import MenuDaftarHalal from './pages/MenuDaftarHalal';
-
+import ExtractToText from './pages/ExtractToText';
 
 const PendingApproval = () => {
   const { currentUser } = useAuth();
@@ -161,6 +161,7 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="popout-settings" element={<ProtectedRoute allowedRoles={['superadmin']}><PopoutSettings /></ProtectedRoute>} />
+              <Route path="extract-text" element={<ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}><ExtractToText /></ProtectedRoute>} />
               <Route path="chat" element={<Chat />} />
           </Route>
         </Routes>
