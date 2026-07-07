@@ -188,7 +188,7 @@ const DaftarHalalPublic = () => {
   }
 
   return (
-    <div className="page-container" style={{ minHeight: '100vh', background: '#0a0a0a', padding: '20px', display: 'flex', justifyContent: 'center' }}>
+    <div className="page-container" style={{ minHeight: '100vh', background: '#f8fafc', padding: '20px', display: 'flex', justifyContent: 'center' }}>
       <div className="mesh-background" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}></div>
       
       <motion.div 
@@ -198,12 +198,12 @@ const DaftarHalalPublic = () => {
         style={{ position: 'relative', zIndex: 1, maxWidth: '800px', width: '100%', margin: '2rem auto' }}
       >
         <div className="form-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logo-p3h.png" alt="P3H" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
+          <img src="/logo-p3h.png" alt="P3H" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
           <h2 className="title-gradient">Pendaftaran Sertifikasi Halal</h2>
-          <p style={{ color: 'rgba(255,255,255,0.7)' }}>Self Declare - P3H Tanjungpinang</p>
+          <p style={{ color: 'var(--text-muted)' }}>Self Declare - P3H Tanjungpinang</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="job-form dark-glass-form">
+        <form onSubmit={handleSubmit} className="job-form">
           <div className="section-divider full-width"><p>Data Pelaku Usaha</p></div>
           <div className="form-grid">
             <div className="input-group">
