@@ -163,13 +163,12 @@ const DaftarHalalPublic = () => {
 
   if (success) {
     return (
-      <div className="login-page-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div className="mesh-background"></div>
+      <div className="login-page-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: '#f0f2f5' }}>
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="login-card-modern glass-card text-center"
-          style={{ maxWidth: '500px', width: '100%' }}
+          className="login-card-modern text-center"
+          style={{ maxWidth: '500px', width: '100%', background: '#ffffff', borderRadius: '16px', padding: '2.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}
         >
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <CheckCircle size={64} color="#10b981" />
@@ -188,14 +187,13 @@ const DaftarHalalPublic = () => {
   }
 
   return (
-    <div className="page-container" style={{ minHeight: '100vh', background: '#f8fafc', padding: '20px', display: 'flex', justifyContent: 'center' }}>
-      <div className="mesh-background" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}></div>
+    <div className="page-container" style={{ minHeight: '100vh', background: '#f0f2f5', padding: '20px', display: 'flex', justifyContent: 'center' }}>
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
         animate={{ opacity: 1, y: 0 }} 
-        className="form-container glass-card"
-        style={{ position: 'relative', zIndex: 1, maxWidth: '800px', width: '100%', margin: '2rem auto' }}
+        className="form-container"
+        style={{ position: 'relative', zIndex: 1, maxWidth: '800px', width: '100%', margin: '2rem auto', background: '#ffffff', borderRadius: '16px', padding: '2rem', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }}
       >
         <div className="form-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <img src="/logo-p3h.png" alt="P3H" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
