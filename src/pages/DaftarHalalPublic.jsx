@@ -512,8 +512,8 @@ table td:first-child { font-weight: bold; width: 32%; white-space: nowrap; }
                 <option value="Minuman">Minuman</option>
               </select>
             </div>
-            <InputField label="KBLI" placeholder="Kode KBLI (5 digit)" inputMode="numeric" maxLength="5" value={formData.kbli} onChange={e => setFormData({...formData, kbli: e.target.value.replace(/\D/g,'').slice(0,5)})} required />
-            <InputField label="Nomor NIB" placeholder="13 digit" inputMode="numeric" maxLength="13" value={formData.nib} onChange={e => setFormData({...formData, nib: e.target.value.replace(/\D/g,'').slice(0,13)})} required />
+            <InputField label="KBLI" placeholder="Kode KBLI (5 digit) (Opsional)" inputMode="numeric" maxLength="5" value={formData.kbli} onChange={e => setFormData({...formData, kbli: e.target.value.replace(/\D/g,'').slice(0,5)})} />
+            <InputField label="Nomor NIB" placeholder="13 digit (Opsional)" inputMode="numeric" maxLength="13" value={formData.nib} onChange={e => setFormData({...formData, nib: e.target.value.replace(/\D/g,'').slice(0,13)})} />
             <InputField label="Tahun Berdiri" placeholder="Contoh: 2020" type="number" value={formData.tahunBerdiri} onChange={e => setFormData({...formData, tahunBerdiri: e.target.value})} required />
             <div style={S.fullWidth}>
               <label style={S.label}>📍 Lokasi Usaha (Alamat)</label>
