@@ -52,6 +52,47 @@ const ExtractToText = () => {
       arr[index + 1] = arr[index];
       arr[index] = temp;
       return arr;
+  };
+
+  const preprocessImage = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Scale up by 2x for better text clarity
+        const scale = 2;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        // Grayscale and increase contrast
+        const factor = (259 * (128 + 255)) / (255 * (259 - 128)); // contrast factor
+        
+        for (let i = 0; i < data.length; i += 4) {
+          // Convert to grayscale
+          const avg = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          
+          // Apply contrast
+          let newColor = factor * (avg - 128) + 128;
+          newColor = Math.max(0, Math.min(255, newColor)); // clamp
+          
+          data[i] = newColor;
+          data[i + 1] = newColor;
+          data[i + 2] = newColor;
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = reject;
+      img.src = url;
     });
   };
 
@@ -73,9 +114,12 @@ const ExtractToText = () => {
       setGlobalProgress({ text: `Membaca gambar ${i + 1} dari ${images.length}...`, percentage: 0 });
 
       try {
+        setGlobalProgress({ text: `Memproses kualitas gambar ${i + 1}...`, percentage: 10 });
+        const processedUrl = await preprocessImage(img.url);
+
         const { data: { text } } = await Tesseract.recognize(
-          img.url,
-          'ind', // Indonesian language
+          processedUrl,
+          'ind+eng', // Indonesian + English language
           {
             logger: m => {
               if (m.status === 'recognizing text') {
