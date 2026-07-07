@@ -981,7 +981,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                         <button
                           onClick={(e) => { handleKirimWA(selectedJob, e); }}
                           className="btn-primary-outline"
-                          style={{ borderColor: '#25D366', color: '#25D366', background: 'rgba(37,211,102,0.08)' }}
+                          style={{ borderColor: '#25D366', color: '#15803d', fontWeight: '700', background: 'rgba(37,211,102,0.08)' }}
                         >
                           <MessageSquare size={18} /> Kirim Undangan WA
                         </button>
