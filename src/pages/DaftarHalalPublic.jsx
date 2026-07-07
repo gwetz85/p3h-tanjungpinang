@@ -129,7 +129,7 @@ const DaftarHalalPublic = () => {
             <CheckCircle size={64} color="#10b981" />
           </div>
           <h2 className="title-gradient" style={{ marginBottom: '1rem' }}>Pendaftaran Berhasil!</h2>
-          <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2rem' }}>
+          <p style={{ color: '#222222', marginBottom: '2rem' }}>
             Data pengajuan Sertifikasi Halal Anda telah kami terima dan akan segera diproses oleh petugas lapangan kami. 
             Terima kasih!
           </p>
