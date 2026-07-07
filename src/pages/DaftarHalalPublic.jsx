@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, push, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,6 +48,19 @@ const KELURAHAN_KECAMATAN = {
 };
 
 const DaftarHalalPublic = () => {
+  // Force white background on body/html when this page is active
+  useEffect(() => {
+    const originalBodyBg = document.body.style.background;
+    const originalHtmlBg = document.documentElement.style.background;
+    document.body.style.background = '#ffffff';
+    document.documentElement.style.background = '#ffffff';
+    document.body.style.backgroundImage = 'none';
+    return () => {
+      document.body.style.background = originalBodyBg;
+      document.documentElement.style.background = originalHtmlBg;
+    };
+  }, []);
+
   const [formData, setFormData] = useState({
     nama: '',
     nik: '',
