@@ -336,6 +336,101 @@ const DaftarHalalPublic = () => {
     }
   };
 
+  const downloadPDF = () => {
+    const baseUrl = window.location.origin;
+    const now = new Date();
+    const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const tanggalStr = `${String(now.getDate()).padStart(2,'0')} ${bulanId[now.getMonth()]} ${now.getFullYear()}`;
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Bukti Pendaftaran - ${formData.nama}</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; font-size: 11pt; color: #111; background: #fff; padding: 18mm 15mm; }
+.section { page-break-inside: avoid; break-inside: avoid; margin-bottom: 18px; }
+.section-heading { background: #e5e7eb; padding: 7px 12px; font-weight: bold; font-size: 11pt; border-left: 4px solid #10b981; margin-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; }
+table td { padding: 5px 8px; vertical-align: top; line-height: 1.5; }
+table td:first-child { font-weight: bold; width: 32%; white-space: nowrap; }
+.doc-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #10b981; padding-bottom: 14px; margin-bottom: 20px; gap: 12px; }
+.doc-header-logo { width: 90px; height: 90px; object-fit: contain; flex-shrink: 0; }
+.doc-header-center { flex: 1; text-align: center; }
+.doc-header-center h1 { color: #10b981; font-size: 17pt; margin-bottom: 4px; }
+.doc-header-center p { font-size: 10pt; color: #374151; }
+.doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
+.identity-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px 14px; margin-bottom: 18px; }
+@page { size: A4 portrait; margin: 18mm 15mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<div class="doc-header">
+  <img class="doc-header-logo" src="${baseUrl}/logo-halal-center.png" alt="Halal Center" onerror="this.style.display='none'" />
+  <div class="doc-header-center">
+    <h1>HALAL CENTRE TPI</h1>
+    <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
+    <p class="sub">Pendampingan Proses Produk Halal (P3H)</p>
+  </div>
+  <img class="doc-header-logo" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" />
+</div>
+
+<h2 style="text-align:center; margin-bottom: 20px; text-decoration: underline; font-size: 14pt;">BUKTI PENDAFTARAN</h2>
+
+<div class="identity-box">
+  <table>
+    <tr><td>Nama Lengkap</td><td>: ${formData.nama || '-'}</td></tr>
+    <tr><td>NIK</td><td>: ${formData.nik || '-'}</td></tr>
+    <tr><td>No. WhatsApp</td><td>: ${formData.wa || '-'}</td></tr>
+    <tr><td>Tempat, Tanggal Lahir</td><td>: ${formData.tempatLahir || '-'}, ${formData.tanggalLahir || '-'}</td></tr>
+    <tr><td>Alamat (Sesuai KTP)</td><td>: ${formData.alamat || '-'}</td></tr>
+    <tr><td>Kelurahan / Kecamatan</td><td>: ${formData.kelurahan || '-'} / ${formData.kecamatan || '-'}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-heading">DATA USAHA</div>
+  <table>
+    <tr><td>Nama Usaha (Merek)</td><td>: ${formData.namaUsaha || '-'}</td></tr>
+    <tr><td>Jenis Usaha</td><td>: ${formData.jenisUsaha || '-'}</td></tr>
+    <tr><td>Nomor NIB</td><td>: ${formData.nib || '-'}</td></tr>
+    <tr><td>KBLI</td><td>: ${formData.kbli || '-'}</td></tr>
+    <tr><td>Tahun Berdiri</td><td>: ${formData.tahunBerdiri || '-'}</td></tr>
+    <tr><td>Lokasi Usaha</td><td>: ${formData.lokasiUsaha || '-'}</td></tr>
+    <tr><td>Kelurahan / Kecamatan Usaha</td><td>: ${formData.kelurahanUsaha || '-'} / ${formData.kecamatanUsaha || '-'}</td></tr>
+    <tr><td>Titik Koordinat (GPS)</td><td>: ${formData.latitude ? `${formData.latitude}, ${formData.longitude}` : '-'}</td></tr>
+  </table>
+</div>
+
+<div style="margin-top: 40px; text-align: right;">
+  <p>Kota Tanjungpinang, ${tanggalStr}</p>
+  <p style="margin-top: 5px;">Pendaftar,</p>
+  <div style="height: 80px;"></div>
+  <p style="font-weight: bold; text-decoration: underline;">${formData.nama || '....................................'}</p>
+</div>
+
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (!win) {
+      alert('Popup diblokir browser. Silakan izinkan popup untuk situs ini lalu coba lagi.');
+      URL.revokeObjectURL(url);
+      return;
+    }
+    win.onload = () => {
+      setTimeout(() => {
+        win.focus();
+        win.print();
+        URL.revokeObjectURL(url);
+      }, 500);
+    };
+  };
+
   const InputField = ({ label, icon, ...props }) => (
     <div>
       <label style={S.label}>{icon && <span style={{ marginRight: 6 }}>{icon}</span>}{label}</label>
@@ -354,9 +449,14 @@ const DaftarHalalPublic = () => {
           <p style={{ color: '#475569', lineHeight: 1.6, marginBottom: '24px' }}>
             Data pengajuan Sertifikasi Halal Anda telah kami terima dan akan segera diproses oleh petugas lapangan kami. Terima kasih!
           </p>
-          <button onClick={() => window.location.reload()} style={S.submitBtn}>
-            Ajukan Pendaftaran Lain
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button onClick={downloadPDF} style={{ ...S.submitBtn, marginTop: 0, background: '#f59e0b', boxShadow: '0 4px 14px rgba(245,158,11,0.3)', color: '#fff' }}>
+              📄 Download / Cetak Bukti PDF
+            </button>
+            <button onClick={() => window.location.reload()} style={{ ...S.submitBtn, marginTop: 0, background: '#f1f5f9', color: '#0f172a', boxShadow: 'none', border: '1.5px solid #cbd5e1' }}>
+              Ajukan Pendaftaran Lain
+            </button>
+          </div>
         </div>
       </div>
     );
