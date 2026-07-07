@@ -259,7 +259,7 @@ const DaftarHalalPublic = () => {
                 ) : (
                   <div className="upload-placeholder">
                     <p>Klik untuk pilih atau ambil foto KTP (Maks 5MB)</p>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photoKTP')} required />
+                    <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageUpload(e, 'photoKTP')} required />
                   </div>
                 )}
               </div>
@@ -276,7 +276,7 @@ const DaftarHalalPublic = () => {
                 ) : (
                   <div className="upload-placeholder">
                     <p>Klik untuk pilih atau ambil foto Produk Utama (Maks 5MB)</p>
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photoProduk')} required />
+                    <input type="file" accept="image/*" capture="environment" onChange={(e) => handleImageUpload(e, 'photoProduk')} required />
                   </div>
                 )}
               </div>
