@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Camera, X, Upload, Bell, ChevronDown } from 'lucide-react';
+import { LogOut, Camera, X, Upload, Bell, ChevronDown, UserCircle } from 'lucide-react';
 import { auth, rtdb } from '../firebase';
 import { ref, update, onValue } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
