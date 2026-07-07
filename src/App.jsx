@@ -22,6 +22,8 @@ import { motion } from 'framer-motion';
 import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
 import PopoutSettings from './pages/PopoutSettings';
+import DaftarHalalPublic from './pages/DaftarHalalPublic';
+import MenuDaftarHalal from './pages/MenuDaftarHalal';
 
 
 const PendingApproval = () => {
@@ -79,6 +81,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/setup" element={<Setup />} />
+          <Route path="/daftar" element={<DaftarHalalPublic />} />
           
           <Route path="/" element={
             <ProtectedRoute>
@@ -116,6 +119,12 @@ function App() {
             <Route path="pendaftaran" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
                 <PendaftaranSihalal />
+              </ProtectedRoute>
+            } />
+
+            <Route path="daftar-halal" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
+                <MenuDaftarHalal />
               </ProtectedRoute>
             } />
             
