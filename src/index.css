@@ -182,12 +182,10 @@ select option {
   flex-direction: column;
   padding: 1.5rem 1rem;
   z-index: 100;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--primary);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 0 24px rgba(5, 150, 105, 0.2);
 }
 
 .sidebar-brand {
@@ -225,7 +223,7 @@ select option {
   gap: 12px;
   padding: 12px 16px;
   text-decoration: none;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.75);
   border-radius: 8px;
   transition: var(--transition);
   font-weight: 500;
@@ -235,12 +233,12 @@ select option {
 }
 
 .nav-item svg {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.75);
   transition: var(--transition);
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   transform: translateX(4px);
 }
@@ -250,9 +248,9 @@ select option {
 }
 
 .nav-item.active {
-  background: var(--primary-gradient);
+  background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  box-shadow: 0 8px 20px -6px rgba(59, 130, 246, 0.5);
+  box-shadow: none;
   border-color: rgba(255, 255, 255, 0.1);
   font-weight: 600;
   transform: translateX(4px);
@@ -276,7 +274,7 @@ select option {
   padding: 12px 16px;
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   border-radius: 8px;
   transition: var(--transition);
@@ -285,13 +283,13 @@ select option {
 }
 
 .btn-logout-sidebar svg {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.75);
   transition: var(--transition);
 }
 
 .btn-logout-sidebar:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .btn-logout-sidebar:hover svg {
