@@ -5,6 +5,48 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, User, MapPin, CreditCard, Phone, Briefcase, Camera, CheckCircle, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const KELURAHAN_LIST = [
+  'Tanjungpinang Barat',
+  'Kemboja',
+  'Bukit Cermin',
+  'Kampung Baru',
+  'Tanjungpinang Kota',
+  'Senggarang',
+  'Kampung Bugis',
+  'Penyengat',
+  'Batu IX',
+  'Melayu Kota Piring',
+  'Kampung Bulang',
+  'Pinang Kencana',
+  'Air Raja',
+  'Dompak',
+  'Sei Jang',
+  'Tanjung Unggat',
+  'Tanjung Ayun Sakti',
+  'Tanjungpinang Timur',
+];
+
+const KELURAHAN_KECAMATAN = {
+  'Tanjungpinang Kota': 'Tanjungpinang Kota',
+  'Senggarang': 'Tanjungpinang Kota',
+  'Kampung Bugis': 'Tanjungpinang Kota',
+  'Penyengat': 'Tanjungpinang Kota',
+  'Tanjungpinang Barat': 'Tanjungpinang Barat',
+  'Kemboja': 'Tanjungpinang Barat',
+  'Bukit Cermin': 'Tanjungpinang Barat',
+  'Kampung Baru': 'Tanjungpinang Barat',
+  'Batu IX': 'Tanjungpinang Timur',
+  'Melayu Kota Piring': 'Tanjungpinang Timur',
+  'Kampung Bulang': 'Tanjungpinang Timur',
+  'Pinang Kencana': 'Tanjungpinang Timur',
+  'Air Raja': 'Tanjungpinang Timur',
+  'Dompak': 'Bukit Bestari',
+  'Sei Jang': 'Bukit Bestari',
+  'Tanjung Unggat': 'Bukit Bestari',
+  'Tanjung Ayun Sakti': 'Bukit Bestari',
+  'Tanjungpinang Timur': 'Bukit Bestari',
+};
+
 const DaftarHalalPublic = () => {
   const [formData, setFormData] = useState({
     nama: '',
@@ -12,12 +54,16 @@ const DaftarHalalPublic = () => {
     tempatLahir: '',
     tanggalLahir: '',
     alamat: '',
+    kelurahan: '',
+    kecamatan: '',
     wa: '',
     namaUsaha: '',
     jenisUsaha: 'Makanan',
     kbli: '',
     nib: '',
     lokasiUsaha: '',
+    kelurahanUsaha: '',
+    kecamatanUsaha: '',
     tahunBerdiri: '',
     latitude: null,
     longitude: null,
@@ -186,6 +232,30 @@ const DaftarHalalPublic = () => {
               <label><MapPin size={16} /> Alamat (Sesuai KTP)</label>
               <textarea placeholder="Alamat lengkap sesuai KTP" rows="2" value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} required ></textarea>
             </div>
+            <div className="input-group">
+              <label>Kelurahan</label>
+              <select
+                value={formData.kelurahan}
+                onChange={(e) => {
+                  const kel = e.target.value;
+                  setFormData({ ...formData, kelurahan: kel, kecamatan: KELURAHAN_KECAMATAN[kel] || '' });
+                }}
+                required
+              >
+                <option value="">-- Pilih Kelurahan --</option>
+                {KELURAHAN_LIST.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
+            </div>
+            <div className="input-group">
+              <label>Kecamatan</label>
+              <input
+                type="text"
+                value={formData.kecamatan}
+                readOnly
+                placeholder="Otomatis terisi"
+                style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: formData.kecamatan ? '#10b981' : 'rgba(255,255,255,0.4)' }}
+              />
+            </div>
           </div>
 
           <div className="section-divider full-width" style={{ marginTop: '2rem' }}><p>Data Usaha</p></div>
@@ -218,6 +288,30 @@ const DaftarHalalPublic = () => {
             <div className="input-group full-width">
               <label><MapPin size={16} /> Lokasi Usaha (Alamat)</label>
               <textarea placeholder="Alamat lengkap tempat produksi / jualan" rows="2" value={formData.lokasiUsaha} onChange={(e) => setFormData({...formData, lokasiUsaha: e.target.value})} required ></textarea>
+            </div>
+            <div className="input-group">
+              <label>Kelurahan Usaha</label>
+              <select
+                value={formData.kelurahanUsaha}
+                onChange={(e) => {
+                  const kel = e.target.value;
+                  setFormData({ ...formData, kelurahanUsaha: kel, kecamatanUsaha: KELURAHAN_KECAMATAN[kel] || '' });
+                }}
+                required
+              >
+                <option value="">-- Pilih Kelurahan --</option>
+                {KELURAHAN_LIST.map(k => <option key={k} value={k}>{k}</option>)}
+              </select>
+            </div>
+            <div className="input-group">
+              <label>Kecamatan Usaha</label>
+              <input
+                type="text"
+                value={formData.kecamatanUsaha}
+                readOnly
+                placeholder="Otomatis terisi"
+                style={{ background: 'rgba(255,255,255,0.05)', cursor: 'not-allowed', color: formData.kecamatanUsaha ? '#10b981' : 'rgba(255,255,255,0.4)' }}
+              />
             </div>
 
             <div className="input-group full-width">

@@ -68,6 +68,8 @@ const MenuDaftarHalal = () => {
           tempatLahir: reg.tempatLahir || '',
           tanggalLahir: reg.tanggalLahir || '',
           alamat: reg.alamat,
+          kelurahan: reg.kelurahan || '',
+          kecamatan: reg.kecamatan || '',
           wa: reg.wa,
           namaUsaha: reg.namaUsaha,
           jenisUsaha: reg.jenisUsaha,
@@ -75,6 +77,8 @@ const MenuDaftarHalal = () => {
           nib: reg.nib || '',
           tahunBerdiri: reg.tahunBerdiri,
           alamatUsaha: reg.lokasiUsaha,
+          kelurahanUsaha: reg.kelurahanUsaha || '',
+          kecamatanUsaha: reg.kecamatanUsaha || '',
           linkMaps: reg.linkMaps || '',
           status: 'Pending',
           tanggalInput: Date.now(),
@@ -228,10 +232,34 @@ const MenuDaftarHalal = () => {
                     <label>Alamat KTP</label>
                     <p>{selectedReg.alamat}</p>
                   </div>
+                  {(selectedReg.kelurahan || selectedReg.kecamatan) && (
+                    <>
+                      <div className="info-item">
+                        <label>Kelurahan (Domisili)</label>
+                        <p>{selectedReg.kelurahan || '-'}</p>
+                      </div>
+                      <div className="info-item">
+                        <label>Kecamatan (Domisili)</label>
+                        <p>{selectedReg.kecamatan || '-'}</p>
+                      </div>
+                    </>
+                  )}
                   <div className="info-item full">
                     <label>Lokasi Usaha</label>
                     <p>{selectedReg.lokasiUsaha}</p>
                   </div>
+                  {(selectedReg.kelurahanUsaha || selectedReg.kecamatanUsaha) && (
+                    <>
+                      <div className="info-item">
+                        <label>Kelurahan Usaha</label>
+                        <p>{selectedReg.kelurahanUsaha || '-'}</p>
+                      </div>
+                      <div className="info-item">
+                        <label>Kecamatan Usaha</label>
+                        <p>{selectedReg.kecamatanUsaha || '-'}</p>
+                      </div>
+                    </>
+                  )}
                   {selectedReg.linkMaps && (
                     <div className="info-item full">
                       <label>Titik Lokasi (Maps)</label>
