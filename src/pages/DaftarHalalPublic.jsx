@@ -166,7 +166,7 @@ const DaftarHalalPublic = () => {
             </div>
             <div className="input-group">
               <label><CreditCard size={16} /> NIK</label>
-              <input type="text" placeholder="16 Digit NIK" maxLength="16" value={formData.nik} onChange={(e) => setFormData({...formData, nik: e.target.value.replace(/\D/g, '')})} required />
+              <input type="text" inputMode="numeric" placeholder="16 Digit NIK" maxLength="16" value={formData.nik} onChange={(e) => setFormData({...formData, nik: e.target.value.replace(/\D/g, '').slice(0, 16)})} required />
             </div>
             
             <div className="input-group">
@@ -180,7 +180,7 @@ const DaftarHalalPublic = () => {
 
             <div className="input-group">
               <label><Phone size={16} /> Nomor WhatsApp</label>
-              <input type="text" placeholder="0812..." value={formData.wa} onChange={(e) => setFormData({...formData, wa: e.target.value.replace(/\D/g, '')})} required />
+              <input type="text" inputMode="numeric" placeholder="0812..." maxLength="13" value={formData.wa} onChange={(e) => setFormData({...formData, wa: e.target.value.replace(/\D/g, '').slice(0, 13)})} required />
             </div>
             <div className="input-group full-width">
               <label><MapPin size={16} /> Alamat (Sesuai KTP)</label>
@@ -203,11 +203,11 @@ const DaftarHalalPublic = () => {
             </div>
             <div className="input-group">
               <label>KBLI</label>
-              <input type="text" placeholder="Kode KBLI" value={formData.kbli} onChange={(e) => setFormData({...formData, kbli: e.target.value})} required />
+              <input type="text" inputMode="numeric" placeholder="Kode KBLI (5 digit)" maxLength="5" value={formData.kbli} onChange={(e) => setFormData({...formData, kbli: e.target.value.replace(/\D/g, '').slice(0, 5)})} required />
             </div>
             <div className="input-group">
               <label>Nomor NIB</label>
-              <input type="text" placeholder="Nomor Induk Berusaha" value={formData.nib} onChange={(e) => setFormData({...formData, nib: e.target.value})} required />
+              <input type="text" inputMode="numeric" placeholder="Nomor Induk Berusaha (13 digit)" maxLength="13" value={formData.nib} onChange={(e) => setFormData({...formData, nib: e.target.value.replace(/\D/g, '').slice(0, 13)})} required />
             </div>
             
             <div className="input-group">
