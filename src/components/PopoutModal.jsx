@@ -142,18 +142,20 @@ const overlayStyle = {
 
 const cardStyle = {
   position: 'relative',
-  background: 'linear-gradient(145deg, #ffffff, #f8faff)',
+  background: 'rgba(255, 255, 255, 0.7)',
+  backdropFilter: 'blur(24px)',
+  WebkitBackdropFilter: 'blur(24px)',
   borderRadius: '20px',
   maxWidth: '460px',
   width: '100%',
-  boxShadow:
-    '0 25px 60px rgba(0,0,0,0.18), 0 8px 24px rgba(37,99,235,0.12)',
+  boxShadow: '0 25px 60px rgba(0,0,0,0.2), 0 8px 24px rgba(37,99,235,0.15)',
   overflow: 'hidden',
-  border: '1px solid rgba(226,232,240,0.8)',
+  border: '1px solid rgba(255, 255, 255, 0.5)',
 };
 
 const headerStyle = {
-  background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)',
+  background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.8) 0%, rgba(37, 99, 235, 0.8) 50%, rgba(59, 130, 246, 0.8) 100%)',
+  backdropFilter: 'blur(10px)',
   padding: '1rem 1.25rem',
   display: 'flex',
   alignItems: 'center',
