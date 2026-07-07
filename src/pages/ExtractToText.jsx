@@ -52,6 +52,7 @@ const ExtractToText = () => {
       arr[index + 1] = arr[index];
       arr[index] = temp;
       return arr;
+    });
   };
 
   const preprocessImage = (url) => {
