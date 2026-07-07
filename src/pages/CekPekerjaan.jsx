@@ -280,6 +280,19 @@ const CekPekerjaan = () => {
     }
   };
 
+  const handleDeleteVervalSchedule = async (jobId) => {
+    if (window.confirm('Hapus jadwal Verval Bahan untuk pemohon ini?')) {
+      try {
+        await update(ref(rtdb, `pekerjaan/${jobId}`), {
+          jadwalVerval: null
+        });
+      } catch (err) {
+        console.error(err);
+        alert('Gagal menghapus jadwal verval');
+      }
+    }
+  };
+
   const handleToggleStatus = async (job) => {
     try {
       const newStatus = job.status === 'Proses' ? 'Pending' : 'Proses';
@@ -660,7 +673,12 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                               <ClipboardCheck size={16} />
                             </button>
                             {job.jadwalKunjungan && (
-                              <button className="btn-table-icon text-danger" title="Hapus Jadwal" onClick={() => handleDeleteSchedule(job.id)}>
+                              <button className="btn-table-icon text-danger" title="Hapus Jadwal Kunjungan" onClick={() => handleDeleteSchedule(job.id)}>
+                                <CalendarX size={16} />
+                              </button>
+                            )}
+                            {job.jadwalVerval && (
+                              <button className="btn-table-icon" style={{ color: '#dc2626' }} title="Hapus Jadwal Verval Bahan" onClick={() => handleDeleteVervalSchedule(job.id)}>
                                 <CalendarX size={16} />
                               </button>
                             )}
@@ -762,6 +780,11 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                             <button className="btn-table-icon" style={{color:'#8b5cf6'}} title="Verval" onClick={() => { setSelectedJob(job); setShowVervalSchedule(true); setVervalScheduleDate(job.jadwalVerval || ''); }}>
                               <ClipboardCheck size={15} />
                             </button>
+                            {job.jadwalVerval && (
+                              <button className="btn-table-icon" style={{color:'#dc2626'}} title="Hapus Jadwal Verval" onClick={() => handleDeleteVervalSchedule(job.id)}>
+                                <CalendarX size={15} />
+                              </button>
+                            )}
                             <button className="btn-table-icon text-danger" title="Batalkan" onClick={() => handleCancelClick(job)}>
                               <X size={15} />
                             </button>
