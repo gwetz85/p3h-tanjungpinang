@@ -142,15 +142,15 @@ const overlayStyle = {
 
 const cardStyle = {
   position: 'relative',
-  background: 'rgba(255, 255, 255, 0.7)',
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
+  background: 'rgba(15, 23, 42, 0.85)',
+  backdropFilter: 'blur(32px)',
+  WebkitBackdropFilter: 'blur(32px)',
   borderRadius: '20px',
   maxWidth: '460px',
   width: '100%',
-  boxShadow: '0 25px 60px rgba(0,0,0,0.2), 0 8px 24px rgba(37,99,235,0.15)',
+  boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 8px 24px rgba(37,99,235,0.2)',
   overflow: 'hidden',
-  border: '1px solid rgba(255, 255, 255, 0.5)',
+  border: '1px solid rgba(255, 255, 255, 0.08)',
 };
 
 const headerStyle = {
@@ -208,14 +208,14 @@ const titleStyle = {
   margin: '0 0 0.75rem',
   fontSize: '1.25rem',
   fontWeight: 700,
-  color: '#0f172a',
+  color: '#f1f5f9',
   lineHeight: 1.3,
 };
 
 const contentStyle = {
   margin: 0,
   fontSize: '0.95rem',
-  color: '#475569',
+  color: '#94a3b8',
   lineHeight: 1.7,
   whiteSpace: 'pre-wrap',
 };
