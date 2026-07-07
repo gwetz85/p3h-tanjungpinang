@@ -1263,7 +1263,7 @@ select option {
 .upcoming-section .section-header h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
+  color: var(--text);
   margin: 0;
 }
 
