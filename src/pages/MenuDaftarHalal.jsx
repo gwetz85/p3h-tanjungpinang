@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, push } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, FileText, Search, X, MessageSquare, Download, MapPin, ExternalLink, Send } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Search, X, MessageSquare, Download, MapPin, ExternalLink, Send, Eye, Trash2 } from 'lucide-react';
 
 const MenuDaftarHalal = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -146,31 +146,64 @@ const MenuDaftarHalal = () => {
         />
       </div>
 
-      <div className="job-list">
+      <div className="table-responsive glass-card" style={{ overflowX: 'auto', borderRadius: '12px' }}>
         {loading ? (
-          <div className="loading">Memuat Data...</div>
+          <div className="loading" style={{ padding: '2rem', textAlign: 'center' }}>Memuat Data...</div>
         ) : filteredData.length === 0 ? (
-          <div className="empty-state glass-card">Belum ada pendaftaran baru.</div>
+          <div className="empty-state" style={{ padding: '2rem', textAlign: 'center' }}>Belum ada pendaftaran baru.</div>
         ) : (
-          filteredData.map((reg) => (
-            <motion.div key={reg.id} onClick={() => setSelectedReg(reg)} className="job-card glass-card" style={{ cursor: 'pointer' }}>
-              <div className="job-main">
-                <div className="job-info">
-                  <span className="badge-type" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-                    Menunggu Admin
-                  </span>
-                  <h3>{reg.nama}</h3>
-                  <p className="job-date">{reg.namaUsaha || '-'}</p>
-                </div>
-              </div>
-              <div className="job-footer">
-                <span className="status-badge text-accent"><FileText size={14} /> Lihat Detail</span>
-                <span className="text-muted" style={{ fontSize: '0.8rem' }}>
-                  {new Date(reg.tanggalInput).toLocaleDateString('id-ID')}
-                </span>
-              </div>
-            </motion.div>
-          ))
+          <table className="modern-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>Waktu Masuk</th>
+                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>Nama Pelaku Usaha</th>
+                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>Nama Usaha</th>
+                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>No. WA</th>
+                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center' }}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((reg) => (
+                <tr key={reg.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }} className="table-row-hover">
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ fontSize: '0.85rem' }}>{new Date(reg.tanggalInput).toLocaleDateString('id-ID')}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(reg.tanggalInput).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
+                  </td>
+                  <td style={{ padding: '1rem', fontWeight: 500 }}>{reg.nama}</td>
+                  <td style={{ padding: '1rem' }}>{reg.namaUsaha || '-'}</td>
+                  <td style={{ padding: '1rem' }}>{reg.wa}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button 
+                        onClick={() => setSelectedReg(reg)} 
+                        className="btn-icon" 
+                        title="Lihat Detail"
+                        style={{ padding: '6px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                      >
+                        <Eye size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(reg.id)} 
+                        className="btn-icon" 
+                        title="Hapus Data"
+                        style={{ padding: '6px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleForwardToPetugas(reg)} 
+                        className="btn-icon" 
+                        title="Kirim ke Petugas Lapangan"
+                        style={{ padding: '6px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                      >
+                        <Send size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
