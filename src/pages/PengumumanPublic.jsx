@@ -66,16 +66,16 @@ const PengumumanPublic = () => {
             </div>
           </div>
 
-        <div className="table-responsive" style={{ overflowX: 'auto', marginTop: '1rem' }}>
+        <div className="table-responsive" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '60vh', marginTop: '1rem' }}>
           <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <tr>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>No</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Pelaku Usaha</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Produk</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Alamat Usaha</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Last Update</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: '#fff' }}>No</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: '#fff' }}>Nama Pelaku Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: '#fff' }}>Nama Produk</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: '#fff' }}>Alamat Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: '#fff' }}>Last Update</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #e5e7eb', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: '#fff' }}>Status</th>
               </tr>
               </thead>
               <tbody>
