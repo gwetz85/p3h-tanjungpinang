@@ -282,9 +282,9 @@ const PengumumanAdmin = () => {
                 filteredPengumuman.map((item, index) => (
                   <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{index + 1}</td>
-                    <td style={{ padding: '16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500' }}>{item.namaPelakuUsaha}</td>
-                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{item.namaProduk}</td>
-                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{item.alamatUsaha}</td>
+                    <td style={{ padding: '16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
+                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
+                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
                     <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
                     <td style={{ padding: '16px' }}>
                       <span className={`status-badge ${item.status.replace(/\s+/g, '-').toLowerCase()}`} style={{

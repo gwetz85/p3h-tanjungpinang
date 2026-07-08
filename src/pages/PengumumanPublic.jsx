@@ -87,9 +87,9 @@ const PengumumanPublic = () => {
                   filteredPengumuman.map((item, index) => (
                     <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid rgba(255,255,255,0.08)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                       <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>{index + 1}</td>
-                      <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600' }}>{item.namaPelakuUsaha}</td>
-                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem' }}>{item.namaProduk}</td>
-                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem' }}>{item.alamatUsaha}</td>
+                      <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
+                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
+                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
                       <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
                       <td style={{ padding: '16px' }}>
                         <span style={{
