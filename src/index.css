@@ -3138,13 +3138,13 @@ select option {
     gap: 8px !important;
   }
 
-  /* ── Modal: full screen on mobile ── */
-  .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+  /* ── Modal: centered on mobile ── */
+  .modal-overlay { padding: 1rem !important; align-items: center !important; justify-content: center !important; }
   .modal-content {
     max-width: 100% !important;
     width: 100% !important;
-    max-height: 92vh !important;
-    border-radius: 20px 20px 0 0 !important;
+    max-height: 85vh !important;
+    border-radius: 20px !important;
     margin: 0 !important;
   }
   .modal-header { padding: 1rem 1.1rem !important; }

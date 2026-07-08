@@ -823,7 +823,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
       <AnimatePresence>
         {selectedJob && !showHalal && (
           <div className="modal-overlay">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="modal-content glass-card">
+            <div className="modal-content glass-card halal-modal">
               <div className="modal-header" style={{ alignItems: 'center', gap: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1 }}>
                   <h2 style={{ margin: 0 }}>Detail Pekerjaan</h2>
@@ -1138,7 +1138,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                 </form>
               )}
 
-            </motion.div>
+            </div>
           </div>
         )}
 
