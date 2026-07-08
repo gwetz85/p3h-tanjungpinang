@@ -18,6 +18,22 @@ const STATUS_OPTIONS = [
   'Batal Pengajuan'
 ];
 
+const getStatusStyle = (status) => {
+  const styles = {
+    'PROSES': { bg: '#dbeafe', color: '#2563eb' },
+    'Pendaftaran Sihalal': { bg: '#f3e8ff', color: '#9333ea' },
+    'VERVAL': { bg: '#fef3c7', color: '#d97706' },
+    'PROSES P3H': { bg: '#e0f2fe', color: '#0284c7' },
+    'Terkirim ke Komite': { bg: '#fce7f3', color: '#db2777' },
+    'Terbit SH': { bg: '#d1fae5', color: '#059669' },
+    'Perbaikkan Akun SiHalal': { bg: '#ffedd5', color: '#ea580c' },
+    'PENDING': { bg: '#f3f4f6', color: '#4b5563' },
+    'Verifikasi PU': { bg: '#ccfbf1', color: '#0d9488' },
+    'Batal Pengajuan': { bg: '#fee2e2', color: '#dc2626' }
+  };
+  return styles[status] || { bg: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary-color)' };
+};
+
 const PengumumanAdmin = () => {
   const { role } = useAuth();
   const [pengumuman, setPengumuman] = useState([]);
@@ -279,40 +295,43 @@ const PengumumanAdmin = () => {
               ) : filteredPengumuman.length === 0 ? (
                 <tr><td colSpan="7" style={{ textAlign: 'center' }}>Belum ada data pengumuman.</td></tr>
               ) : (
-                filteredPengumuman.map((item, index) => (
-                  <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{index + 1}</td>
-                    <td style={{ padding: '16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
-                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
-                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
-                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
-                    <td style={{ padding: '16px' }}>
-                      <span className={`status-badge ${item.status.replace(/\s+/g, '-').toLowerCase()}`} style={{
-                        background: 'rgba(var(--primary-rgb), 0.1)',
-                        color: 'var(--primary-color)',
-                        padding: '6px 12px',
-                        borderRadius: '20px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: '16px' }}>
-                      <div className="action-buttons" style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => handleEdit(item)} title="Edit" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'}>
-                          <Edit size={16} />
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} title="Hapus" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}>
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filteredPengumuman.map((item, index) => {
+                  const style = getStatusStyle(item.status);
+                  return (
+                    <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{index + 1}</td>
+                      <td style={{ padding: '16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
+                      <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
+                      <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
+                      <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
+                      <td style={{ padding: '16px' }}>
+                        <span className={`status-badge ${item.status.replace(/\s+/g, '-').toLowerCase()}`} style={{
+                          background: style.bg,
+                          color: style.color,
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        <div className="action-buttons" style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => handleEdit(item)} title="Edit" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'}>
+                            <Edit size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(item.id)} title="Hapus" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

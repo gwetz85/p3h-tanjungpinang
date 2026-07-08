@@ -5,6 +5,21 @@ import { motion } from 'framer-motion';
 import { Search, FileText, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const getStatusStyle = (status) => {
+  const styles = {
+    'PROSES': { bg: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: 'rgba(59, 130, 246, 0.3)' },
+    'Pendaftaran Sihalal': { bg: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' },
+    'VERVAL': { bg: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: 'rgba(245, 158, 11, 0.3)' },
+    'PROSES P3H': { bg: 'rgba(14, 165, 233, 0.2)', color: '#38bdf8', border: 'rgba(14, 165, 233, 0.3)' },
+    'Terkirim ke Komite': { bg: 'rgba(236, 72, 153, 0.2)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' },
+    'Terbit SH': { bg: 'rgba(16, 185, 129, 0.2)', color: '#34d399', border: 'rgba(16, 185, 129, 0.3)' },
+    'Perbaikkan Akun SiHalal': { bg: 'rgba(249, 115, 22, 0.2)', color: '#fb923c', border: 'rgba(249, 115, 22, 0.3)' },
+    'PENDING': { bg: 'rgba(107, 114, 128, 0.2)', color: '#9ca3af', border: 'rgba(107, 114, 128, 0.3)' },
+    'Verifikasi PU': { bg: 'rgba(20, 184, 166, 0.2)', color: '#2dd4bf', border: 'rgba(20, 184, 166, 0.3)' },
+    'Batal Pengajuan': { bg: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: 'rgba(239, 68, 68, 0.3)' }
+  };
+  return styles[status] || { bg: 'rgba(16, 185, 129, 0.2)', color: '#6ee7b7', border: 'rgba(16, 185, 129, 0.3)' };
+};
 const PengumumanPublic = () => {
   const [pengumuman, setPengumuman] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,31 +82,34 @@ const PengumumanPublic = () => {
                 ) : pengumuman.length === 0 ? (
                   <tr><td colSpan="6" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)', padding: '2rem' }}>Belum ada data pengumuman.</td></tr>
                 ) : (
-                  pengumuman.map((item, index) => (
-                    <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid rgba(255,255,255,0.08)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>{index + 1}</td>
-                      <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
-                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
-                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
-                      <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          background: 'rgba(16,185,129,0.2)',
-                          color: '#6ee7b7',
-                          padding: '6px 12px',
-                          borderRadius: '20px',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          whiteSpace: 'nowrap',
-                          border: '1px solid rgba(16,185,129,0.3)'
-                        }}>
-                          {item.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  pengumuman.map((item, index) => {
+                    const style = getStatusStyle(item.status);
+                    return (
+                      <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid rgba(255,255,255,0.08)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>{index + 1}</td>
+                        <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
+                        <td style={{ padding: '16px' }}>
+                          <span style={{
+                            background: style.bg,
+                            color: style.color,
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            whiteSpace: 'nowrap',
+                            border: `1px solid ${style.border}`
+                          }}>
+                            {item.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
