@@ -39,7 +39,7 @@ const PengumumanPublic = () => {
     <div className="login-page-container" style={{ minHeight: '100vh', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div className="mesh-background"></div>
       
-      <div style={{ width: '100%', maxWidth: '1000px', zIndex: 10 }}>
+      <div style={{ width: '100%', maxWidth: '1200px', zIndex: 10 }}>
         <button 
           onClick={() => navigate('/login')} 
           className="btn-secondary" 
@@ -55,49 +55,49 @@ const PengumumanPublic = () => {
           style={{ padding: '2rem' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <img src="/icon-192x192.png" alt="P3H Logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
+            <img src="/logo-p3h.png" alt="P3H Logo" style={{ height: '60px', width: 'auto', marginBottom: '1rem' }} />
             <h1 style={{ color: '#000', margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>PENGUMUMAN</h1>
             <p style={{ color: 'rgba(0,0,0,0.7)', marginTop: '0.5rem', fontWeight: '500' }}>Status Proses Sertifikasi Halal Pelaku Usaha</p>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-            <div className="search-bar" style={{ width: '100%', maxWidth: '300px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <Search size={18} style={{ color: 'rgba(255,255,255,0.5)' }} />
+            <div className="search-bar" style={{ width: '100%', maxWidth: '300px', background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.1)' }}>
+              <Search size={18} style={{ color: 'rgba(0,0,0,0.5)' }} />
               <input 
                 type="text" 
                 placeholder="Cari nama atau produk..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ color: 'white' }}
+                style={{ color: '#000' }}
               />
             </div>
           </div>
 
           <div className="table-responsive">
-            <table className="data-table" style={{ background: 'transparent' }}>
+            <table className="data-table" style={{ background: 'transparent', width: '100%' }}>
               <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.1)' }}>
-                  <th>No</th>
-                  <th>Nama Pelaku Usaha</th>
-                  <th>Nama Produk</th>
-                  <th>Alamat Usaha</th>
-                  <th>Last Update</th>
-                  <th>Status</th>
+                <tr style={{ background: 'rgba(0,0,0,0.05)' }}>
+                  <th style={{ color: '#1f2937' }}>No</th>
+                  <th style={{ color: '#1f2937' }}>Nama Pelaku Usaha</th>
+                  <th style={{ color: '#1f2937' }}>Nama Produk</th>
+                  <th style={{ color: '#1f2937' }}>Alamat Usaha</th>
+                  <th style={{ color: '#1f2937' }}>Last Update</th>
+                  <th style={{ color: '#1f2937' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', color: 'white' }}>Memuat data...</td></tr>
+                  <tr><td colSpan="6" style={{ textAlign: 'center', color: '#1f2937' }}>Memuat data...</td></tr>
                 ) : filteredPengumuman.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', color: 'white' }}>Belum ada data pengumuman.</td></tr>
+                  <tr><td colSpan="6" style={{ textAlign: 'center', color: '#1f2937' }}>Belum ada data pengumuman.</td></tr>
                 ) : (
                   filteredPengumuman.map((item, index) => (
-                    <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ color: 'rgba(255,255,255,0.9)' }}>{index + 1}</td>
-                      <td style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 'bold' }}>{item.namaPelakuUsaha}</td>
-                      <td style={{ color: 'rgba(255,255,255,0.9)' }}>{item.namaProduk}</td>
-                      <td style={{ color: 'rgba(255,255,255,0.9)' }}>{item.alamatUsaha}</td>
-                      <td style={{ color: 'rgba(255,255,255,0.9)' }}>{item.lastUpdate}</td>
+                    <tr key={item.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.1)' }}>
+                      <td style={{ color: '#1f2937' }}>{index + 1}</td>
+                      <td style={{ color: '#1f2937', fontWeight: 'bold' }}>{item.namaPelakuUsaha}</td>
+                      <td style={{ color: '#1f2937' }}>{item.namaProduk}</td>
+                      <td style={{ color: '#1f2937' }}>{item.alamatUsaha}</td>
+                      <td style={{ color: '#1f2937' }}>{item.lastUpdate}</td>
                       <td>
                         <span className={`status-badge ${item.status.replace(/\s+/g, '-').toLowerCase()}`} style={{
                           background: 'rgba(var(--primary-rgb), 0.2)',
