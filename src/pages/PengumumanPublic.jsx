@@ -102,11 +102,12 @@ const PengumumanPublic = () => {
                         <span className={`status-badge ${item.status.replace(/\s+/g, '-').toLowerCase()}`} style={{
                           background: 'rgba(var(--primary-rgb), 0.2)',
                           border: '1px solid rgba(var(--primary-rgb), 0.5)',
-                          color: 'white',
+                          color: '#1f2937',
                           padding: '4px 10px',
                           borderRadius: '20px',
                           fontSize: '0.85rem',
-                          display: 'inline-block'
+                          display: 'inline-block',
+                          fontWeight: '500'
                         }}>
                           {item.status}
                         </span>
