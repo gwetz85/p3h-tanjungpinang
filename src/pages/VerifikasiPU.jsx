@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send, ClipboardCheck, Navigation, Map } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
+import { addNotification } from '../utils/notifications';
 
 
 
@@ -31,7 +32,8 @@ const KELURAHAN_LIST = [
   "Dompak",
   "Tanjung Ayun Sakti"
 ];
-const Countdown = ({ targetDate }) => {
+
+const Countdown = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
@@ -292,6 +294,7 @@ const VerifikasiPU = () => {
           status: 'Review',
           reviewStartedAt: Date.now()
         });
+        addNotification('Pindah ke Review', `Data "${job.nama}" dipindahkan ke proses Review (Admin).`, 'movement');
         alert('Data berhasil dikirim ke Pendaftaran SIHalal!');
       } catch (err) {
         console.error(err);
@@ -320,6 +323,7 @@ const VerifikasiPU = () => {
         keterangan: `DIBATALKAN: ${cancelReason}`,
         verifiedAt: Date.now()
       });
+      addNotification('Dibatalkan', `Pekerjaan "${jobToCancel.nama}" dibatalkan.`, 'movement');
       alert('Pekerjaan berhasil dibatalkan dan dipindahkan ke Riwayat Selesai.');
       setShowCancelModal(false);
       setJobToCancel(null);

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, db, rtdb } from '../firebase';
+import { auth, rtdb } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import { ref, set, update } from 'firebase/database';
+import { addNotification } from '../utils/notifications';
 import { Lock, Mail, Award, User, ArrowLeft, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +43,8 @@ const Login = () => {
       await update(ref(rtdb, `users/${userCredential.user.uid}`), {
         activeSession: sessionId
       });
+      
+      addNotification('Login', `User ${email} telah masuk ke aplikasi.`, 'login');
       
       navigate('/');
     } catch (err) {

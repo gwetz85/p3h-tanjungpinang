@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { rtdb } from '../firebase';
-import { ref, onValue, update, remove, push } from 'firebase/database';
+import { ref, onValue, update, remove, get, push } from 'firebase/database';
+import { useAuth } from '../context/AuthContext';
+import { addNotification } from '../utils/notifications';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, FileText, Search, X, MessageSquare, Download, MapPin, ExternalLink, Send, Eye, Trash2 } from 'lucide-react';
 
@@ -100,6 +102,8 @@ const MenuDaftarHalal = () => {
         await update(ref(rtdb, `daftar_halal/${reg.id}`), {
           status: 'Diteruskan'
         });
+
+        addNotification('Data Diteruskan', `Usaha "${reg.namaUsaha}" telah diteruskan ke petugas ${selectedPetugasEmail}.`, 'movement');
 
         alert('Berhasil diteruskan ke Petugas!');
         setSelectedReg(null);

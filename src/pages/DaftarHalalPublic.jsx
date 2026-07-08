@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
-import { ref, push, update } from 'firebase/database';
+import { ref, update, push, onValue, get } from 'firebase/database';
+import { addNotification } from '../utils/notifications';
 import { compressImage } from '../utils/imageUtils';
 
 const KELURAHAN_LIST = [
@@ -331,6 +332,9 @@ const DaftarHalalPublic = () => {
         linkMaps: `https://www.google.com/maps?q=${formData.latitude},${formData.longitude}`
       });
       await update(ref(rtdb, `daftar_halal_photos/${id}`), { photoKTP, photoProduk });
+      
+      addNotification('Pendaftaran Baru (Publik)', `Usaha "${formData.namaUsaha}" baru saja mendaftar.`, 'register');
+      
       setSuccess(true);
     } catch (err) {
       console.error(err);

@@ -3,6 +3,7 @@ import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send, ClipboardCheck, Navigation, Map } from 'lucide-react';
+import { addNotification } from '../utils/notifications';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
 
@@ -350,6 +351,7 @@ const CekPekerjaan = () => {
       await update(ref(rtdb, `pekerjaan/${job.id}`), {
         status: newStatus
       });
+      addNotification('Perubahan Status', `Pekerjaan "${job.nama}" diubah menjadi ${newStatus}.`, 'movement');
       alert(`Status pekerjaan diubah menjadi: ${newStatus}`);
     } catch (err) {
       console.error(err);
@@ -363,6 +365,7 @@ const CekPekerjaan = () => {
         await update(ref(rtdb, `pekerjaan/${job.id}`), {
           status: 'Verifikasi PU'
         });
+        addNotification('Pindah Verifikasi', `Data "${job.nama}" dipindahkan ke Verifikasi PU.`, 'movement');
         alert('Data berhasil dipindahkan ke menu Verifikasi PU');
       } catch (err) {
         console.error(err);

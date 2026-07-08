@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, Camera, X, Upload, Bell, ChevronDown, UserCircle } from 'lucide-react';
 import { auth, rtdb } from '../firebase';
-import { ref, update, onValue } from 'firebase/database';
+import { ref, update, onValue, query, limitToLast } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Isolated clock component — re-renders every second independently, not the whole Topbar
@@ -55,6 +55,40 @@ const Topbar = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [koordinatorPhoto, setKoordinatorPhoto] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+
+  useEffect(() => {
+    const notifQuery = query(ref(rtdb, 'notifikasi'), limitToLast(50));
+    const unsub = onValue(notifQuery, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const notifList = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
+        notifList.sort((a, b) => b.timestamp - a.timestamp);
+        setNotifications(notifList);
+      } else {
+        setNotifications([]);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const unreadCount = currentUser ? notifications.filter(n => !n?.readBy?.[currentUser.uid]).length : 0;
+
+  const handleNotifClick = async () => {
+    setShowNotifDropdown(!showNotifDropdown);
+    if (!showNotifDropdown && unreadCount > 0 && currentUser) {
+      const updates = {};
+      notifications.forEach(n => {
+        if (!n?.readBy?.[currentUser.uid]) {
+          updates[`notifikasi/${n.id}/readBy/${currentUser.uid}`] = true;
+        }
+      });
+      if (Object.keys(updates).length > 0) {
+        try { await update(ref(rtdb), updates); } catch (e) { console.error('Gagal update readBy:', e); }
+      }
+    }
+  };
 
   useEffect(() => {
     if (!userData?.nama) return;
@@ -128,10 +162,45 @@ const Topbar = () => {
       </div>
       
       <div className="topbar-right">
-        <button className="topbar-icon-btn" title="Notifikasi">
-          <Bell size={18} />
-          <span className="notification-badge-dot"></span>
-        </button>
+        <div className="notification-container" style={{ position: 'relative' }}>
+          <button className="topbar-icon-btn" title="Notifikasi" onClick={handleNotifClick}>
+            <Bell size={18} />
+            {unreadCount > 0 && <span className="notification-badge-dot"></span>}
+          </button>
+          
+          <AnimatePresence>
+            {showNotifDropdown && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                exit={{ opacity: 0, y: 10 }}
+                className="notif-dropdown-menu glass-card"
+              >
+                <div className="notif-header">
+                  <h3>Notifikasi Terbaru</h3>
+                </div>
+                <div className="notif-list">
+                  {notifications.length > 0 ? (
+                    notifications.map(notif => (
+                      <div key={notif.id} className={`notif-item ${!notif?.readBy?.[currentUser?.uid] ? 'unread' : ''}`}>
+                        <div className="notif-type-icon" data-type={notif.type}>
+                          {notif.type === 'login' ? '👤' : notif.type === 'register' ? '📝' : notif.type === 'movement' ? '➡️' : '🔔'}
+                        </div>
+                        <div className="notif-content">
+                          <h4>{notif.title}</h4>
+                          <p>{notif.message}</p>
+                          <span className="notif-time">{new Date(notif.timestamp).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="notif-empty">Belum ada aktivitas.</div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <div className="user-profile-trigger" onClick={() => setShowDropdown(!showDropdown)}>
           <div className="avatar-circle">
