@@ -40,6 +40,8 @@ const CekPekerjaan = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedJobPhoto, setSelectedJobPhoto] = useState('');
   const [selectedJobKTP, setSelectedJobKTP] = useState('');
+  const [selectedJobLokasi, setSelectedJobLokasi] = useState('');
+  const [selectedJobKunjungan, setSelectedJobKunjungan] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [showHalal, setShowHalal] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -89,6 +91,20 @@ const CekPekerjaan = () => {
         if (snapshot.exists()) {
           setSelectedJobKTP(snapshot.val());
         }
+      }, { onlyOnce: true });
+
+      // Lazy-load foto Lokasi Usaha
+      setSelectedJobLokasi('');
+      const lokasiRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoLokasiUsaha`);
+      onValue(lokasiRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobLokasi(snapshot.val());
+      }, { onlyOnce: true });
+
+      // Lazy-load foto Kunjungan
+      setSelectedJobKunjungan('');
+      const kunjunganRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKunjungan`);
+      onValue(kunjunganRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobKunjungan(snapshot.val());
       }, { onlyOnce: true });
 
       // Lazy-load halalData if not already present (stripped from list for performance)
@@ -951,6 +967,34 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                               style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#10b981', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
                             >
                               <Download size={16} /> Download Foto KTP
+                            </button>
+                          </div>
+                        )}
+
+                        {selectedJobLokasi && (
+                          <div className="info-item full">
+                            <label>Foto Lokasi Usaha</label>
+                            <img src={selectedJobLokasi} alt="Lokasi" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobLokasi, `Lokasi_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(245,158,11,0.15)', border: '1px solid #f59e0b', color: '#f59e0b', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download Foto Lokasi
+                            </button>
+                          </div>
+                        )}
+
+                        {selectedJobKunjungan && (
+                          <div className="info-item full">
+                            <label>Foto Kunjungan Pendampingan</label>
+                            <img src={selectedJobKunjungan} alt="Kunjungan" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobKunjungan, `Kunjungan_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(236,72,153,0.15)', border: '1px solid #ec4899', color: '#ec4899', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download Foto Kunjungan
                             </button>
                           </div>
                         )}
