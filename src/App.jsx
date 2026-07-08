@@ -1,42 +1,56 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import DataKoordinator from './pages/DataKoordinator';
-import InputPekerjaan from './pages/InputPekerjaan';
-import CekPekerjaan from './pages/CekPekerjaan';
-import VerifikasiPU from './pages/VerifikasiPU';
-import Selesai from './pages/Selesai';
-import Setup from './pages/Setup';
-import DataUser from './pages/DataUser';
-import RunningTextSettings from './pages/RunningTextSettings';
-import Chat from './pages/Chat';
-import PendaftaranSihalal from './pages/PendaftaranSihalal';
-import GudangBahan from './pages/GudangBahan';
-import CatatanAkunSihalal from './pages/CatatanAkunSihalal';
-import ArsipSH from './pages/ArsipSH';
-import PerbaikanAkunSihalal from './pages/PerbaikanAkunSihalal';
-import { motion } from 'framer-motion';
-import { Clock, Award } from 'lucide-react';
 import { auth } from './firebase';
-import PopoutSettings from './pages/PopoutSettings';
-import DaftarHalalPublic from './pages/DaftarHalalPublic';
-import MenuDaftarHalal from './pages/MenuDaftarHalal';
+
+// Lazy load all pages for code splitting - only loads when user navigates to them
+const Login = React.lazy(() => import('./pages/Login'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const DataKoordinator = React.lazy(() => import('./pages/DataKoordinator'));
+const InputPekerjaan = React.lazy(() => import('./pages/InputPekerjaan'));
+const CekPekerjaan = React.lazy(() => import('./pages/CekPekerjaan'));
+const VerifikasiPU = React.lazy(() => import('./pages/VerifikasiPU'));
+const Selesai = React.lazy(() => import('./pages/Selesai'));
+const Setup = React.lazy(() => import('./pages/Setup'));
+const DataUser = React.lazy(() => import('./pages/DataUser'));
+const RunningTextSettings = React.lazy(() => import('./pages/RunningTextSettings'));
+const Chat = React.lazy(() => import('./pages/Chat'));
+const PendaftaranSihalal = React.lazy(() => import('./pages/PendaftaranSihalal'));
+const GudangBahan = React.lazy(() => import('./pages/GudangBahan'));
+const CatatanAkunSihalal = React.lazy(() => import('./pages/CatatanAkunSihalal'));
+const ArsipSH = React.lazy(() => import('./pages/ArsipSH'));
+const PerbaikanAkunSihalal = React.lazy(() => import('./pages/PerbaikanAkunSihalal'));
+const PopoutSettings = React.lazy(() => import('./pages/PopoutSettings'));
+const DaftarHalalPublic = React.lazy(() => import('./pages/DaftarHalalPublic'));
+const MenuDaftarHalal = React.lazy(() => import('./pages/MenuDaftarHalal'));
+
+// Lightweight loading spinner
+const PageLoader = () => (
+  <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
+    <div style={{ textAlign: 'center' }}>
+      <img src="/icon-192x192.png" alt="Loading" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', animation: 'spin 1s linear infinite' }} />
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </div>
+  </div>
+);
+
+// Minimal inline loader for nested pages (no full-screen)
+const InlineLoader = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
+    <img src="/icon-192x192.png" alt="Loading" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', animation: 'spin 1s linear infinite' }} />
+    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
 
 const PendingApproval = () => {
   const { currentUser } = useAuth();
   return (
     <div className="login-page-container">
       <div className="mesh-background"></div>
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="login-card-modern glass-card"
-      >
+      <div className="login-card-modern glass-card" style={{ opacity: 1, transform: 'scale(1)' }}>
         <div className="login-header-modern">
-          <img src="/logo-p3h.png" alt="P3H" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
+          <img src="/icon-192x192.png" alt="P3H" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', marginBottom: '0.5rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
           <h1 className="brand-name">MENUNGGU PERSETUJUAN</h1>
           <p className="brand-tagline">Akun sedang diverifikasi oleh Admin</p>
           
@@ -48,7 +62,7 @@ const PendingApproval = () => {
         <button onClick={() => auth.signOut()} className="btn-logout" style={{ marginTop: '1rem', width: '100%', justifyContent: 'center' }}>
           Keluar dan Gunakan Akun Lain
         </button>
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -56,13 +70,7 @@ const PendingApproval = () => {
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, role, loading } = useAuth();
 
-  if (loading) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-        <img src="/logo-p3h.png" alt="Loading" style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
-      </motion.div>
-    </div>
-  );
+  if (loading) return <PageLoader />;
 
   if (!currentUser) return <Navigate to="/login" />;
   
@@ -78,89 +86,89 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/setup" element={<Setup />} />
-          <Route path="/daftar" element={<DaftarHalalPublic />} />
+          <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+          <Route path="/setup" element={<Suspense fallback={<PageLoader />}><Setup /></Suspense>} />
+          <Route path="/daftar" element={<Suspense fallback={<PageLoader />}><DaftarHalalPublic /></Suspense>} />
           
           <Route path="/" element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Suspense fallback={<InlineLoader />}><Dashboard /></Suspense>} />
             
             <Route path="koordinator" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
-                <DataKoordinator />
+                <Suspense fallback={<InlineLoader />}><DataKoordinator /></Suspense>
               </ProtectedRoute>
             } />
 
 
             <Route path="users" element={
               <ProtectedRoute allowedRoles={['superadmin']}>
-                <DataUser />
+                <Suspense fallback={<InlineLoader />}><DataUser /></Suspense>
               </ProtectedRoute>
             } />
 
             <Route path="running-text" element={
               <ProtectedRoute allowedRoles={['superadmin']}>
-                <RunningTextSettings />
+                <Suspense fallback={<InlineLoader />}><RunningTextSettings /></Suspense>
               </ProtectedRoute>
             } />
 
             
             <Route path="input" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
-                <InputPekerjaan />
+                <Suspense fallback={<InlineLoader />}><InputPekerjaan /></Suspense>
               </ProtectedRoute>
             } />
 
             <Route path="pendaftaran" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
-                <PendaftaranSihalal />
+                <Suspense fallback={<InlineLoader />}><PendaftaranSihalal /></Suspense>
               </ProtectedRoute>
             } />
 
             <Route path="daftar-halal" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
-                <MenuDaftarHalal />
+                <Suspense fallback={<InlineLoader />}><MenuDaftarHalal /></Suspense>
               </ProtectedRoute>
             } />
             
             <Route path="gudang-bahan" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
-                <GudangBahan />
+                <Suspense fallback={<InlineLoader />}><GudangBahan /></Suspense>
               </ProtectedRoute>
             } />
             
             <Route path="cek" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
-                <CekPekerjaan />
+                <Suspense fallback={<InlineLoader />}><CekPekerjaan /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="verifikasi-pu" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
-                <VerifikasiPU />
+                <Suspense fallback={<InlineLoader />}><VerifikasiPU /></Suspense>
               </ProtectedRoute>
             } />
-            <Route path="selesai" element={<Selesai />} />
+            <Route path="selesai" element={<Suspense fallback={<InlineLoader />}><Selesai /></Suspense>} />
             <Route path="perbaikan-akun" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
-                <PerbaikanAkunSihalal />
+                <Suspense fallback={<InlineLoader />}><PerbaikanAkunSihalal /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="catatan-akun" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
-                <CatatanAkunSihalal />
+                <Suspense fallback={<InlineLoader />}><CatatanAkunSihalal /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="arsip-sh" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
-                <ArsipSH />
+                <Suspense fallback={<InlineLoader />}><ArsipSH /></Suspense>
                 </ProtectedRoute>
               } />
-              <Route path="popout-settings" element={<ProtectedRoute allowedRoles={['superadmin']}><PopoutSettings /></ProtectedRoute>} />
-              <Route path="chat" element={<Chat />} />
+              <Route path="popout-settings" element={<ProtectedRoute allowedRoles={['superadmin']}><Suspense fallback={<InlineLoader />}><PopoutSettings /></Suspense></ProtectedRoute>} />
+              <Route path="chat" element={<Suspense fallback={<InlineLoader />}><Chat /></Suspense>} />
           </Route>
         </Routes>
       </BrowserRouter>

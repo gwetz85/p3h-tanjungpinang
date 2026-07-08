@@ -1,42 +1,49 @@
-import React from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import PopoutModal from './PopoutModal';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import NotificationManager from './NotificationManager';
 import RunningText from './RunningText';
-import { motion, AnimatePresence } from 'framer-motion';
-
+import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
+// Faster page transition — reduced from 0.3s to 0.18s
+const pageVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit:    { opacity: 0, y: -10 },
+};
+const pageTransition = { duration: 0.18, ease: 'easeOut' };
+
 const Layout = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
+  const toggleMobileMenu = useCallback(() => setIsMobileMenuOpen(v => !v), []);
 
   return (
     <div className="layout">
-      {/* Tombol Mobile Menu */}
-      <button 
-        className="mobile-menu-toggle"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      >
+      <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <Sidebar isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
       
-      <main className="main-content" onClick={() => setIsMobileMenuOpen(false)}>
+      <main className="main-content" onClick={closeMobileMenu}>
         <Topbar />
         <div className="layout-content-wrapper">
           <NotificationManager />
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              style={{ width: '100%' }}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+              style={{ width: '100%', willChange: 'opacity, transform' }}
             >
               <Outlet />
             </motion.div>
@@ -50,4 +57,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default memo(Layout);

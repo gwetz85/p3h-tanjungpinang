@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, Camera, X, Upload, Bell, ChevronDown, UserCircle } from 'lucide-react';
@@ -6,85 +6,103 @@ import { auth, rtdb } from '../firebase';
 import { ref, update, onValue } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Isolated clock component — re-renders every second independently, not the whole Topbar
+const LiveClock = memo(() => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  
+  const dayName = days[time.getDay()];
+  const day = String(time.getDate()).padStart(2, '0');
+  const month = months[time.getMonth()];
+  const year = time.getFullYear();
+  const hours = String(time.getHours()).padStart(2, '0');
+  const minutes = String(time.getMinutes()).padStart(2, '0');
+  const seconds = String(time.getSeconds()).padStart(2, '0');
+
+  return (
+    <span className="topbar-datetime">
+      {`${dayName}, ${day} ${month} ${year} - ${hours}:${minutes}:${seconds}`}
+    </span>
+  );
+});
+LiveClock.displayName = 'LiveClock';
+
+const PAGE_TITLES = {
+  '/': 'Ringkasan',
+  '/koordinator': 'Manajemen Petugas',
+  '/users': 'Manajemen User',
+  '/input': 'Input Pekerjaan',
+  '/cek': 'Proses & Verifikasi',
+  '/verifikasi-pu': 'Verifikasi PU',
+  '/pendaftaran': 'Pendaftaran SIHALAL',
+  '/selesai': 'Riwayat Selesai',
+  '/catatan-akun': 'Catatan Akun Sihalal',
+  '/chat': 'Pesan',
+};
+
 const Topbar = () => {
   const { userData, currentUser, role } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [time, setTime] = useState(new Date());
   const [showDropdown, setShowDropdown] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [koordinatorPhoto, setKoordinatorPhoto] = useState(null);
 
   useEffect(() => {
-    if (userData?.nama) {
-      const coordRef = ref(rtdb, 'koordinators');
-      const unsubscribe = onValue(coordRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const matchedCoord = Object.values(data).find(c => c.nama === userData.nama);
-          if (matchedCoord && matchedCoord.photoURL) {
-            setKoordinatorPhoto(matchedCoord.photoURL);
-          } else {
-            setKoordinatorPhoto(null);
-          }
-        }
-      });
-      return () => unsubscribe();
-    }
+    if (!userData?.nama) return;
+    const coordRef = ref(rtdb, 'koordinators');
+    const unsubscribe = onValue(coordRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const matchedCoord = Object.values(data).find(c => c.nama === userData.nama);
+        setKoordinatorPhoto(matchedCoord?.photoURL || null);
+      }
+    });
+    return () => unsubscribe();
   }, [userData?.nama]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     auth.signOut();
     navigate('/login');
-  };
+  }, [navigate]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = useCallback((e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       alert('Harap pilih file gambar (JPG/PNG).');
       return;
     }
-
     setUploading(true);
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = async () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 150;
-        const MAX_HEIGHT = 150;
-        let width = img.width;
-        let height = img.height;
-
+        const MAX_SIZE = 150;
+        let { width, height } = img;
         if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
+          if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
         } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
+          if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
         }
-
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress as JPEG 80% quality
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
         try {
           await update(ref(rtdb, `users/${currentUser.uid}`), { photoURL: dataUrl });
           setShowPhotoModal(false);
         } catch (error) {
-          console.error("Error updating photo:", error);
-          alert("Gagal memperbarui foto profil.");
+          alert('Gagal memperbarui foto profil.');
         } finally {
           setUploading(false);
         }
@@ -92,45 +110,9 @@ const Topbar = () => {
       img.src = event.target.result;
     };
     reader.readAsDataURL(file);
-  };
+  }, [currentUser]);
 
-  // Determine current page title
-  const getPageTitle = (path) => {
-    switch (path) {
-      case '/': return 'Ringkasan';
-      case '/koordinator': return 'Manajemen Petugas';
-      case '/users': return 'Manajemen User';
-      case '/input': return 'Input Pekerjaan';
-      case '/cek': return 'Proses & Verifikasi';
-      case '/verifikasi-pu': return 'Verifikasi PU';
-      case '/pendaftaran': return 'Pendaftaran SIHALAL';
-      case '/selesai': return 'Riwayat Selesai';
-      case '/catatan-akun': return 'Catatan Akun Sihalal';
-      case '/chat': return 'Pesan';
-      default: return 'P3H TPI';
-    }
-  };
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatDateTime = (date) => {
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    
-    const dayName = days[date.getDay()];
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${dayName}, ${day} ${month} ${year} - ${hours}:${minutes}:${seconds}`;
-  };
-
+  const pageTitle = PAGE_TITLES[location.pathname] || 'P3H TPI';
   const displayName = userData?.nama || currentUser?.email?.split('@')[0] || 'User';
   const displayPhoto = userData?.photoURL || koordinatorPhoto;
   const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AD';
@@ -138,17 +120,14 @@ const Topbar = () => {
   return (
     <div className="topbar">
       <div className="topbar-left">
-        <h2 className="topbar-title">{getPageTitle(location.pathname)}</h2>
+        <h2 className="topbar-title">{pageTitle}</h2>
       </div>
 
       <div className="topbar-center">
-        <span className="topbar-datetime">
-          {formatDateTime(time)}
-        </span>
+        <LiveClock />
       </div>
       
       <div className="topbar-right">
-        {/* Bell Icon Notification */}
         <button className="topbar-icon-btn" title="Notifikasi">
           <Bell size={18} />
           <span className="notification-badge-dot"></span>
@@ -188,7 +167,6 @@ const Topbar = () => {
         </div>
       </div>
       
-      {/* Modal Upload Photo */}
       <AnimatePresence>
         {showPhotoModal && (
           <div className="modal-overlay">
@@ -205,7 +183,6 @@ const Topbar = () => {
                     <UserCircle size={64} style={{ color: 'var(--primary)' }} />
                   )}
                 </div>
-                
                 <label className="btn-primary-filled" style={{ display: 'inline-flex', cursor: 'pointer', background: 'var(--primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold' }}>
                   {uploading ? 'Memproses...' : (
                     <>
@@ -225,4 +202,4 @@ const Topbar = () => {
   );
 };
 
-export default Topbar;
+export default memo(Topbar);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { auth, rtdb } from '../firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { ref, get, update, remove, onValue } from 'firebase/database';
@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         setCurrentUser(user);
         
-        // Listen to role changes in real-time
         const userRef = ref(rtdb, `users/${user.uid}`);
         roleUnsubscribe = onValue(userRef, async (snapshot) => {
           const SUPERADMIN_EMAILS = ['admin@tarunabangsa.id', 'sihalal-akun@gmail.com'];
@@ -38,7 +37,6 @@ export const AuthProvider = ({ children }) => {
             setUserData(snapshot.val());
             setLoading(false);
           } else {
-            // Check by Email (for pre-registered users)
             const allUsersRef = ref(rtdb, 'users');
             const allUsersSnapshot = await get(allUsersRef);
             let foundRole = 'Pending';
@@ -51,7 +49,6 @@ export const AuthProvider = ({ children }) => {
               
               if (preRegisteredUser) {
                 foundRole = preRegisteredUser[1].role;
-                // Migrate to UID node
                 await update(ref(rtdb, `users/${user.uid}`), preRegisteredUser[1]);
                 await remove(ref(rtdb, `users/${preRegisteredUser[0]}`));
               }
@@ -61,13 +58,10 @@ export const AuthProvider = ({ children }) => {
           }
         });
 
-        // Listen for session changes (single-device enforcement)
         const sessionRef = ref(rtdb, `users/${user.uid}/activeSession`);
         sessionUnsubscribe = onValue(sessionRef, (snapshot) => {
           const localSession = sessionStorage.getItem('sessionId');
           const remoteSession = snapshot.val();
-
-          // If we have a local session and it doesn't match remote, we've been kicked
           if (localSession && remoteSession && localSession !== remoteSession) {
             sessionStorage.removeItem('sessionId');
             setSessionKicked(true);
@@ -90,18 +84,19 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const value = {
+  // Memoize context value to prevent unnecessary re-renders of all consumers
+  const value = useMemo(() => ({
     currentUser,
     role,
     userData,
     loading,
     sessionKicked,
     clearSessionKicked: () => setSessionKicked(false)
-  };
+  }), [currentUser, role, userData, loading, sessionKicked]);
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
