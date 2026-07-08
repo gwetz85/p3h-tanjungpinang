@@ -2475,7 +2475,9 @@ select option {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
+  background: 
+    radial-gradient(ellipse at 50% 45%, rgba(10,46,20,0.15) 0%, rgba(10,46,20,0.6) 50%, rgba(10,46,20,0.85) 100%),
+    linear-gradient(to bottom, rgba(10,46,20,0.3) 0%, rgba(10,46,20,0.7) 100%);
   z-index: 1;
 }
 
@@ -2493,13 +2495,15 @@ select option {
 }
 
 .simpu-logo-circle {
-  width: 160px;
-  height: 160px;
+  width: 180px;
+  height: 180px;
   background: transparent;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
+  overflow: hidden;
 }
 
 .simpu-logo-circle img {
@@ -2507,7 +2511,8 @@ select option {
   height: 100%;
   object-fit: contain;
   object-position: center;
-  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+  border-radius: 50%;
+  filter: drop-shadow(0 8px 25px rgba(0,0,0,0.4));
 }
 
 .simpu-title {
@@ -2734,7 +2739,7 @@ select option {
 
 @media (max-width: 768px) {
   .simpu-overlay {
-    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.9) 100%);
+    background: linear-gradient(to bottom, rgba(10,46,20,0.6) 0%, rgba(10,46,20,0.9) 100%);
   }
   
   .simpu-logo-container {
