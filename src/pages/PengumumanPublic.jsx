@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 const PengumumanPublic = () => {
   const [pengumuman, setPengumuman] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,10 +29,7 @@ const PengumumanPublic = () => {
     return () => unsub();
   }, []);
 
-  const filteredPengumuman = pengumuman.filter(p => 
-    p.namaPelakuUsaha?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.namaProduk?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Search feature removed per user request
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
@@ -47,26 +43,13 @@ const PengumumanPublic = () => {
           animate={{ opacity: 1, y: 0 }}
           style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', overflow: 'hidden' }}
         >
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
             <img src="/logo-p3h.png" alt="P3H Logo" style={{ height: '110px', width: '110px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '2px solid rgba(255,255,255,0.2)' }} />
             <h1 style={{ color: '#fff', margin: 0, fontSize: '2rem', fontWeight: 'bold', letterSpacing: '0.05em' }}>PENGUMUMAN</h1>
             <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem', fontWeight: '400' }}>Status Proses Sertifikasi Halal Pelaku Usaha</p>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-            <div className="search-bar" style={{ width: '100%', maxWidth: '300px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-              <Search size={18} style={{ color: 'rgba(255,255,255,0.6)' }} />
-              <input 
-                type="text" 
-                placeholder="Cari nama atau produk..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ color: '#fff', background: 'transparent' }}
-              />
-            </div>
-          </div>
-
-        <div className="table-responsive" style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', marginTop: '1rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+        <div className="table-responsive" style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', marginTop: 0, border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
           <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <tr>
@@ -81,10 +64,10 @@ const PengumumanPublic = () => {
               <tbody>
                 {loading ? (
                   <tr><td colSpan="6" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)', padding: '2rem' }}>Memuat data...</td></tr>
-                ) : filteredPengumuman.length === 0 ? (
+                ) : pengumuman.length === 0 ? (
                   <tr><td colSpan="6" style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)', padding: '2rem' }}>Belum ada data pengumuman.</td></tr>
                 ) : (
-                  filteredPengumuman.map((item, index) => (
+                  pengumuman.map((item, index) => (
                     <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid rgba(255,255,255,0.08)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                       <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>{index + 1}</td>
                       <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
