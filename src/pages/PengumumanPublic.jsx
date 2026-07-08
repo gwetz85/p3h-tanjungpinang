@@ -36,16 +36,16 @@ const PengumumanPublic = () => {
   );
 
   return (
-    <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}>
       {/* Mesh Background sama seperti Login */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 20% 20%, rgba(24, 119, 242, 0.4) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.4) 0%, transparent 40%)', filter: 'blur(80px)', zIndex: 0 }}></div>
 
-      <div style={{ position: 'relative', zIndex: 10, padding: '2rem 1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, position: 'relative', zIndex: 10, padding: '2rem 1rem', overflow: 'hidden' }}>
 
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+          style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', overflow: 'hidden' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <img src="/logo-p3h.png" alt="P3H Logo" style={{ height: '60px', width: 'auto', marginBottom: '1rem' }} />
@@ -66,7 +66,7 @@ const PengumumanPublic = () => {
             </div>
           </div>
 
-        <div className="table-responsive" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '60vh', marginTop: '1rem' }}>
+        <div className="table-responsive" style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', marginTop: '1rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
           <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <tr>
