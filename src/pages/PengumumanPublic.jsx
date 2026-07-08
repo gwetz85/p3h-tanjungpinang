@@ -39,14 +39,7 @@ const PengumumanPublic = () => {
     <div className="login-page-container" style={{ minHeight: '100vh', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div className="mesh-background"></div>
       
-      <div style={{ width: '100%', maxWidth: '1200px', zIndex: 10 }}>
-        <button 
-          onClick={() => navigate('/login')} 
-          className="btn-secondary" 
-          style={{ marginBottom: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
-        >
-          <ArrowLeft size={18} /> Kembali
-        </button>
+      <div style={{ width: '100%', maxWidth: '100%', padding: '0 1rem', zIndex: 10 }}>
 
         <motion.div 
           initial={{ opacity: 0, y: -20 }} 
