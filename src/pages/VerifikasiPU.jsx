@@ -31,6 +31,41 @@ const KELURAHAN_LIST = [
   "Dompak",
   "Tanjung Ayun Sakti"
 ];
+const Countdown = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const target = new Date(targetDate).getTime();
+      const now = new Date().getTime();
+      if (isNaN(target)) {
+        setTimeLeft('Jadwal tidak valid');
+        return;
+      }
+      const diff = target - now;
+      if (diff <= 0) {
+        setTimeLeft('Waktunya Kunjungan!');
+        return;
+      }
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      const pad = (num) => String(num).padStart(2, '0');
+      setTimeLeft(`${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`);
+    };
+
+    calculateTime();
+    const timer = setInterval(calculateTime, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className={`countdown-badge ${timeLeft === 'Waktunya Kunjungan!' ? 'urgent-glow' : ''}`}>
+      <Timer size={12} /> {timeLeft}
+    </div>
+  );
+};
 
 const VerifikasiPU = () => {
   const { role } = useAuth();
@@ -396,41 +431,6 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
     }
   };
 
-  const Countdown = ({ targetDate }) => {
-    const [timeLeft, setTimeLeft] = useState('');
-
-    useEffect(() => {
-      const calculateTime = () => {
-        const target = new Date(targetDate).getTime();
-        const now = new Date().getTime();
-        if (isNaN(target)) {
-          setTimeLeft('Jadwal tidak valid');
-          return;
-        }
-        const diff = target - now;
-        if (diff <= 0) {
-          setTimeLeft('Waktunya Kunjungan!');
-          return;
-        }
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-        const pad = (num) => String(num).padStart(2, '0');
-        setTimeLeft(`${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`);
-      };
-
-      calculateTime();
-      const timer = setInterval(calculateTime, 1000);
-      return () => clearInterval(timer);
-    }, [targetDate]);
-
-    return (
-      <div className={`countdown-badge ${timeLeft === 'Waktunya Kunjungan!' ? 'urgent-glow' : ''}`}>
-        <Timer size={12} /> {timeLeft}
-      </div>
-    );
-  };
 
   const filteredJobs = jobs.filter(job => 
     (job.nama?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
