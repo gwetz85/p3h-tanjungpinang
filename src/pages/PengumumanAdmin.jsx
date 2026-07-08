@@ -12,7 +12,9 @@ const STATUS_OPTIONS = [
   'PROSES P3H',
   'Terkirim ke Komite',
   'Terbit SH',
-  'Perbaikkan Akun SiHalal'
+  'Perbaikkan Akun SiHalal',
+  'PENDING',
+  'Verifikasi PU'
 ];
 
 const PengumumanAdmin = () => {
