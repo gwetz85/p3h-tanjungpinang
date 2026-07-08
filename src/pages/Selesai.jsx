@@ -80,16 +80,16 @@ const Selesai = () => {
         </div>
       </div>
 
-      <div className="table-container glass-card desktop-only">
-        <table className="custom-table">
+      <div className="table-container glass-card desktop-only" style={{ overflowX: 'auto' }}>
+        <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr>
-              <th><User size={16} /> Nama Pelaku Usaha</th>
-              <th><Send size={16} /> Tanggal Dikirim ke Admin</th>
-              <th><CheckCircle2 size={16} /> Tanggal Dipindahkan Ke Menu Selesai</th>
-              <th><Briefcase size={16} /> Nama Usaha</th>
-              <th><MapPin size={16} /> Alamat</th>
-              {(isSuperAdmin || canDownload) && <th>Aksi</th>}
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><User size={16} /> Nama Pelaku Usaha</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}><Send size={16} /> Tanggal Dikirim ke Admin</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}><CheckCircle2 size={16} /> Tanggal Dipindahkan Ke Menu Selesai</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><Briefcase size={16} /> Nama Usaha</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><MapPin size={16} /> Alamat</th>
+              {(isSuperAdmin || canDownload) && <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Aksi</th>}
             </tr>
           </thead>
           <tbody>
@@ -99,14 +99,14 @@ const Selesai = () => {
               <tr><td colSpan={(isSuperAdmin || canDownload) ? "6" : "5"} className="text-center">Belum ada data.</td></tr>
             ) : (
               filteredJobs.map((job) => (
-                <motion.tr key={job.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td className="font-bold">{job.nama || '-'}</td>
-                  <td>{job.reviewStartedAt ? new Date(job.reviewStartedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
-                  <td>{job.verifiedAt ? new Date(job.verifiedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
-                  <td>{job.namaUsaha || '-'}</td>
-                  <td className="text-muted">{job.alamat || '-'}</td>
+                <motion.tr key={job.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>{job.nama || '-'}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{job.reviewStartedAt ? new Date(job.reviewStartedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{job.verifiedAt ? new Date(job.verifiedAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-'}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{job.namaUsaha || '-'}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{job.alamat || '-'}</td>
                   {(isSuperAdmin || canDownload) && (
-                    <td>
+                    <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         {canDownload && job.jenisPekerjaan === 'Sertifikasi Halal' && (
                           <button 

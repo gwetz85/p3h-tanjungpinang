@@ -234,15 +234,15 @@ const CatatanAkunSihalal = () => {
       </div>
 
       <div className="table-container glass-card">
-        <table className="custom-table">
+        <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr>
-              <th style={{ width: '60px' }}>Nomor</th>
-              <th>Nama</th>
-              <th>Akun</th>
-              <th>Kata Sandi</th>
-              <th>Status</th>
-              <th>Upload Berkas</th>
+              <th style={{ width: '60px', padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Nomor</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Akun</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Kata Sandi</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Upload Berkas</th>
             </tr>
           </thead>
           <tbody>
@@ -256,17 +256,17 @@ const CatatanAkunSihalal = () => {
               </tr>
             ) : (
               data.map((item, index) => (
-                <motion.tr key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                  <td><strong>{item.nama}</strong></td>
-                  <td>{item.akun}</td>
-                  <td>{item.kataSandi}</td>
-                  <td>
-                    <span className={`status-badge ${item.status === 'Active' ? 'status-selesai' : 'status-revisi'}`}>
+                <motion.tr key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'nowrap' }}>{index + 1}</td>
+                  <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>{item.nama}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{item.akun}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{item.kataSandi}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
+                    <span style={{ background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary-color)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
                       {item.status}
                     </span>
                   </td>
-                  <td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {item.berkasUrl && (
                         <button onClick={() => handleViewPdf(item.berkasUrl)} className="btn-primary-outline" style={{ padding: '4px 8px', fontSize: '0.8rem' }} title="View PDF">

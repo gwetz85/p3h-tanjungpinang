@@ -507,22 +507,22 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
           <div className="empty-state">Tidak ada pekerjaan aktif yang ditemukan.</div>
         ) : (
           <>
-            <div className="table-container desktop-only">
-              <table className="verification-table">
+            <div className="table-container desktop-only" style={{ overflowX: 'auto' }}>
+              <table className="verification-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr>
-                    <th>Jadwal Kunjungan</th>
-                    <th>Informasi Pemohon</th>
-                    <th>Kelurahan</th>
-                    <th>Jenis & Progres</th>
-                    <th>Status</th>
-                    {role !== 'Admin' && <th>Aksi</th>}
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Jadwal Kunjungan</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Informasi Pemohon</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Kelurahan</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Jenis &amp; Progres</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+                    {role !== 'Admin' && <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Aksi</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {sortedJobs.map((job) => (
-                    <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row">
-                      <td>
+                    <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row" style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                         {job.jadwalKunjungan && (
                           <div className="schedule-cell">
                             <small className="text-muted" style={{fontSize: '0.65rem', display: 'block', marginBottom: '2px', fontWeight: 'bold'}}>Kunjungan:</small>
@@ -553,16 +553,16 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                           <span className="text-muted italic">Belum diset</span>
                         )}
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>
                         <div className="applicant-cell">
                           <span className="name">{job.nama}</span>
                           <span className="address"><MapPin size={10} /> {job.alamat}</span>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         <span className="kelurahan-badge">{job.kelurahan || '-'}</span>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         <div className="type-progress-cell">
                           <span className="job-type-small">{job.jenisPekerjaan}</span>
                           <div className="mini-progress">
@@ -571,12 +571,12 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
                         <span className={`status-pill ${job.status === 'Returned' ? 'returned' : (job.jadwalVerval ? '' : (job.status === 'Pending' ? 'pending' : 'proses'))}`} style={job.jadwalVerval && job.status !== 'Returned' ? {backgroundColor: '#ede9fe', color: '#8b5cf6', border: '1px solid #c4b5fd'} : {}}>
                           {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.jadwalVerval ? 'Verval Bahan' : job.status)}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
                         {role !== 'Admin' ? (
                           <div className="table-actions" onClick={(e) => e.stopPropagation()}>
                              <button

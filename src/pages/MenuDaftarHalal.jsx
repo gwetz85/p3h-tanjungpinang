@@ -150,7 +150,7 @@ const MenuDaftarHalal = () => {
         />
       </div>
 
-      <div className="table-responsive glass-card" style={{ overflowX: 'auto', borderRadius: '12px' }}>
+      <div className="table-responsive glass-card" style={{ overflowX: 'auto', borderRadius: '12px', borderTop: 'none' }}>
         {loading ? (
           <div className="loading" style={{ padding: '2rem', textAlign: 'center' }}>Memuat Data...</div>
         ) : filteredData.length === 0 ? (
@@ -158,25 +158,25 @@ const MenuDaftarHalal = () => {
         ) : (
           <table className="modern-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>Waktu Masuk</th>
-                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>Nama Pelaku Usaha</th>
-                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>Nama Usaha</th>
-                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)' }}>No. WA</th>
-                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center' }}>Aksi</th>
+              <tr>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Waktu Masuk</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Pelaku Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>No. WA</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.map((reg) => (
-                <tr key={reg.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }} className="table-row-hover">
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ fontSize: '0.85rem' }}>{new Date(reg.tanggalInput).toLocaleDateString('id-ID')}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(reg.tanggalInput).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
+                <tr key={reg.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#111827', fontWeight: '500' }}>{new Date(reg.tanggalInput).toLocaleDateString('id-ID')}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{new Date(reg.tanggalInput).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
-                  <td style={{ padding: '1rem', fontWeight: 500 }}>{reg.nama}</td>
-                  <td style={{ padding: '1rem' }}>{reg.namaUsaha || '-'}</td>
-                  <td style={{ padding: '1rem' }}>{reg.wa}</td>
-                  <td style={{ padding: '1rem' }}>
+                  <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>{reg.nama}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{reg.namaUsaha || '-'}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>{reg.wa}</td>
+                  <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                       <button 
                         onClick={() => setSelectedReg(reg)} 

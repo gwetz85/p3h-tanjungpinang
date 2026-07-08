@@ -314,14 +314,14 @@ const ArsipSH = () => {
       </div>
 
       <div className="table-container glass-card">
-        <table className="custom-table">
+        <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr>
-              <th style={{ width: '60px' }}>No</th>
-              <th>Nama Pelaku Usaha</th>
-              <th>Nomor Sertifikat</th>
-              <th>Keterangan</th>
-              <th>Aksi</th>
+              <th style={{ width: '60px', padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>No</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Pelaku Usaha</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nomor Sertifikat</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Keterangan</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -335,12 +335,12 @@ const ArsipSH = () => {
               </tr>
             ) : (
               data.map((item, index) => (
-                <motion.tr key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                  <td><strong>{item.namaUsaha}</strong></td>
-                  <td>{item.nomorSertifikat}</td>
-                  <td>{item.keterangan}</td>
-                  <td>
+                <motion.tr key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'nowrap' }}>{index + 1}</td>
+                  <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>{item.namaUsaha}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{item.nomorSertifikat}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{item.keterangan}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {item.berkasUrl && (
                         <button onClick={() => handleViewPdf(item.berkasUrl)} className="btn-primary-outline" style={{ padding: '4px 8px', fontSize: '0.8rem' }} title="View PDF">
