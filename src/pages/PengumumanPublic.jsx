@@ -55,9 +55,9 @@ const PengumumanPublic = () => {
           style={{ padding: '2rem' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <FileText size={48} style={{ color: 'var(--primary-color)', marginBottom: '1rem' }} />
-            <h1 style={{ color: 'white', margin: 0, fontSize: '2rem' }}>PENGUMUMAN</h1>
-            <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem' }}>Status Proses Sertifikasi Halal Pelaku Usaha</p>
+            <img src="/icon-192x192.png" alt="P3H Logo" style={{ width: '70px', height: '70px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
+            <h1 style={{ color: '#000', margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>PENGUMUMAN</h1>
+            <p style={{ color: 'rgba(0,0,0,0.7)', marginTop: '0.5rem', fontWeight: '500' }}>Status Proses Sertifikasi Halal Pelaku Usaha</p>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
