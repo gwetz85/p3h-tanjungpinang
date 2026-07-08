@@ -4,6 +4,7 @@ import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'f
 import { motion } from 'framer-motion';
 import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool, Sparkles, Maximize2 } from 'lucide-react';
 import FloatingTatacara from './FloatingTatacara';
+import { compressImage } from '../utils/imageUtils';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -368,39 +369,51 @@ const HalalForm = ({ job, onClose }) => {
   };
 
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photo: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photo: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 
-  const handleKTPUpload = (e) => {
+  const handleKTPUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photoKTP: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoKTP: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 
-  const handleLokasiUpload = (e) => {
+  const handleLokasiUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photoLokasiUsaha: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoLokasiUsaha: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 
-  const handleKunjunganUpload = (e) => {
+  const handleKunjunganUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photoKunjungan: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoKunjungan: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 

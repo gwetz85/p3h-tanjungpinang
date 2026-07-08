@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, push, update } from 'firebase/database';
+import { compressImage } from '../utils/imageUtils';
 
 const KELURAHAN_LIST = [
   'Tanjungpinang Barat', 'Kemboja', 'Bukit Cermin', 'Kampung Baru',
@@ -272,7 +273,7 @@ const DaftarHalalPublic = () => {
     };
   }, []);
 
-  const handleImageUpload = (e, field) => {
+  const handleImageUpload = async (e, field) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -280,9 +281,12 @@ const DaftarHalalPublic = () => {
         e.target.value = null;
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, [field]: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, [field]: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 

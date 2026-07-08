@@ -3,6 +3,7 @@ import { rtdb } from '../firebase';
 import { ref, push, update, serverTimestamp } from 'firebase/database';
 import { motion } from 'framer-motion';
 import { Send, User, MapPin, CreditCard, Phone, Briefcase } from 'lucide-react';
+import { compressImage } from '../utils/imageUtils';
 
 const KELURAHAN_LIST = [
   "Tanjungpinang Kota",
@@ -107,12 +108,15 @@ const InputPekerjaan = () => {
     setFormData({ ...formData, tanggalLahir: dob, usia: age > 0 ? age : 0 });
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photoPengajuan: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoPengajuan: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 
