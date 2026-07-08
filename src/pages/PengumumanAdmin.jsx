@@ -58,7 +58,7 @@ const PengumumanAdmin = () => {
         const list = Object.keys(data).map(key => ({
           id: key,
           ...data[key]
-        })).sort((a, b) => b.createdAt - a.createdAt);
+        })).sort((a, b) => (a.namaPelakuUsaha || '').localeCompare(b.namaPelakuUsaha || '', 'id'));
         setPengumuman(list);
       } else {
         setPengumuman([]);
