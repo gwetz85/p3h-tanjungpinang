@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, set, push, remove, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { UserPlus, Trash2, Shield, Mail, UserCheck, Lock, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Mail, UserCheck, Lock, Eye, EyeOff, User } from 'lucide-react';
 
 const DataUser = () => {
   const [users, setUsers] = useState([]);
