@@ -11,7 +11,8 @@ const STATUS_OPTIONS = [
   'VERVAL',
   'PROSES P3H',
   'Terkirim ke Komite',
-  'Terbit SH'
+  'Terbit SH',
+  'Perbaikkan Akun SiHalal'
 ];
 
 const PengumumanAdmin = () => {
