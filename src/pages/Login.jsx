@@ -143,6 +143,9 @@ const Login = () => {
                 <div className="footer-link" onClick={() => { setIsRegister(true); setError(''); setSuccess(''); }}>
                   BELUM PUNYA AKUN?<br/>DAFTAR
                 </div>
+                <div className="footer-link" onClick={() => navigate('/pengumuman')}>
+                  CEK STATUS<br/>PENGUMUMAN
+                </div>
               </div>
             </motion.form>
 
@@ -201,6 +204,9 @@ const Login = () => {
               <div className="simpu-form-footer">
                 <div className="footer-link" onClick={() => { setIsRegister(false); setError(''); }}>
                   SUDAH PUNYA AKUN?<br/>MASUK
+                </div>
+                <div className="footer-link" onClick={() => navigate('/pengumuman')}>
+                  CEK STATUS<br/>PENGUMUMAN
                 </div>
               </div>
             </motion.form>

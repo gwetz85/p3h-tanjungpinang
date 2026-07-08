@@ -24,6 +24,8 @@ const PerbaikanAkunSihalal = React.lazy(() => import('./pages/PerbaikanAkunSihal
 const PopoutSettings = React.lazy(() => import('./pages/PopoutSettings'));
 const DaftarHalalPublic = React.lazy(() => import('./pages/DaftarHalalPublic'));
 const MenuDaftarHalal = React.lazy(() => import('./pages/MenuDaftarHalal'));
+const PengumumanAdmin = React.lazy(() => import('./pages/PengumumanAdmin'));
+const PengumumanPublic = React.lazy(() => import('./pages/PengumumanPublic'));
 
 // Lightweight loading spinner
 const PageLoader = () => (
@@ -89,6 +91,7 @@ function App() {
           <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
           <Route path="/setup" element={<Suspense fallback={<PageLoader />}><Setup /></Suspense>} />
           <Route path="/daftar" element={<Suspense fallback={<PageLoader />}><DaftarHalalPublic /></Suspense>} />
+          <Route path="/pengumuman" element={<Suspense fallback={<PageLoader />}><PengumumanPublic /></Suspense>} />
           
           <Route path="/" element={
             <ProtectedRoute>
@@ -116,6 +119,11 @@ function App() {
               </ProtectedRoute>
             } />
 
+            <Route path="admin-pengumuman" element={
+              <ProtectedRoute allowedRoles={['superadmin']}>
+                <Suspense fallback={<InlineLoader />}><PengumumanAdmin /></Suspense>
+              </ProtectedRoute>
+            } />
             
             <Route path="input" element={
               <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>

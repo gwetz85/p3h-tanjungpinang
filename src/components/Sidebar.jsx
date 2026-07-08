@@ -25,6 +25,7 @@ const ALL_NAV_ITEMS = [
   { name: 'Manajemen User',     path: '/users',          icon: Users,           roles: ['superadmin'] },
   { name: 'Running Text',       path: '/running-text',   icon: Settings,        roles: ['superadmin'] },
   { name: 'Pengaturan Pop-out', path: '/popout-settings',icon: Settings,        roles: ['superadmin'] },
+  { name: 'PENGUMUMAN',         path: '/admin-pengumuman',icon: FileText,        roles: ['superadmin'] },
   { name: 'Pesan Chat',         path: '/chat',           icon: MessageCircle,   roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
 ];
 
