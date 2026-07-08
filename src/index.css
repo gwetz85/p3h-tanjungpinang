@@ -60,6 +60,11 @@ body {
 
 #root {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
 
 /* Performance: isolate rendering layers */
 .sidebar {
@@ -70,21 +75,11 @@ body {
   contain: layout style;
 }
 
-/* Optimize images globally */
-img {
-  content-visibility: auto;
-}
-
 /* Reduce paint area for cards */
 .glass-card,
 .stat-card,
 .table-card {
-  contain: layout style paint;
-}
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  max-width: 100vw;
+  contain: layout style;
 }
 
 /* Layout Styles */
