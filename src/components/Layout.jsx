@@ -10,9 +10,9 @@ import { Menu, X } from 'lucide-react';
 
 // Faster page transition — reduced from 0.3s to 0.18s
 const pageVariants = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -10 },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit:    { opacity: 0 },
 };
 const pageTransition = { duration: 0.18, ease: 'easeOut' };
 
@@ -43,7 +43,7 @@ const Layout = () => {
               animate="animate"
               exit="exit"
               transition={pageTransition}
-              style={{ width: '100%', willChange: 'opacity, transform' }}
+              style={{ width: '100%', willChange: 'opacity' }}
             >
               <Outlet />
             </motion.div>
