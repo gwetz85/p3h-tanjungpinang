@@ -257,17 +257,17 @@ const PengumumanAdmin = () => {
           </div>
         </div>
 
-        <div className="table-responsive">
-          <table className="data-table">
+        <div className="table-responsive" style={{ overflowX: 'auto', marginTop: '1rem' }}>
+          <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr>
-                <th>No</th>
-                <th>Nama Pelaku Usaha</th>
-                <th>Nama Produk</th>
-                <th>Alamat Usaha</th>
-                <th>Last Update</th>
-                <th>Status</th>
-                <th>Aksi</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>No</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Pelaku Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Nama Produk</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Alamat Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Last Update</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -277,27 +277,35 @@ const PengumumanAdmin = () => {
                 <tr><td colSpan="7" style={{ textAlign: 'center' }}>Belum ada data pengumuman.</td></tr>
               ) : (
                 filteredPengumuman.map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{index + 1}</td>
-                    <td>{item.namaPelakuUsaha}</td>
-                    <td>{item.namaProduk}</td>
-                    <td>{item.alamatUsaha}</td>
-                    <td>{item.lastUpdate}</td>
-                    <td>
+                  <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{index + 1}</td>
+                    <td style={{ padding: '16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500' }}>{item.namaPelakuUsaha}</td>
+                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{item.namaProduk}</td>
+                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem' }}>{item.alamatUsaha}</td>
+                    <td style={{ padding: '16px', color: '#4b5563', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
+                    <td style={{ padding: '16px' }}>
                       <span className={`status-badge ${item.status.replace(/\s+/g, '-').toLowerCase()}`} style={{
-                        background: 'rgba(255,255,255,0.1)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        padding: '4px 10px',
+                        background: 'rgba(var(--primary-rgb), 0.1)',
+                        color: 'var(--primary-color)',
+                        padding: '6px 12px',
                         borderRadius: '20px',
-                        fontSize: '0.85rem'
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        whiteSpace: 'nowrap'
                       }}>
                         {item.status}
                       </span>
                     </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button className="btn-icon" onClick={() => handleEdit(item)} title="Edit" style={{ color: '#60a5fa' }}><Edit size={16} /></button>
-                        <button className="btn-icon" onClick={() => handleDelete(item.id)} title="Hapus" style={{ color: '#ef4444' }}><Trash2 size={16} /></button>
+                    <td style={{ padding: '16px' }}>
+                      <div className="action-buttons" style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => handleEdit(item)} title="Edit" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'}>
+                          <Edit size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} title="Hapus" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}>
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
