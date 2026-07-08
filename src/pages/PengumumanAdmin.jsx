@@ -28,7 +28,7 @@ const getStatusStyle = (status) => {
     'Terbit SH': { bg: '#d1fae5', color: '#059669' },
     'Perbaikkan Akun SiHalal': { bg: '#ffedd5', color: '#ea580c' },
     'PENDING': { bg: '#f3f4f6', color: '#4b5563' },
-    'Verifikasi PU': { bg: '#ccfbf1', color: '#0d9488' },
+    'Verifikasi PU': { bg: '#cffafe', color: '#0891b2' },
     'Batal Pengajuan': { bg: '#fee2e2', color: '#dc2626' }
   };
   return styles[status] || { bg: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary-color)' };
