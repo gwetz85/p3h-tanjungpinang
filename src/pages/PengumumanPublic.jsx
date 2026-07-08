@@ -48,7 +48,7 @@ const PengumumanPublic = () => {
           style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.07)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '2rem', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', overflow: 'hidden' }}
         >
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <img src="/logo-p3h.png" alt="P3H Logo" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '2px solid rgba(255,255,255,0.2)' }} />
+            <img src="/logo-p3h.png" alt="P3H Logo" style={{ height: '110px', width: '110px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', border: '2px solid rgba(255,255,255,0.2)' }} />
             <h1 style={{ color: '#fff', margin: 0, fontSize: '2rem', fontWeight: 'bold', letterSpacing: '0.05em' }}>PENGUMUMAN</h1>
             <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem', fontWeight: '400' }}>Status Proses Sertifikasi Halal Pelaku Usaha</p>
           </div>
