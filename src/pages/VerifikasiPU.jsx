@@ -816,7 +816,14 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                         {(selectedJobPhoto || selectedJob.photoPengajuan) && (
                           <div className="info-item full">
                             <label>Foto Pengajuan</label>
-                            <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" />
+                            <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobPhoto || selectedJob.photoPengajuan, `Produk_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', color: '#3b82f6', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download
+                            </button>
                           </div>
                         )}
 

@@ -1022,7 +1022,17 @@ ${(() => {
           <div className="section-title mt-4">Photo Produk Jadi</div>
           <div className="photo-upload glass-card mb-4">
             {formData.photo ? (
-              <img src={formData.photo} alt="Produk" className="preview-img" />
+              <>
+                <img src={formData.photo} alt="Produk" className="preview-img" />
+                <button
+                  type="button"
+                  onClick={() => downloadImage(formData.photo, `Produk_${job.nama || job.id}.jpg`)}
+                  className="btn-primary"
+                  style={{ marginTop: '10px', width: '100%', justifyContent: 'center' }}
+                >
+                  <Download size={16} /> Download
+                </button>
+              </>
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Photo Produk</p></div>
             )}
