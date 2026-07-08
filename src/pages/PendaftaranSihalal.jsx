@@ -33,6 +33,7 @@ const PendaftaranSihalal = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedJobKTP, setSelectedJobKTP] = useState('');
+  const [selectedJobPhoto, setSelectedJobPhoto] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showHalal, setShowHalal] = useState(false);
   const [adminNote, setAdminNote] = useState('');
@@ -103,6 +104,12 @@ const PendaftaranSihalal = () => {
       const ktpRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKTP`);
       onValue(ktpRef, (snapshot) => {
         if (snapshot.exists()) setSelectedJobKTP(snapshot.val());
+      }, { onlyOnce: true });
+
+      setSelectedJobPhoto('');
+      const photoRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoPengajuan`);
+      onValue(photoRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobPhoto(snapshot.val());
       }, { onlyOnce: true });
     }
   }, [selectedJob?.id]);
@@ -308,6 +315,20 @@ const PendaftaranSihalal = () => {
                         >
                           <ExternalLink size={18} /> Buka Google Drive Survey
                         </a>
+                      </div>
+                    )}
+
+                    {(selectedJobPhoto || selectedJob.photoPengajuan) && (
+                      <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.3)' }}>
+                        <label style={{ color: '#3b82f6', marginBottom: '8px', display: 'block' }}>📷 Foto Pengajuan Produk</label>
+                        <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" style={{ width: '100%', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        <button
+                          type="button"
+                          onClick={() => downloadImage(selectedJobPhoto || selectedJob.photoPengajuan, `Produk_${selectedJob.nama || selectedJob.id}.jpg`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59,130,246,0.2)', border: '1px solid #3b82f6', color: '#3b82f6', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                        >
+                          <Download size={16} /> Download Foto Produk
+                        </button>
                       </div>
                     )}
 
