@@ -14,7 +14,8 @@ const STATUS_OPTIONS = [
   'Terbit SH',
   'Perbaikkan Akun SiHalal',
   'PENDING',
-  'Verifikasi PU'
+  'Verifikasi PU',
+  'Batal Pengajuan'
 ];
 
 const PengumumanAdmin = () => {
