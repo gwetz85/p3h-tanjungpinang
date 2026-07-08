@@ -69,11 +69,11 @@ const PengumumanPublic = () => {
             <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
               <tr>
                 <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>No</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Nama Pelaku Usaha</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Nama Produk</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Alamat Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Nama Pelaku Usaha</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Nama Produk</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', minWidth: '250px', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Alamat Usaha</th>
                 <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Last Update</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Status</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)' }}>Status</th>
               </tr>
               </thead>
               <tbody>
@@ -86,12 +86,12 @@ const PengumumanPublic = () => {
                     const style = getStatusStyle(item.status);
                     return (
                       <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid rgba(255,255,255,0.08)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>{index + 1}</td>
-                        <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600', textTransform: 'uppercase' }}>{item.namaPelakuUsaha}</td>
-                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.namaProduk}</td>
-                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase' }}>{item.alamatUsaha}</td>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{index + 1}</td>
+                        <td style={{ padding: '16px', color: '#fff', fontSize: '0.875rem', fontWeight: '600', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{item.namaPelakuUsaha}</td>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{item.namaProduk}</td>
+                        <td style={{ padding: '16px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', textTransform: 'uppercase', minWidth: '250px' }}>{item.alamatUsaha}</td>
                         <td style={{ padding: '16px', color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{item.lastUpdate}</td>
-                        <td style={{ padding: '16px' }}>
+                        <td style={{ padding: '16px', whiteSpace: 'nowrap' }}>
                           <span style={{
                             background: style.bg,
                             color: style.color,
