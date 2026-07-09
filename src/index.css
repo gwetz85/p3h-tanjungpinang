@@ -95,7 +95,7 @@ body {
   margin-left: 260px; 
   padding: 90px 2rem 2rem 2rem; 
   min-height: 100vh;
-  transition: var(--transition);
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), var(--transition);
   display: flex;
   justify-content: center;
   min-width: 0; /* Prevent flex blowout */
@@ -197,8 +197,69 @@ select option {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* ── Collapsed state ── */
+.sidebar.sidebar-collapsed {
+  width: 72px;
+  padding: 1.5rem 0.5rem;
+}
+
+.sidebar.sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+  padding-left: 0;
+  gap: 0;
+}
+
+.sidebar.sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 12px;
+  gap: 0;
+}
+
+.sidebar.sidebar-collapsed .nav-item:hover {
+  transform: none;
+}
+
+.sidebar.sidebar-collapsed .nav-item.active {
+  transform: none;
+}
+
+.sidebar.sidebar-collapsed .btn-logout-sidebar {
+  justify-content: center;
+  padding: 12px;
+  gap: 0;
+}
+
+/* ── Tombol toggle collapse (desktop only) ── */
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 6px;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.sidebar.sidebar-collapsed .sidebar-collapse-btn {
+  margin-left: 0;
 }
 
 .sidebar-brand {
@@ -411,8 +472,20 @@ select option {
   .sidebar.mobile-open {
     transform: translateX(0);
   }
+  /* Di mobile, sidebar-collapsed tidak berlaku — tampilkan lebar penuh */
+  .sidebar.sidebar-collapsed {
+    width: 260px;
+    padding: 1.5rem 1rem;
+  }
+  .sidebar.sidebar-collapsed .sidebar-brand { justify-content: flex-start; padding-left: 0.5rem; gap: 12px; }
+  .sidebar.sidebar-collapsed .nav-item { justify-content: flex-start; padding: 12px 16px; gap: 12px; }
+  .sidebar.sidebar-collapsed .btn-logout-sidebar { justify-content: flex-start; padding: 12px 16px; gap: 12px; }
+  /* Sembunyikan tombol collapse di mobile */
+  .sidebar-collapse-btn {
+    display: none;
+  }
   .main-content {
-    margin-left: 0;
+    margin-left: 0 !important;
     padding: 1.5rem;
     padding-top: 120px;
   }

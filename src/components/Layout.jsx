@@ -8,6 +8,12 @@ import RunningText from './RunningText';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
+// Ambil preferensi sidebar dari localStorage
+const getSavedSidebarState = () => {
+  try { return localStorage.getItem('sidebarCollapsed') === 'true'; }
+  catch { return false; }
+};
+
 // Faster page transition — reduced from 0.3s to 0.18s
 const pageVariants = {
   initial: { opacity: 0 },
@@ -18,20 +24,39 @@ const pageTransition = { duration: 0.18, ease: 'easeOut' };
 
 const Layout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(getSavedSidebarState);
   const location = useLocation();
 
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
   const toggleMobileMenu = useCallback(() => setIsMobileMenuOpen(v => !v), []);
 
+  const toggleSidebarCollapse = useCallback(() => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('sidebarCollapsed', String(next)); } catch {}
+      return next;
+    });
+  }, []);
+
   return (
-    <div className="layout">
+    <div className={`layout${isSidebarCollapsed ? ' sidebar-collapsed-layout' : ''}`}>
+      {/* Tombol toggle mobile */}
       <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      <Sidebar isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
+      <Sidebar
+        isOpen={isMobileMenuOpen}
+        onClose={closeMobileMenu}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
+      />
       
-      <main className="main-content" onClick={closeMobileMenu}>
+      <main
+        className="main-content"
+        style={{ marginLeft: isSidebarCollapsed ? '72px' : '260px' }}
+        onClick={closeMobileMenu}
+      >
         <Topbar />
         <div className="layout-content-wrapper">
           <NotificationManager />

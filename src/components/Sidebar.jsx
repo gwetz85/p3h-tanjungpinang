@@ -3,7 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Users, PlusSquare, CheckCircle2, ClipboardCheck,
   History, LogOut, LayoutDashboard, MessageCircle,
-  FileSearch, X, Settings, Package, FileText, Archive, Wrench
+  FileSearch, X, Settings, Package, FileText, Archive, Wrench,
+  ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -29,7 +30,7 @@ const ALL_NAV_ITEMS = [
   { name: 'Pesan Chat',         path: '/chat',           icon: MessageCircle,   roles: ['superadmin', 'Admin', 'Petugas', 'Monitoring'] },
 ];
 
-const Sidebar = ({ isOpen, onClose }) => {
+const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
   const { role } = useAuth();
   const navigate = useNavigate();
 
@@ -45,9 +46,20 @@ const Sidebar = ({ isOpen, onClose }) => {
   );
 
   return (
-    <div className={`sidebar ${isOpen ? 'mobile-open' : ''}`}>
+    <div className={`sidebar ${isOpen ? 'mobile-open' : ''} ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="sidebar-brand">
-        <h2 style={{ color: 'white', fontWeight: 700, margin: 0, fontSize: '1.35rem', letterSpacing: '-0.5px' }}>P3H TPI</h2>
+        {!isCollapsed && (
+          <h2 style={{ color: 'white', fontWeight: 700, margin: 0, fontSize: '1.35rem', letterSpacing: '-0.5px' }}>P3H TPI</h2>
+        )}
+        {/* Tombol collapse — hanya terlihat di desktop */}
+        <button
+          onClick={onToggleCollapse}
+          className="sidebar-collapse-btn"
+          title={isCollapsed ? 'Perluas sidebar' : 'Sembunyikan sidebar'}
+        >
+          {isCollapsed ? <ChevronsRight size={20} /> : <ChevronsLeft size={20} />}
+        </button>
+        {/* Tombol close mobile */}
         <button onClick={onClose} className="mobile-close-btn" style={{ display: 'none', marginLeft: 'auto', background: 'none', border: 'none', color: 'white' }}>
           <X size={24} />
         </button>
@@ -60,17 +72,18 @@ const Sidebar = ({ isOpen, onClose }) => {
             to={item.path}
             onClick={onClose}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            title={isCollapsed ? item.name : undefined}
           >
             <item.icon size={18} />
-            <span>{item.name}</span>
+            {!isCollapsed && <span>{item.name}</span>}
           </NavLink>
         ))}
       </nav>
 
       <div className="sidebar-footer">
-        <button onClick={handleLogout} className="btn-logout-sidebar">
+        <button onClick={handleLogout} className="btn-logout-sidebar" title={isCollapsed ? 'Keluar' : undefined}>
           <LogOut size={18} />
-          <span>Keluar</span>
+          {!isCollapsed && <span>Keluar</span>}
         </button>
       </div>
     </div>
