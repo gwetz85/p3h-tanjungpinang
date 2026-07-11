@@ -120,12 +120,15 @@ const FloatingTatacara = ({
 
 const headerStyle = {
   padding: '16px 20px',
-  borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+  borderBottom: '1px solid var(--glass-border)',
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  background: 'rgba(241, 245, 249, 0.5)',
+  background: 'rgba(255, 255, 255, 0.6)',
+  backdropFilter: 'blur(12px)',
   userSelect: 'none',
+  borderTopLeftRadius: '24px',
+  borderTopRightRadius: '24px',
 };
 
 const headerTitleStyle = {
@@ -174,8 +177,9 @@ const textareaStyle = {
   width: '100%',
   padding: '16px',
   borderRadius: '12px',
-  border: '1px solid rgba(226, 232, 240, 0.8)',
-  background: 'white',
+  border: '1px solid var(--glass-border)',
+  background: 'rgba(255, 255, 255, 0.5)',
+  backdropFilter: 'blur(12px)',
   color: 'var(--text)',
   fontSize: '0.95rem',
   lineHeight: 1.6,
@@ -202,10 +206,13 @@ const clearBtnStyle = {
 
 const footerStyle = {
   padding: '16px 20px',
-  borderTop: '1px solid rgba(226, 232, 240, 0.8)',
+  borderTop: '1px solid var(--glass-border)',
   display: 'flex',
   alignItems: 'center',
-  background: 'rgba(241, 245, 249, 0.3)',
+  background: 'rgba(255, 255, 255, 0.6)',
+  backdropFilter: 'blur(12px)',
+  borderBottomLeftRadius: '24px',
+  borderBottomRightRadius: '24px',
 };
 
 export default FloatingTatacara;

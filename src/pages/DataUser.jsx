@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, set, push, remove, update } from 'firebase/database';
 import { motion } from 'framer-motion';
-import { UserPlus, Trash2, Shield, Mail, UserCheck, Lock, Eye, EyeOff } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Mail, UserCheck, Lock, Eye, EyeOff, User } from 'lucide-react';
 
 const DataUser = () => {
   const [users, setUsers] = useState([]);
@@ -125,25 +125,25 @@ const DataUser = () => {
         {/* Daftar User */}
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="list-card glass-card">
           <h3>Daftar Pengguna Aktif</h3>
-          <div className="table-container mt-4">
+          <div className="table-container mt-4" style={{ overflowX: 'auto' }}>
             {loading ? <p>Memuat data...</p> : (
-              <table className="custom-table">
+              <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr>
-                    <th>User</th>
-                    <th>Role</th>
-                    <th>Password</th>
-                    <th>Aksi</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>User</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Role</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Password</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id}>
-                      <td>
+                    <tr key={user.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>
                         <div style={{ fontWeight: '600' }}>{user.nama || 'User'}</div>
                         <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{user.email}</div>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
                           <span style={{
                             display: 'inline-block',
@@ -194,7 +194,7 @@ const DataUser = () => {
                           </select>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         {user.password ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
@@ -211,7 +211,7 @@ const DataUser = () => {
                           <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic' }}>Tidak tersimpan</span>
                         )}
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         <button onClick={() => handleDelete(user.id)} className="text-danger" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                           <Trash2 size={18} />
                         </button>

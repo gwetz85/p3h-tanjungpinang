@@ -142,18 +142,20 @@ const overlayStyle = {
 
 const cardStyle = {
   position: 'relative',
-  background: 'linear-gradient(145deg, #ffffff, #f8faff)',
+  background: 'rgba(15, 23, 42, 0.85)',
+  backdropFilter: 'blur(32px)',
+  WebkitBackdropFilter: 'blur(32px)',
   borderRadius: '20px',
   maxWidth: '460px',
   width: '100%',
-  boxShadow:
-    '0 25px 60px rgba(0,0,0,0.18), 0 8px 24px rgba(37,99,235,0.12)',
+  boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 8px 24px rgba(37,99,235,0.2)',
   overflow: 'hidden',
-  border: '1px solid rgba(226,232,240,0.8)',
+  border: '1px solid rgba(255, 255, 255, 0.08)',
 };
 
 const headerStyle = {
-  background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)',
+  background: 'linear-gradient(135deg, rgba(30, 64, 175, 0.8) 0%, rgba(37, 99, 235, 0.8) 50%, rgba(59, 130, 246, 0.8) 100%)',
+  backdropFilter: 'blur(10px)',
   padding: '1rem 1.25rem',
   display: 'flex',
   alignItems: 'center',
@@ -206,14 +208,14 @@ const titleStyle = {
   margin: '0 0 0.75rem',
   fontSize: '1.25rem',
   fontWeight: 700,
-  color: '#0f172a',
+  color: '#f1f5f9',
   lineHeight: 1.3,
 };
 
 const contentStyle = {
   margin: 0,
   fontSize: '0.95rem',
-  color: '#475569',
+  color: '#94a3b8',
   lineHeight: 1.7,
   whiteSpace: 'pre-wrap',
 };

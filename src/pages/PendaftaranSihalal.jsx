@@ -33,6 +33,9 @@ const PendaftaranSihalal = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedJobKTP, setSelectedJobKTP] = useState('');
+  const [selectedJobPhoto, setSelectedJobPhoto] = useState('');
+  const [selectedJobLokasi, setSelectedJobLokasi] = useState('');
+  const [selectedJobKunjungan, setSelectedJobKunjungan] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showHalal, setShowHalal] = useState(false);
   const [adminNote, setAdminNote] = useState('');
@@ -103,6 +106,24 @@ const PendaftaranSihalal = () => {
       const ktpRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKTP`);
       onValue(ktpRef, (snapshot) => {
         if (snapshot.exists()) setSelectedJobKTP(snapshot.val());
+      }, { onlyOnce: true });
+
+      setSelectedJobPhoto('');
+      const photoRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoPengajuan`);
+      onValue(photoRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobPhoto(snapshot.val());
+      }, { onlyOnce: true });
+
+      setSelectedJobLokasi('');
+      const lokasiRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoLokasiUsaha`);
+      onValue(lokasiRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobLokasi(snapshot.val());
+      }, { onlyOnce: true });
+
+      setSelectedJobKunjungan('');
+      const kunjunganRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKunjungan`);
+      onValue(kunjunganRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobKunjungan(snapshot.val());
       }, { onlyOnce: true });
     }
   }, [selectedJob?.id]);
@@ -311,6 +332,20 @@ const PendaftaranSihalal = () => {
                       </div>
                     )}
 
+                    {(selectedJobPhoto || selectedJob.photoPengajuan) && (
+                      <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.3)' }}>
+                        <label style={{ color: '#3b82f6', marginBottom: '8px', display: 'block' }}>📷 Foto Pengajuan Produk</label>
+                        <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" style={{ width: '100%', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        <button
+                          type="button"
+                          onClick={() => downloadImage(selectedJobPhoto || selectedJob.photoPengajuan, `Produk_${selectedJob.nama || selectedJob.id}.jpg`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59,130,246,0.2)', border: '1px solid #3b82f6', color: '#3b82f6', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                        >
+                          <Download size={16} /> Download Foto Produk
+                        </button>
+                      </div>
+                    )}
+
                     {selectedJobKTP && (
                       <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)' }}>
                         <label style={{ color: '#10b981', marginBottom: '8px', display: 'block' }}>📷 Foto KTP Pelaku Usaha</label>
@@ -321,6 +356,34 @@ const PendaftaranSihalal = () => {
                           style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16,185,129,0.2)', border: '1px solid #10b981', color: '#10b981', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
                         >
                           <Download size={16} /> Download Foto KTP
+                        </button>
+                      </div>
+                    )}
+
+                    {selectedJobLokasi && (
+                      <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                        <label style={{ color: '#f59e0b', marginBottom: '8px', display: 'block' }}>📷 Foto Lokasi Usaha</label>
+                        <img src={selectedJobLokasi} alt="Lokasi" style={{ width: '100%', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        <button
+                          type="button"
+                          onClick={() => downloadImage(selectedJobLokasi, `Lokasi_${selectedJob.nama || selectedJob.id}.jpg`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(245,158,11,0.2)', border: '1px solid #f59e0b', color: '#f59e0b', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                        >
+                          <Download size={16} /> Download Foto Lokasi
+                        </button>
+                      </div>
+                    )}
+
+                    {selectedJobKunjungan && (
+                      <div className="info-item full glass-card p-4 mb-6" style={{ background: 'rgba(236,72,153,0.08)', border: '1px solid rgba(236,72,153,0.3)' }}>
+                        <label style={{ color: '#ec4899', marginBottom: '8px', display: 'block' }}>📷 Foto Kunjungan Pendampingan</label>
+                        <img src={selectedJobKunjungan} alt="Kunjungan" style={{ width: '100%', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        <button
+                          type="button"
+                          onClick={() => downloadImage(selectedJobKunjungan, `Kunjungan_${selectedJob.nama || selectedJob.id}.jpg`)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(236,72,153,0.2)', border: '1px solid #ec4899', color: '#ec4899', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                        >
+                          <Download size={16} /> Download Foto Kunjungan
                         </button>
                       </div>
                     )}

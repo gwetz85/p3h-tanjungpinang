@@ -119,14 +119,14 @@ const DataKoordinator = () => {
     <div className="page-container">
       <h1 className="title-gradient mb-8">Data Petugas Lapangan</h1>
 
-      <div className="table-container glass-card desktop-only">
-        <table className="custom-table">
+      <div className="table-container glass-card desktop-only" style={{ overflowX: 'auto' }}>
+        <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr>
-              <th><User size={16} /> Nama Petugas</th>
-              <th><Phone size={16} /> No. WhatsApp</th>
-              <th><MapPin size={16} /> Wilayah Kerja</th>
-              {['Admin', 'superadmin'].includes(role) && <th style={{ textAlign: 'center' }}>Aksi</th>}
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><User size={16} /> Nama Petugas</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}><Phone size={16} /> No. WhatsApp</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><MapPin size={16} /> Wilayah Kerja</th>
+              {['Admin', 'superadmin'].includes(role) && <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', textAlign: 'center' }}>Aksi</th>}
             </tr>
           </thead>
           <tbody>
@@ -152,8 +152,8 @@ const DataKoordinator = () => {
               </tr>
             ) : (
               coordinators.map((coord) => (
-                <motion.tr key={coord.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td>
+                <motion.tr key={coord.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {coord.photoURL ? (
@@ -165,14 +165,14 @@ const DataKoordinator = () => {
                       <strong>{coord.nama}</strong>
                     </div>
                   </td>
-                  <td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                     <a href={`https://wa.me/${coord.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ color: '#10b981', textDecoration: 'none', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       {coord.phone}
                     </a>
                   </td>
-                  <td>{coord.wilayah}</td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>{coord.wilayah}</td>
                   {['Admin', 'superadmin'].includes(role) && (
-                    <td style={{ textAlign: 'center' }}>
+                    <td style={{ padding: '14px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
                       {role === 'superadmin' && (
                         <button onClick={() => handleEdit(coord)} className="btn-icon text-accent" title="Edit" style={{ marginRight: '0.5rem' }}>
                           <Edit3 size={18} />

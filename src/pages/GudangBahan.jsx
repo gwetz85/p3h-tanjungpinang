@@ -226,13 +226,13 @@ const GudangBahan = () => {
         </div>
       </div>
 
-      <div className="table-container glass-card desktop-only">
-        <table className="custom-table">
+      <div className="table-container glass-card desktop-only" style={{ overflowX: 'auto' }}>
+        <table className="custom-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr>
-              <th><Package size={16} /> Merek Bahan</th>
-              <th><Factory size={16} /> Jumlah Varian Produsen</th>
-              <th style={{ textAlign: 'center' }}>Aksi</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><Package size={16} /> Merek Bahan</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}><Factory size={16} /> Jumlah Varian Produsen</th>
+              <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', textAlign: 'center' }}>Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -252,14 +252,14 @@ const GudangBahan = () => {
               </tr>
             ) : (
               filteredBahan.map((group) => (
-                <motion.tr key={group.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ cursor: 'pointer' }} onClick={() => setSelectedMerek(group.merek)} className="hover-row">
-                  <td><strong style={{ fontSize: '1.1rem' }}>{group.merek}</strong></td>
-                  <td>
+                <motion.tr key={group.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ cursor: 'pointer', transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onClick={() => setSelectedMerek(group.merek)} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}><strong style={{ fontSize: '1.1rem' }}>{group.merek}</strong></td>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                     <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', padding: '4px 10px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 500 }}>
                       {group.variants.length} Varian
                     </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
+                  <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
                     <button onClick={(e) => { e.stopPropagation(); setSelectedMerek(group.merek); }} className="btn-icon text-accent" title="Lihat Detail" style={{ padding: '6px 12px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <Eye size={16} /> Detail
                     </button>

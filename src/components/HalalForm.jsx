@@ -4,6 +4,7 @@ import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'f
 import { motion } from 'framer-motion';
 import { X, Save, FileText, Image as ImageIcon, Download, ExternalLink, MapPin, Send, Eraser, PenTool, Sparkles, Maximize2 } from 'lucide-react';
 import FloatingTatacara from './FloatingTatacara';
+import { compressImage } from '../utils/imageUtils';
 
 const HalalForm = ({ job, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,8 @@ const HalalForm = ({ job, onClose }) => {
     tatacara: '',
     photo: '',
     photoKTP: '',
+    photoLokasiUsaha: '',
+    photoKunjungan: '',
     surveyDriveLink: '',
     location: null,
     siHalalEmail: '',
@@ -88,6 +91,8 @@ const HalalForm = ({ job, onClose }) => {
             kemasan: fetchedData.kemasan || defaultData.kemasan,
             photo: prev.photo, // Preserve lazily loaded photos
             photoKTP: prev.photoKTP,
+            photoLokasiUsaha: prev.photoLokasiUsaha,
+            photoKunjungan: prev.photoKunjungan,
             tandaTanganPelakuUsaha: prev.tandaTanganPelakuUsaha
           };
         });
@@ -103,6 +108,8 @@ const HalalForm = ({ job, onClose }) => {
           ...prev,
           photo: val.photo || prev.photo,
           photoKTP: val.photoKTP || prev.photoKTP,
+          photoLokasiUsaha: val.photoLokasiUsaha || prev.photoLokasiUsaha,
+          photoKunjungan: val.photoKunjungan || prev.photoKunjungan,
           tandaTanganPelakuUsaha: val.tandaTanganPelakuUsaha || prev.tandaTanganPelakuUsaha
         }));
       }
@@ -137,7 +144,7 @@ const HalalForm = ({ job, onClose }) => {
   }, [job.id]);
 
   const calculateProgress = (data) => {
-    let totalFields = 17; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 Drive + 1 Location + 2 siHalal
+    let totalFields = 19; // 7 Data Usaha + 3 Daftar + 1 Tatacara + 1 Photo + 1 PhotoKTP + 1 LokasiUsaha + 1 Kunjungan + 1 Drive + 1 Location + 2 siHalal
     let filledFields = 0;
 
     if (data.nib) filledFields++;
@@ -153,6 +160,8 @@ const HalalForm = ({ job, onClose }) => {
     if (data.tatacara) filledFields++;
     if (data.photo) filledFields++;
     if (data.photoKTP) filledFields++;
+    if (data.photoLokasiUsaha) filledFields++;
+    if (data.photoKunjungan) filledFields++;
     if (data.surveyDriveLink) filledFields++;
     if (data.location) filledFields++;
     if (data.siHalalEmail) filledFields++;
@@ -175,7 +184,7 @@ const HalalForm = ({ job, onClose }) => {
         sub: (p.sub || []).filter(s => s && s.trim() !== '')
       }));
       
-      const { photo, photoKTP, tandaTanganPelakuUsaha, ...restFormData } = formData;
+      const { photo, photoKTP, photoLokasiUsaha, photoKunjungan, tandaTanganPelakuUsaha, ...restFormData } = formData;
       const dataToSave = {
         ...restFormData,
         bahan: cleanedBahan,
@@ -205,6 +214,8 @@ const HalalForm = ({ job, onClose }) => {
       const photoUpdates = {};
       if (photo) photoUpdates.photo = photo;
       if (photoKTP) photoUpdates.photoKTP = photoKTP;
+      if (photoLokasiUsaha) photoUpdates.photoLokasiUsaha = photoLokasiUsaha;
+      if (photoKunjungan) photoUpdates.photoKunjungan = photoKunjungan;
       if (tandaTanganPelakuUsaha) photoUpdates.tandaTanganPelakuUsaha = tandaTanganPelakuUsaha;
 
       if (Object.keys(photoUpdates).length > 0) {
@@ -358,21 +369,51 @@ const HalalForm = ({ job, onClose }) => {
   };
 
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photo: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photo: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 
-  const handleKTPUpload = (e) => {
+  const handleKTPUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, photoKTP: reader.result });
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoKTP: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
+    }
+  };
+
+  const handleLokasiUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoLokasiUsaha: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
+    }
+  };
+
+  const handleKunjunganUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoKunjungan: compressed });
+      } catch (err) {
+        console.error("Gagal kompres foto:", err);
+      }
     }
   };
 
@@ -589,9 +630,17 @@ table td:first-child { font-weight: bold; width: 32%; white-space: nowrap; }
   <div class="section-heading">IV. TATACARA PEMBUATAN PRODUK</div>
   <p style="white-space: pre-wrap; line-height: 1.7; font-size: 10.5pt;">${formData.tatacara || '-'}</p>
 </div>
-${formData.surveyDriveLink ? `<div class="section"><div class="section-heading">V. LINK FOTO SURVEY LAPANGAN</div><p style="word-break:break-all;color:#2563eb;">${formData.surveyDriveLink}</p></div>` : ''}
-${formData.photo ? `<div class="section"><div class="section-heading">${formData.surveyDriveLink ? 'VI' : 'V'}. FOTO PRODUK</div><div class="img-section"><img src="${formData.photo}" alt="Foto Produk" /></div></div>` : ''}
-${formData.photoKTP ? `<div class="section"><div class="section-heading">${formData.surveyDriveLink && formData.photo ? 'VII' : formData.surveyDriveLink || formData.photo ? 'VI' : 'V'}. FOTO KTP PELAKU USAHA</div><div class="img-section"><img src="${formData.photoKTP}" alt="Foto KTP" /></div></div>` : ''}
+${(() => {
+  let section = 5;
+  const rom = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+  let res = '';
+  if (formData.surveyDriveLink) res += `<div class="section"><div class="section-heading">${rom[section++]}. LINK FOTO SURVEY LAPANGAN</div><p style="word-break:break-all;color:#2563eb;">${formData.surveyDriveLink}</p></div>`;
+  if (formData.photo) res += `<div class="section"><div class="section-heading">${rom[section++]}. FOTO PRODUK</div><div class="img-section"><img src="${formData.photo}" alt="Foto Produk" /></div></div>`;
+  if (formData.photoKTP) res += `<div class="section"><div class="section-heading">${rom[section++]}. FOTO KTP PELAKU USAHA</div><div class="img-section"><img src="${formData.photoKTP}" alt="Foto KTP" /></div></div>`;
+  if (formData.photoLokasiUsaha) res += `<div class="section"><div class="section-heading">${rom[section++]}. FOTO LOKASI USAHA</div><div class="img-section"><img src="${formData.photoLokasiUsaha}" alt="Foto Lokasi Usaha" /></div></div>`;
+  if (formData.photoKunjungan) res += `<div class="section"><div class="section-heading">${rom[section++]}. FOTO KUNJUNGAN PENDAMPINGAN</div><div class="img-section"><img src="${formData.photoKunjungan}" alt="Foto Kunjungan Pendampingan" /></div></div>`;
+  return res;
+})()}
 <div style="margin-top: 36px; text-align: right;">
   <p style="font-size:10pt;">Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
   <div style="display:inline-block;text-align:center;margin-top:20px;min-width:200px;">
@@ -973,7 +1022,17 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
           <div className="section-title mt-4">Photo Produk Jadi</div>
           <div className="photo-upload glass-card mb-4">
             {formData.photo ? (
-              <img src={formData.photo} alt="Produk" className="preview-img" />
+              <>
+                <img src={formData.photo} alt="Produk" className="preview-img" />
+                <button
+                  type="button"
+                  onClick={() => downloadImage(formData.photo, `Produk_${job.nama || job.id}.jpg`)}
+                  className="btn-primary"
+                  style={{ marginTop: '10px', width: '100%', justifyContent: 'center' }}
+                >
+                  <Download size={16} /> Download
+                </button>
+              </>
             ) : (
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Photo Produk</p></div>
             )}
@@ -998,6 +1057,46 @@ ${formData.photoKTP ? `<div class="section"><div class="section-heading">${formD
               <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto KTP</p></div>
             )}
             <input type="file" accept="image/*" capture="environment" onChange={handleKTPUpload} />
+          </div>
+
+          <div className="section-title mt-4">Foto Lokasi Usaha</div>
+          <div className="photo-upload glass-card mb-4">
+            {formData.photoLokasiUsaha ? (
+              <>
+                <img src={formData.photoLokasiUsaha} alt="Lokasi Usaha" className="preview-img" />
+                <button
+                  type="button"
+                  onClick={() => downloadImage(formData.photoLokasiUsaha, `Lokasi_${job.nama || job.id}.jpg`)}
+                  className="btn-primary"
+                  style={{ marginTop: '10px', width: '100%', background: 'rgba(16,185,129,0.2)', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <Download size={16} /> Download Foto Lokasi
+                </button>
+              </>
+            ) : (
+              <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto Lokasi Usaha</p></div>
+            )}
+            <input type="file" accept="image/*" capture="environment" onChange={handleLokasiUpload} />
+          </div>
+
+          <div className="section-title mt-4">Foto Kunjungan Pendampingan</div>
+          <div className="photo-upload glass-card mb-4">
+            {formData.photoKunjungan ? (
+              <>
+                <img src={formData.photoKunjungan} alt="Kunjungan" className="preview-img" />
+                <button
+                  type="button"
+                  onClick={() => downloadImage(formData.photoKunjungan, `Kunjungan_${job.nama || job.id}.jpg`)}
+                  className="btn-primary"
+                  style={{ marginTop: '10px', width: '100%', background: 'rgba(16,185,129,0.2)', border: '1px solid #10b981', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <Download size={16} /> Download Foto Kunjungan
+                </button>
+              </>
+            ) : (
+              <div className="photo-placeholder"><ImageIcon size={48} /> <p>Pilih Foto Kunjungan Pendampingan</p></div>
+            )}
+            <input type="file" accept="image/*" capture="environment" onChange={handleKunjunganUpload} />
           </div>
 
           <div className="input-group glass-card p-4 mb-4" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ── WMO Weather code → label & condition ──────────────────────────────────
 const getWeatherInfo = (code) => {
   if (code === 0) return { label: 'Cerah', condition: 'sunny' };
-  if (code <= 3) return { label: 'Berawan Sebagian', condition: 'cloudy' };
+  if (code <= 3) return { label: 'Berawan', condition: 'cloudy' };
   if (code <= 48) return { label: 'Berkabut', condition: 'cloudy' };
   if (code <= 55) return { label: 'Gerimis', condition: 'rainy' };
   if (code <= 67) return { label: 'Hujan', condition: 'rainy' };
@@ -15,118 +15,134 @@ const getWeatherInfo = (code) => {
   return { label: 'Tidak Diketahui', condition: 'cloudy' };
 };
 
-// ── Animated weather illustrations ────────────────────────────────────────
-const SunnyAnimation = () => (
-  <svg viewBox="0 0 120 120" width="90" height="90" className="weather-anim-svg">
-    {/* Rays */}
-    {[0,45,90,135,180,225,270,315].map((deg, i) => (
-      <motion.line
-        key={i}
-        x1="60" y1="60"
-        x2={60 + Math.cos((deg * Math.PI) / 180) * 44}
-        y2={60 + Math.sin((deg * Math.PI) / 180) * 44}
-        stroke="#FCD34D" strokeWidth="3.5" strokeLinecap="round"
-        animate={{ opacity: [1, 0.4, 1], scale: [1, 1.1, 1] }}
-        transition={{ duration: 2, delay: i * 0.15, repeat: Infinity }}
-      />
-    ))}
-    {/* Sun core */}
-    <motion.circle
-      cx="60" cy="60" r="22"
-      fill="#FBBF24"
-      animate={{ scale: [1, 1.05, 1] }}
-      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <circle cx="60" cy="60" r="16" fill="#FDE68A" opacity="0.7" />
-  </svg>
-);
+// ── Full Background Animations ────────────────────────────────────────
 
-const CloudyAnimation = () => (
-  <svg viewBox="0 0 120 90" width="110" height="85" className="weather-anim-svg">
-    {/* Back cloud */}
-    <motion.g
-      animate={{ x: [-4, 4, -4] }}
+const SunnyBackground = () => (
+  <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+    <motion.div
+      style={{
+        position: 'absolute',
+        top: '-50px',
+        right: '-50px',
+        width: '300px',
+        height: '300px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(253,224,71,0.4) 0%, rgba(253,224,71,0) 70%)',
+      }}
+      animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-    >
-      <ellipse cx="75" cy="52" rx="32" ry="20" fill="#CBD5E1" />
-      <ellipse cx="90" cy="44" rx="20" ry="16" fill="#CBD5E1" />
-    </motion.g>
-    {/* Front cloud */}
-    <motion.g
-      animate={{ x: [3, -3, 3] }}
-      transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-    >
-      <ellipse cx="52" cy="58" rx="36" ry="22" fill="#E2E8F0" />
-      <ellipse cx="38" cy="47" rx="22" ry="18" fill="#E2E8F0" />
-      <ellipse cx="62" cy="44" rx="20" ry="16" fill="#E2E8F0" />
-    </motion.g>
-  </svg>
+    />
+    <motion.div
+      style={{
+        position: 'absolute',
+        top: '20px',
+        right: '40px',
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        background: '#FBBF24',
+        boxShadow: '0 0 40px #F59E0B',
+      }}
+      animate={{ rotate: 360 }}
+      transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+    />
+  </div>
 );
 
-const RainyAnimation = () => {
-  const drops = [10, 22, 34, 46, 58, 70, 82, 16, 28, 52, 64, 76];
+const CloudyBackground = () => (
+  <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+    <motion.div
+      animate={{ x: [0, -50, 0] }}
+      transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+      style={{ position: 'absolute', top: '10%', right: '10%', width: '150px', height: '60px', background: 'rgba(255,255,255,0.4)', borderRadius: '50px', filter: 'blur(8px)' }}
+    />
+    <motion.div
+      animate={{ x: [0, 60, 0] }}
+      transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+      style={{ position: 'absolute', top: '40%', left: '5%', width: '200px', height: '80px', background: 'rgba(255,255,255,0.2)', borderRadius: '50px', filter: 'blur(12px)' }}
+    />
+    <motion.div
+      animate={{ x: [0, -30, 0] }}
+      transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+      style={{ position: 'absolute', bottom: '10%', right: '30%', width: '120px', height: '50px', background: 'rgba(255,255,255,0.3)', borderRadius: '50px', filter: 'blur(10px)' }}
+    />
+  </div>
+);
+
+const RainyBackground = () => {
+  const drops = Array.from({ length: 30 });
   return (
-    <svg viewBox="0 0 100 110" width="90" height="100" className="weather-anim-svg">
-      {/* Cloud */}
-      <motion.g animate={{ y: [-2, 2, -2] }} transition={{ duration: 3, repeat: Infinity }}>
-        <ellipse cx="50" cy="38" rx="36" ry="22" fill="#94A3B8" />
-        <ellipse cx="34" cy="28" rx="20" ry="17" fill="#94A3B8" />
-        <ellipse cx="62" cy="26" rx="18" ry="15" fill="#94A3B8" />
-      </motion.g>
-      {/* Raindrops */}
-      {drops.map((x, i) => (
-        <motion.line
-          key={i} x1={x} y1={58 + (i % 3) * 6} x2={x - 4} y2={74 + (i % 3) * 6}
-          stroke="#60A5FA" strokeWidth="2.2" strokeLinecap="round"
-          animate={{ opacity: [0, 1, 0], y: [0, 14, 0] }}
-          transition={{ duration: 0.9, delay: (i * 0.13) % 0.9, repeat: Infinity }}
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
+      <CloudyBackground />
+      {drops.map((_, i) => (
+        <motion.div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: -20,
+            left: `${Math.random() * 100}%`,
+            width: '2px',
+            height: '20px',
+            background: 'rgba(255,255,255,0.6)',
+            borderRadius: '2px',
+          }}
+          animate={{ y: ['0vh', '300px'], opacity: [0, 1, 0] }}
+          transition={{ duration: 0.7 + Math.random() * 0.3, repeat: Infinity, delay: Math.random(), ease: 'linear' }}
         />
       ))}
-    </svg>
+    </div>
   );
 };
 
-const StormyAnimation = () => {
-  const drops = [12, 28, 44, 60, 76, 20, 36, 52, 68];
+const StormyBackground = () => {
+  const drops = Array.from({ length: 40 });
   return (
-    <svg viewBox="0 0 100 120" width="90" height="110" className="weather-anim-svg">
-      <motion.g animate={{ y: [-2, 2, -2] }} transition={{ duration: 3, repeat: Infinity }}>
-        <ellipse cx="50" cy="36" rx="36" ry="22" fill="#64748B" />
-        <ellipse cx="34" cy="26" rx="20" ry="17" fill="#64748B" />
-        <ellipse cx="64" cy="24" rx="18" ry="15" fill="#64748B" />
-      </motion.g>
-      {drops.map((x, i) => (
-        <motion.line
-          key={i} x1={x} y1={56 + (i % 3) * 5} x2={x - 5} y2={70 + (i % 3) * 5}
-          stroke="#93C5FD" strokeWidth="2" strokeLinecap="round"
-          animate={{ opacity: [0, 1, 0], y: [0, 12, 0] }}
-          transition={{ duration: 0.8, delay: (i * 0.11) % 0.8, repeat: Infinity }}
-        />
-      ))}
-      {/* Lightning */}
-      <motion.polyline
-        points="55,60 48,78 54,78 46,98"
-        fill="none" stroke="#FCD34D" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
-        animate={{ opacity: [0, 1, 0, 1, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, times: [0, 0.1, 0.3, 0.4, 1] }}
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0, background: 'rgba(0,0,0,0.3)' }}>
+      <CloudyBackground />
+      {/* Lightning Flash */}
+      <motion.div
+        style={{ position: 'absolute', inset: 0, background: 'white' }}
+        animate={{ opacity: [0, 0, 0.8, 0, 0, 0, 0.5, 0] }}
+        transition={{ duration: 5, repeat: Infinity, times: [0, 0.9, 0.92, 0.94, 0.95, 0.96, 0.98, 1] }}
       />
-    </svg>
+      {drops.map((_, i) => (
+        <motion.div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: -20,
+            left: `${Math.random() * 100}%`,
+            width: '3px',
+            height: '25px',
+            background: 'rgba(255,255,255,0.8)',
+            transform: 'rotate(15deg)'
+          }}
+          animate={{ y: ['0vh', '400px'], x: [0, -50], opacity: [0, 1, 0] }}
+          transition={{ duration: 0.5 + Math.random() * 0.3, repeat: Infinity, delay: Math.random(), ease: 'linear' }}
+        />
+      ))}
+    </div>
   );
 };
 
-const WeatherAnim = ({ condition }) => {
-  if (condition === 'sunny')  return <SunnyAnimation />;
-  if (condition === 'rainy')  return <RainyAnimation />;
-  if (condition === 'stormy') return <StormyAnimation />;
-  return <CloudyAnimation />;
+const WeatherBackground = ({ condition }) => {
+  if (condition === 'sunny')  return <SunnyBackground />;
+  if (condition === 'rainy')  return <RainyBackground />;
+  if (condition === 'stormy') return <StormyBackground />;
+  return <CloudyBackground />;
 };
 
-// ── Gradient presets per condition ────────────────────────────────────────
-const gradients = {
-  sunny:  'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)',
-  cloudy: 'linear-gradient(135deg, #334155 0%, #475569 50%, #64748b 100%)',
-  rainy:  'linear-gradient(135deg, #1e3a5f 0%, #1e4d8c 50%, #2563eb 100%)',
-  stormy: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 100 } }
 };
 
 // ── Main component ─────────────────────────────────────────────────────────
@@ -168,7 +184,6 @@ const WeatherBanner = () => {
           label:     info.label,
           condition: info.condition,
         });
-        // Record last-updated time
         const now = new Date();
         const hh  = String(now.getHours()).padStart(2, '0');
         const mm  = String(now.getMinutes()).padStart(2, '0');
@@ -182,82 +197,124 @@ const WeatherBanner = () => {
   };
 
   useEffect(() => {
-    // Initial load
     updateDate();
     fetchWeather();
-
-    // Refresh weather every 5 minutes (300 000 ms)
-    const weatherInterval = setInterval(() => {
-      fetchWeather();
-    }, 5 * 60 * 1000);
-
-    // Refresh date label every minute (in case user keeps page open past midnight)
-    const dateInterval = setInterval(() => {
-      updateDate();
-    }, 60 * 1000);
-
-    // Cleanup on unmount
+    const weatherInterval = setInterval(fetchWeather, 5 * 60 * 1000);
+    const dateInterval = setInterval(updateDate, 60 * 1000);
     return () => {
       clearInterval(weatherInterval);
       clearInterval(dateInterval);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const condition = weather?.condition || 'cloudy';
-  const bg = gradients[condition];
+  
+  const gradients = {
+    sunny:  'linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%)',
+    cloudy: 'linear-gradient(135deg, #64748b 0%, #334155 100%)',
+    rainy:  'linear-gradient(135deg, #475569 0%, #1e3a8a 100%)',
+    stormy: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="weather-banner"
-      style={{ background: bg }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, type: 'spring' }}
+      style={{
+        position: 'relative',
+        background: gradients[condition],
+        borderRadius: '24px',
+        padding: '30px',
+        color: 'white',
+        overflow: 'hidden',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: '220px',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}
     >
-      {/* Left: text info */}
-      <div className="weather-info">
-        <div className="weather-city">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.85}}>
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          Tanjungpinang, Kepulauan Riau
-        </div>
-        <div className="weather-date">{today}</div>
+      <WeatherBackground condition={condition} />
 
-        {loading ? (
-          <div className="weather-loading">⏳ Memuat data cuaca...</div>
-        ) : (
-          <>
-            <div className="weather-condition-label">{weather.label}</div>
-            <div className="weather-temp-main">{weather.temp}°C</div>
-            <div className="weather-temp-range">
-              <span className="temp-high">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+        
+        {/* Left Side */}
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <motion.div 
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', opacity: 0.9, marginBottom: '8px', fontWeight: 500 }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Tanjungpinang, Kepulauan Riau
+          </motion.div>
+          
+          <motion.div 
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            style={{ fontSize: '1.2rem', fontWeight: 600, letterSpacing: '0.5px' }}
+          >
+            {today}
+          </motion.div>
+
+          {loading ? (
+            <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} style={{ marginTop: '20px', fontSize: '1.1rem' }}>
+              Mendeteksi kondisi cuaca...
+            </motion.div>
+          ) : (
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              style={{ marginTop: '25px', display: 'flex', alignItems: 'center', gap: '15px' }}
+            >
+              <div style={{ fontSize: '1.1rem', background: 'rgba(255,255,255,0.2)', padding: '6px 14px', borderRadius: '20px', backdropFilter: 'blur(5px)' }}>
+                {weather.label}
+              </div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
+                Diperbarui {lastUpdated}
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Right Side (Temperature) */}
+        {!loading && (
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}
+          >
+            <motion.div variants={itemVariants} style={{ fontSize: '4.5rem', fontWeight: 800, lineHeight: 1, letterSpacing: '-2px', textShadow: '0 4px 10px rgba(0,0,0,0.2)' }}>
+              {weather.temp}°
+            </motion.div>
+            
+            <motion.div variants={itemVariants} style={{ display: 'flex', gap: '15px', marginTop: '10px', fontSize: '1rem', fontWeight: 500, opacity: 0.9 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="3"><polyline points="18 15 12 9 6 15"/></svg>
                 {weather.tempMax}°
               </span>
-              <span className="temp-divider">|</span>
-              <span className="temp-low">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="3"><polyline points="6 9 12 15 18 9"/></svg>
                 {weather.tempMin}°
               </span>
-            </div>
-            <div className="weather-extra">
-              <span>💧 {weather.humidity}%</span>
-              <span>💨 {weather.wind} km/j</span>
-            </div>
-            {lastUpdated && (
-              <div className="weather-updated">
-                🔄 Diperbarui pukul {lastUpdated} · tiap 5 menit
-              </div>
-            )}
-          </>
-        )}
-      </div>
+            </motion.div>
 
-      {/* Right: animation */}
-      <div className="weather-anim-wrapper">
-        {!loading && <WeatherAnim condition={condition} />}
+            <motion.div variants={itemVariants} style={{ display: 'flex', gap: '15px', marginTop: '15px', background: 'rgba(0,0,0,0.15)', padding: '10px 20px', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '1.2rem' }}>💧</span> {weather.humidity}%
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '1.2rem' }}>💨</span> {weather.wind} km/j
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

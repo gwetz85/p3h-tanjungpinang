@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Edit3, Clock, Info, X, FileText, Calendar, CalendarX, Timer, MessageSquare, PhoneCall, Trash2, Save, ExternalLink, MapPin, CheckCircle2, User, Play, Pause, Home, Download, Send, ClipboardCheck, Navigation, Map } from 'lucide-react';
 import HalalForm from '../components/HalalForm';
 import { useAuth } from '../context/AuthContext';
+import { addNotification } from '../utils/notifications';
 
 
 
@@ -32,6 +33,42 @@ const KELURAHAN_LIST = [
   "Tanjung Ayun Sakti"
 ];
 
+const Countdown = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const target = new Date(targetDate).getTime();
+      const now = new Date().getTime();
+      if (isNaN(target)) {
+        setTimeLeft('Jadwal tidak valid');
+        return;
+      }
+      const diff = target - now;
+      if (diff <= 0) {
+        setTimeLeft('Waktunya Kunjungan!');
+        return;
+      }
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      const pad = (num) => String(num).padStart(2, '0');
+      setTimeLeft(`${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`);
+    };
+
+    calculateTime();
+    const timer = setInterval(calculateTime, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className={`countdown-badge ${timeLeft === 'Waktunya Kunjungan!' ? 'urgent-glow' : ''}`}>
+      <Timer size={12} /> {timeLeft}
+    </div>
+  );
+};
+
 const VerifikasiPU = () => {
   const { role } = useAuth();
   const [jobs, setJobs] = useState([]);
@@ -40,6 +77,8 @@ const VerifikasiPU = () => {
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedJobPhoto, setSelectedJobPhoto] = useState('');
   const [selectedJobKTP, setSelectedJobKTP] = useState('');
+  const [selectedJobLokasi, setSelectedJobLokasi] = useState('');
+  const [selectedJobKunjungan, setSelectedJobKunjungan] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [showHalal, setShowHalal] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -89,6 +128,20 @@ const VerifikasiPU = () => {
         if (snapshot.exists()) {
           setSelectedJobKTP(snapshot.val());
         }
+      }, { onlyOnce: true });
+
+      // Lazy-load foto Lokasi Usaha
+      setSelectedJobLokasi('');
+      const lokasiRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoLokasiUsaha`);
+      onValue(lokasiRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobLokasi(snapshot.val());
+      }, { onlyOnce: true });
+
+      // Lazy-load foto Kunjungan
+      setSelectedJobKunjungan('');
+      const kunjunganRef = ref(rtdb, `pekerjaan_photos/${selectedJob.id}/photoKunjungan`);
+      onValue(kunjunganRef, (snapshot) => {
+        if (snapshot.exists()) setSelectedJobKunjungan(snapshot.val());
       }, { onlyOnce: true });
 
       // Lazy-load halalData if not already present (stripped from list for performance)
@@ -241,6 +294,7 @@ const VerifikasiPU = () => {
           status: 'Review',
           reviewStartedAt: Date.now()
         });
+        addNotification('Pindah ke Review', `Data "${job.nama}" dipindahkan ke proses Review (Admin).`, 'movement');
         alert('Data berhasil dikirim ke Pendaftaran SIHalal!');
       } catch (err) {
         console.error(err);
@@ -269,6 +323,7 @@ const VerifikasiPU = () => {
         keterangan: `DIBATALKAN: ${cancelReason}`,
         verifiedAt: Date.now()
       });
+      addNotification('Dibatalkan', `Pekerjaan "${jobToCancel.nama}" dibatalkan.`, 'movement');
       alert('Pekerjaan berhasil dibatalkan dan dipindahkan ke Riwayat Selesai.');
       setShowCancelModal(false);
       setJobToCancel(null);
@@ -380,41 +435,6 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
     }
   };
 
-  const Countdown = ({ targetDate }) => {
-    const [timeLeft, setTimeLeft] = useState('');
-
-    useEffect(() => {
-      const calculateTime = () => {
-        const target = new Date(targetDate).getTime();
-        const now = new Date().getTime();
-        if (isNaN(target)) {
-          setTimeLeft('Jadwal tidak valid');
-          return;
-        }
-        const diff = target - now;
-        if (diff <= 0) {
-          setTimeLeft('Waktunya Kunjungan!');
-          return;
-        }
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-        const pad = (num) => String(num).padStart(2, '0');
-        setTimeLeft(`${pad(d)}:${pad(h)}:${pad(m)}:${pad(s)}`);
-      };
-
-      calculateTime();
-      const timer = setInterval(calculateTime, 1000);
-      return () => clearInterval(timer);
-    }, [targetDate]);
-
-    return (
-      <div className={`countdown-badge ${timeLeft === 'Waktunya Kunjungan!' ? 'urgent-glow' : ''}`}>
-        <Timer size={12} /> {timeLeft}
-      </div>
-    );
-  };
 
   const filteredJobs = jobs.filter(job => 
     (job.nama?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -487,22 +507,22 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
           <div className="empty-state">Tidak ada pekerjaan aktif yang ditemukan.</div>
         ) : (
           <>
-            <div className="table-container desktop-only">
-              <table className="verification-table">
+            <div className="table-container desktop-only" style={{ overflowX: 'auto' }}>
+              <table className="verification-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr>
-                    <th>Jadwal Kunjungan</th>
-                    <th>Informasi Pemohon</th>
-                    <th>Kelurahan</th>
-                    <th>Jenis & Progres</th>
-                    <th>Status</th>
-                    {role !== 'Admin' && <th>Aksi</th>}
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Jadwal Kunjungan</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Informasi Pemohon</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Kelurahan</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Jenis &amp; Progres</th>
+                    <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Status</th>
+                    {role !== 'Admin' && <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Aksi</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {sortedJobs.map((job) => (
-                    <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row">
-                      <td>
+                    <tr key={job.id} onClick={() => setSelectedJob(job)} className="table-row" style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                         {job.jadwalKunjungan && (
                           <div className="schedule-cell">
                             <small className="text-muted" style={{fontSize: '0.65rem', display: 'block', marginBottom: '2px', fontWeight: 'bold'}}>Kunjungan:</small>
@@ -533,16 +553,16 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                           <span className="text-muted italic">Belum diset</span>
                         )}
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>
                         <div className="applicant-cell">
                           <span className="name">{job.nama}</span>
                           <span className="address"><MapPin size={10} /> {job.alamat}</span>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         <span className="kelurahan-badge">{job.kelurahan || '-'}</span>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle' }}>
                         <div className="type-progress-cell">
                           <span className="job-type-small">{job.jenisPekerjaan}</span>
                           <div className="mini-progress">
@@ -551,12 +571,12 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
                         <span className={`status-pill ${job.status === 'Returned' ? 'returned' : (job.jadwalVerval ? '' : (job.status === 'Pending' ? 'pending' : 'proses'))}`} style={job.jadwalVerval && job.status !== 'Returned' ? {backgroundColor: '#ede9fe', color: '#8b5cf6', border: '1px solid #c4b5fd'} : {}}>
                           {job.status === 'Returned' ? 'Perlu Perbaikan' : (job.jadwalVerval ? 'Verval Bahan' : job.status)}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
                         {role !== 'Admin' ? (
                           <div className="table-actions" onClick={(e) => e.stopPropagation()}>
                              <button
@@ -714,7 +734,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
       <AnimatePresence>
         {selectedJob && !showHalal && (
           <div className="modal-overlay">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="modal-content glass-card">
+            <div className="modal-content glass-card halal-modal">
               <div className="modal-header" style={{ alignItems: 'center', gap: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flex: 1 }}>
                   <h2 style={{ margin: 0 }}>Detail Pekerjaan</h2>
@@ -816,7 +836,14 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                         {(selectedJobPhoto || selectedJob.photoPengajuan) && (
                           <div className="info-item full">
                             <label>Foto Pengajuan</label>
-                            <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" />
+                            <img src={selectedJobPhoto || selectedJob.photoPengajuan} alt="Pengajuan" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobPhoto || selectedJob.photoPengajuan, `Produk_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', color: '#3b82f6', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download
+                            </button>
                           </div>
                         )}
 
@@ -830,6 +857,34 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                               style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#10b981', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
                             >
                               <Download size={16} /> Download Foto KTP
+                            </button>
+                          </div>
+                        )}
+
+                        {selectedJobLokasi && (
+                          <div className="info-item full">
+                            <label>Foto Lokasi Usaha</label>
+                            <img src={selectedJobLokasi} alt="Lokasi" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobLokasi, `Lokasi_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(245,158,11,0.15)', border: '1px solid #f59e0b', color: '#f59e0b', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download Foto Lokasi
+                            </button>
+                          </div>
+                        )}
+
+                        {selectedJobKunjungan && (
+                          <div className="info-item full">
+                            <label>Foto Kunjungan Pendampingan</label>
+                            <img src={selectedJobKunjungan} alt="Kunjungan" className="detail-photo" style={{ marginBottom: '10px' }} />
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(selectedJobKunjungan, `Kunjungan_${selectedJob.nama || selectedJob.id}.jpg`)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(236,72,153,0.15)', border: '1px solid #ec4899', color: '#ec4899', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600', width: '100%', justifyContent: 'center' }}
+                            >
+                              <Download size={16} /> Download Foto Kunjungan
                             </button>
                           </div>
                         )}
@@ -867,7 +922,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                         <button
                           onClick={(e) => { handleKirimWA(selectedJob, e); }}
                           className="btn-primary-outline"
-                          style={{ borderColor: '#25D366', color: '#25D366', background: 'rgba(37,211,102,0.08)' }}
+                          style={{ borderColor: '#25D366', color: '#15803d', fontWeight: '700', background: 'rgba(37,211,102,0.08)' }}
                         >
                           <MessageSquare size={18} /> Kirim Undangan WA
                         </button>
@@ -972,7 +1027,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
                 </form>
               )}
 
-            </motion.div>
+            </div>
           </div>
         )}
 
