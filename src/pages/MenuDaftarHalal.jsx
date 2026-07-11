@@ -102,8 +102,7 @@ const MenuDaftarHalal = () => {
         await update(ref(rtdb, `daftar_halal/${reg.id}`), {
           status: 'Diteruskan'
         });
-
-        addNotification('Data Diteruskan', `Usaha "${reg.namaUsaha}" telah diteruskan ke petugas ${selectedPetugasEmail}.`, 'movement');
+        addNotification('Data Diteruskan', `Usaha "${reg.namaUsaha}" telah diteruskan ke Petugas Lapangan.`, 'movement');
 
         alert('Berhasil diteruskan ke Petugas!');
         setSelectedReg(null);

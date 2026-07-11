@@ -101,7 +101,7 @@ function App() {
             <Route index element={<Suspense fallback={<InlineLoader />}><Dashboard /></Suspense>} />
             
             <Route path="koordinator" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas']}>
                 <Suspense fallback={<InlineLoader />}><DataKoordinator /></Suspense>
               </ProtectedRoute>
             } />
@@ -126,52 +126,52 @@ function App() {
             } />
             
             <Route path="input" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
                 <Suspense fallback={<InlineLoader />}><InputPekerjaan /></Suspense>
               </ProtectedRoute>
             } />
 
             <Route path="pendaftaran" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
                 <Suspense fallback={<InlineLoader />}><PendaftaranSihalal /></Suspense>
               </ProtectedRoute>
             } />
 
             <Route path="daftar-halal" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
                 <Suspense fallback={<InlineLoader />}><MenuDaftarHalal /></Suspense>
               </ProtectedRoute>
             } />
             
             <Route path="gudang-bahan" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
                 <Suspense fallback={<InlineLoader />}><GudangBahan /></Suspense>
               </ProtectedRoute>
             } />
             
             <Route path="cek" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Petugas', 'petugas']}>
                 <Suspense fallback={<InlineLoader />}><CekPekerjaan /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="verifikasi-pu" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Petugas', 'petugas']}>
                 <Suspense fallback={<InlineLoader />}><VerifikasiPU /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="selesai" element={<Suspense fallback={<InlineLoader />}><Selesai /></Suspense>} />
             <Route path="perbaikan-akun" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
                 <Suspense fallback={<InlineLoader />}><PerbaikanAkunSihalal /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="catatan-akun" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
                 <Suspense fallback={<InlineLoader />}><CatatanAkunSihalal /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="arsip-sh" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'Petugas', 'Monitoring']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
                 <Suspense fallback={<InlineLoader />}><ArsipSH /></Suspense>
                 </ProtectedRoute>
               } />
