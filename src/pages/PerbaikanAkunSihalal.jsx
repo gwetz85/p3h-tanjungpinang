@@ -338,7 +338,7 @@ const PerbaikanAkunSihalal = () => {
                 <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '17%' }}>Keterangan</th>
                 <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '4%', textAlign: 'center' }}>Detail</th>
                 <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '13%', textAlign: 'center', whiteSpace: 'nowrap' }}>Jadwal &amp; Status</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '9%', textAlign: 'center' }}>Aksi</th>
+                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '11%', minWidth: '100px', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -396,13 +396,14 @@ const PerbaikanAkunSihalal = () => {
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                    <td style={{ padding: '14px 10px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center', minWidth: '100px' }}>
                       <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 28px)',
-                        gap: '5px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
                         justifyContent: 'center',
-                        margin: '0 auto'
+                        alignItems: 'center',
+                        minWidth: '72px'
                       }}>
                         {item.status !== 'Selesai' && (
                           <>
