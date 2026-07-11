@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -241,6 +242,7 @@ const PendaftaranSihalal = () => {
         )}
       </div>
 
+      {createPortal(
       <AnimatePresence>
         {selectedJob && !showHalal && (
           <div className="modal-overlay">
@@ -433,7 +435,9 @@ const PendaftaranSihalal = () => {
         {selectedJob && showHalal && (
           <HalalForm job={selectedJob} onClose={() => setShowHalal(false)} />
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };

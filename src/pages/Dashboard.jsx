@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { rtdb } from '../firebase';
 import { ref, onValue, query, orderByChild, equalTo, limitToLast, update } from 'firebase/database';
@@ -657,7 +658,7 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Selected Visit Detail Modal */}
+      {createPortal(
       <AnimatePresence>
         {selectedVisit && (
           <div className="modal-overlay" onClick={() => setSelectedVisit(null)}>
@@ -816,7 +817,9 @@ const Dashboard = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };

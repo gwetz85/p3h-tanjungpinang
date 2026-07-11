@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, onValue, update, remove, query, orderByChild, equalTo } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -823,6 +824,7 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
         )}
       </div>
 
+      {createPortal(
       <AnimatePresence>
         {selectedJob && !showHalal && (
           <div className="modal-overlay">
@@ -1393,7 +1395,9 @@ TIM AKA BOGOR KOTA TANJUNGPINANG`;
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
 
 
     </div>

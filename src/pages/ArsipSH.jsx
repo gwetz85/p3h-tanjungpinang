@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { supabase, STORAGE_BUCKET } from '../supabase';
@@ -427,7 +428,7 @@ const ArsipSH = () => {
         )}
       </div>
 
-      {/* Form Modal */}
+      {createPortal(
       <AnimatePresence>
         {isFormModalOpen && (
           <div className="modal-overlay">
@@ -499,9 +500,12 @@ const ArsipSH = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
 
       {/* Upload Modal */}
+      {createPortal(
       <AnimatePresence>
         {isUploadModalOpen && (
           <div className="modal-overlay">
@@ -567,9 +571,12 @@ const ArsipSH = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
 
       {/* View PDF Modal */}
+      {createPortal(
       <AnimatePresence>
         {isViewModalOpen && (
           <div className="modal-overlay" style={{ padding: '0.5rem' }}>
@@ -600,7 +607,9 @@ const ArsipSH = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, update, onValue, push, get, query, orderByChild, equalTo } from 'firebase/database';
 import { motion } from 'framer-motion';
@@ -680,7 +681,7 @@ ${(() => {
     openPrintWindow(html);
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="modal-content glass-card halal-modal">
         <div className="modal-header">
@@ -1207,7 +1208,8 @@ ${(() => {
         currentText={formData.tatacara}
         onApply={(newText) => setFormData({ ...formData, tatacara: newText })}
       />
-    </div>
+    </div>,
+    document.body
   );
 };
 

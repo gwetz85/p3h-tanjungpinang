@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -507,6 +508,7 @@ const PerbaikanAkunSihalal = () => {
       </div>
 
       {/* Schedule Modal */}
+      {createPortal(
       <AnimatePresence>
         {isScheduleOpen && (
           <div className="modal-overlay" onClick={() => setIsScheduleOpen(false)}>
@@ -562,9 +564,12 @@ const PerbaikanAkunSihalal = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
 
       {/* Detail Modal */}
+      {createPortal(
       <AnimatePresence>
         {viewDetailItem && (
           <div className="modal-overlay" onClick={() => setViewDetailItem(null)}>
@@ -585,7 +590,9 @@ const PerbaikanAkunSihalal = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };
