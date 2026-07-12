@@ -126,6 +126,116 @@ const MenuDaftarHalal = () => {
     }
   };
 
+  const handlePrintPDF = (reg) => {
+    const baseUrl = window.location.origin;
+    const now = new Date();
+    const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    
+    const tanggalCetakStr = `${String(now.getDate()).padStart(2,'0')} ${bulanId[now.getMonth()]} ${now.getFullYear()}`;
+    const regDate = new Date(reg.tanggalInput);
+    const tanggalRegistrasiStr = `${String(regDate.getDate()).padStart(2,'0')} ${bulanId[regDate.getMonth()]} ${regDate.getFullYear()}`;
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Bukti Pendaftaran - ${reg.nama}</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #111; background: #fff; padding: 18mm 15mm; }
+.section { page-break-inside: avoid; break-inside: avoid; margin-bottom: 24px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+.section-heading { background: #059669; color: #ffffff; padding: 10px 14px; font-weight: bold; font-size: 11.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+table { width: 100%; border-collapse: collapse; }
+table tr:nth-child(even) { background-color: #f9fafb; }
+table td { padding: 10px 14px; vertical-align: top; line-height: 1.5; border-bottom: 1px solid #f3f4f6; }
+table td:first-child { font-weight: 600; width: 35%; color: #374151; border-right: 1px solid #f3f4f6; }
+.doc-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #10b981; padding-bottom: 14px; margin-bottom: 24px; gap: 12px; }
+.doc-header-logo { width: 90px; height: 90px; object-fit: contain; flex-shrink: 0; }
+.logo-circle { border-radius: 50%; }
+.doc-header-center { flex: 1; text-align: center; }
+.doc-header-center h1 { color: #10b981; font-size: 17pt; margin-bottom: 4px; }
+.doc-header-center p { font-size: 10pt; color: #374151; }
+.doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
+.badge { display: inline-block; padding: 4px 8px; background: #ecfdf5; color: #059669; border-radius: 4px; font-weight: 600; font-size: 9pt; border: 1px solid #a7f3d0; }
+.info-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 10pt; color: #4b5563; }
+@page { size: A4 portrait; margin: 18mm 15mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<div class="doc-header">
+  <img class="doc-header-logo" src="${baseUrl}/logo-halal-center.png" alt="Halal Center" onerror="this.style.display='none'" />
+  <div class="doc-header-center">
+    <h1>HALAL CENTRE TPI</h1>
+    <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
+    <p class="sub">Pendampingan Proses Produk Halal (P3H)</p>
+  </div>
+  <img class="doc-header-logo logo-circle" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" />
+</div>
+
+<h2 style="text-align:center; margin-bottom: 12px; font-size: 15pt; color: #111827;">FORMULIR PENDAFTARAN MANDIRI</h2>
+<div class="info-row">
+  <div><strong>Tanggal Registrasi:</strong> ${tanggalRegistrasiStr}</div>
+  <div><strong>Tanggal Cetak:</strong> ${tanggalCetakStr}</div>
+</div>
+
+<div class="section">
+  <div class="section-heading">DATA PELAKU USAHA</div>
+  <table>
+    <tr><td>Nama Lengkap</td><td>${reg.nama || '-'}</td></tr>
+    <tr><td>NIK</td><td>${reg.nik || '-'}</td></tr>
+    <tr><td>No. WhatsApp</td><td>${reg.wa || '-'}</td></tr>
+    <tr><td>Tempat, Tanggal Lahir</td><td>${reg.tempatLahir || '-'}, ${reg.tanggalLahir || '-'}</td></tr>
+    <tr><td>Alamat (Sesuai KTP)</td><td>${reg.alamat || '-'}</td></tr>
+    <tr><td>Kelurahan / Kecamatan</td><td>${reg.kelurahan || '-'} / ${reg.kecamatan || '-'}</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-heading">DATA USAHA</div>
+  <table>
+    <tr><td>Nama Usaha (Merek)</td><td><strong>${reg.namaUsaha || '-'}</strong></td></tr>
+    <tr><td>Jenis Usaha</td><td><span class="badge">${reg.jenisUsaha || '-'}</span></td></tr>
+    <tr><td>Nomor NIB</td><td>${reg.nib || '-'}</td></tr>
+    <tr><td>KBLI</td><td>${reg.kbli || '-'}</td></tr>
+    <tr><td>Tahun Berdiri</td><td>${reg.tahunBerdiri || '-'}</td></tr>
+    <tr><td>Lokasi Usaha</td><td>${reg.lokasiUsaha || '-'}</td></tr>
+    <tr><td>Kelurahan / Kecamatan Usaha</td><td>${reg.kelurahanUsaha || '-'} / ${reg.kecamatanUsaha || '-'}</td></tr>
+    <tr><td>Titik Koordinat (GPS)</td><td>${reg.latitude && reg.longitude ? `${reg.latitude}, ${reg.longitude}` : (reg.linkMaps ? 'Tersedia via Maps' : '-')}</td></tr>
+  </table>
+</div>
+
+<div style="margin-top: 50px; display: flex; justify-content: space-between;">
+  <div style="text-align: center; width: 250px;">
+    <p style="margin-bottom: 60px;">Pendaftar,</p>
+    <p style="font-weight: bold; text-decoration: underline;">${reg.nama || '....................................'}</p>
+  </div>
+  <div style="text-align: center; width: 250px;">
+    <p style="margin-bottom: 60px;">Petugas Penerima,</p>
+    <p style="font-weight: bold; text-decoration: underline;">(....................................)</p>
+  </div>
+</div>
+
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (!win) {
+      alert('Popup diblokir browser. Silakan izinkan popup untuk situs ini lalu coba lagi.');
+      URL.revokeObjectURL(url);
+      return;
+    }
+    win.onload = () => {
+      setTimeout(() => {
+        win.focus();
+        win.print();
+        URL.revokeObjectURL(url);
+      }, 500);
+    };
+  };
+
   const filteredData = registrations.filter(reg => 
     reg.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
     reg.namaUsaha?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -184,6 +294,14 @@ const MenuDaftarHalal = () => {
                         style={{ padding: '6px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
                       >
                         <Eye size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handlePrintPDF(reg)} 
+                        className="btn-icon" 
+                        title="Cetak Pendaftaran"
+                        style={{ padding: '6px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+                      >
+                        <FileText size={16} />
                       </button>
                       <button 
                         onClick={() => handleDelete(reg.id)} 
@@ -347,17 +465,25 @@ const MenuDaftarHalal = () => {
                   <div className="p-4 text-center text-muted">Memuat Foto...</div>
                 )}
 
-                <div className="modal-footer-actions" style={{ gridTemplateColumns: '1fr 1fr', marginTop: '1rem' }}>
-                  <button onClick={() => handleDelete(selectedReg.id)} className="btn-danger-outline" style={{ border: '1px solid #ef4444', color: '#ef4444' }}>
+                <div className="modal-footer-actions" style={{ gridTemplateColumns: '1fr 1fr 1fr', marginTop: '1rem', display: 'grid', gap: '10px' }}>
+                  <button onClick={() => handleDelete(selectedReg.id)} className="btn-danger-outline" style={{ border: '1px solid #ef4444', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '8px', background: 'transparent', cursor: 'pointer', fontSize: '0.9rem' }}>
                     <XCircle size={18} /> Hapus Data
+                  </button>
+
+                  <button 
+                    onClick={() => handlePrintPDF(selectedReg)} 
+                    className="btn-primary-outline" 
+                    style={{ border: '1px solid #f59e0b', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '8px', background: 'transparent', cursor: 'pointer', fontSize: '0.9rem' }}
+                  >
+                    <FileText size={18} /> Cetak Form
                   </button>
 
                   <button 
                     onClick={() => handleForwardToPetugas(selectedReg)} 
                     className="btn-primary-filled" 
-                    style={{ background: '#3b82f6' }}
+                    style={{ background: '#3b82f6', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem' }}
                   >
-                    <Send size={18} /> Teruskan ke Petugas
+                    <Send size={18} /> Ke Petugas
                   </button>
                 </div>
               </div>
