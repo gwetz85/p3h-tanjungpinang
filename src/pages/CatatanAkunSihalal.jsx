@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { supabase, STORAGE_BUCKET } from '../supabase';
@@ -353,156 +354,165 @@ const CatatanAkunSihalal = () => {
         )}
       </div>
 
-      {/* Form Modal (Add/Edit) */}
-      <AnimatePresence>
-        {isFormModalOpen && (
-          <div className="modal-overlay">
-            <motion.div 
-              initial={{ opacity: 0, y: 50, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 50, scale: 0.9 }}
-              className="modal-content glass-card"
-              style={{ maxWidth: '500px', width: '100%', padding: '2rem' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: 0 }}>{editingId ? 'Edit Catatan Akun' : 'Tambah Catatan Akun'}</h3>
-                <button onClick={handleCloseForm} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
-                  <X size={24} />
-                </button>
-              </div>
-              <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="input-group">
-                  <label>Nama</label>
-                  <input type="text" value={formData.nama} onChange={(e) => setFormData({...formData, nama: e.target.value})} required placeholder="Masukkan Nama" />
+      {/* Form Modal (Add/Edit) - rendered via Portal */}
+      {createPortal(
+        <AnimatePresence>
+          {isFormModalOpen && (
+            <div className="modal-overlay" style={{ zIndex: 99999 }}>
+              <motion.div 
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                className="modal-content glass-card"
+                style={{ maxWidth: '500px', width: '100%', padding: '2rem' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h3 style={{ margin: 0 }}>{editingId ? 'Edit Catatan Akun' : 'Tambah Catatan Akun'}</h3>
+                  <button onClick={handleCloseForm} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
+                    <X size={24} />
+                  </button>
                 </div>
-                <div className="input-group">
-                  <label>Akun</label>
-                  <input type="text" value={formData.akun} onChange={(e) => setFormData({...formData, akun: e.target.value})} required placeholder="Masukkan Akun" />
-                </div>
-                <div className="input-group">
-                  <label>Kata Sandi</label>
-                  <input type="text" value={formData.kataSandi} onChange={(e) => setFormData({...formData, kataSandi: e.target.value})} required placeholder="Masukkan Kata Sandi" />
-                </div>
-                <div className="input-group">
-                  <label>Status</label>
-                  <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} className="custom-select" required>
-                    <option value="Active">Active</option>
-                    <option value="Nonaktif">Nonaktif</option>
-                  </select>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
-                  <button type="button" onClick={handleCloseForm} className="btn-secondary">Batal</button>
-                  <button type="submit" className="btn-primary">Simpan</button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Upload Modal */}
-      <AnimatePresence>
-        {isUploadModalOpen && (
-          <div className="modal-overlay">
-            <motion.div 
-              initial={{ opacity: 0, y: 50, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 50, scale: 0.9 }}
-              className="modal-content glass-card"
-              style={{ maxWidth: '400px', width: '100%', padding: '2rem', textAlign: 'center' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: 0 }}>Upload Berkas PDF</h3>
-                <button onClick={handleCloseUpload} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
-                  <X size={24} />
-                </button>
-              </div>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ padding: '2rem', border: '2px dashed var(--accent-color)', borderRadius: '12px', marginBottom: '1rem', background: 'var(--surface-alt, rgba(0,0,0,0.02))' }}>
-                  <FileText size={48} style={{ color: 'var(--accent-color)', marginBottom: '1rem' }} />
-                  <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--text-color, inherit)' }}>Pilih file PDF dari perangkat Anda</p>
-                  <input 
-                    type="file" 
-                    accept="application/pdf" 
-                    onChange={(e) => setSelectedFile(e.target.files[0])} 
-                    style={{ color: 'inherit', width: '100%', padding: '0.5rem', border: '1px solid var(--surface-border)', borderRadius: '8px' }}
-                  />
-                </div>
-                {isUploading && (
-                  <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59,130,246,0.06)', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.15)' }}>
-                    {/* Header persentase */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-color, #333)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {uploadProgress === 0
-                          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
-                              Menginisialisasi...
-                            </span>
-                          : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
-                              Sedang mengunggah...
-                            </span>
-                        }
-                      </span>
-                      <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#3b82f6' }}>{Math.round(uploadProgress)}%</span>
-                    </div>
-                    {/* Progress bar */}
-                    <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '20px', overflow: 'hidden', height: '14px', marginBottom: '6px' }}>
-                      <div style={{ width: `${uploadProgress}%`, background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', height: '100%', borderRadius: '20px', transition: 'width 0.4s ease' }}></div>
-                    </div>
-                    {/* Info bytes */}
-                    {totalBytes > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'rgba(0,0,0,0.5)' }}>
-                        <span>{(uploadedBytes / (1024 * 1024)).toFixed(2)} MB diunggah</span>
-                        <span>{(totalBytes / (1024 * 1024)).toFixed(2)} MB total</span>
-                      </div>
-                    )}
+                <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="input-group">
+                    <label>Nama</label>
+                    <input type="text" value={formData.nama} onChange={(e) => setFormData({...formData, nama: e.target.value})} required placeholder="Masukkan Nama" />
                   </div>
-                )}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button onClick={handleCloseUpload} className="btn-secondary" disabled={isUploading}>Batal</button>
-                <button onClick={handleUploadFile} className="btn-primary" disabled={!selectedFile || isUploading}>
-                  {isUploading ? (uploadProgress > 0 ? `Mengunggah ${Math.round(uploadProgress)}%` : 'Memulai unggahan...') : 'Unggah File'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                  <div className="input-group">
+                    <label>Akun</label>
+                    <input type="text" value={formData.akun} onChange={(e) => setFormData({...formData, akun: e.target.value})} required placeholder="Masukkan Akun" />
+                  </div>
+                  <div className="input-group">
+                    <label>Kata Sandi</label>
+                    <input type="text" value={formData.kataSandi} onChange={(e) => setFormData({...formData, kataSandi: e.target.value})} required placeholder="Masukkan Kata Sandi" />
+                  </div>
+                  <div className="input-group">
+                    <label>Status</label>
+                    <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} className="custom-select" required>
+                      <option value="Active">Active</option>
+                      <option value="Nonaktif">Nonaktif</option>
+                    </select>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
+                    <button type="button" onClick={handleCloseForm} className="btn-secondary">Batal</button>
+                    <button type="submit" className="btn-primary">Simpan</button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
-      {/* View PDF Modal */}
-      <AnimatePresence>
-        {isViewModalOpen && (
-          <div className="modal-overlay" style={{ padding: '0.5rem' }}>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="modal-content glass-card"
-              style={{ width: '100%', maxWidth: '1200px', height: '95vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', margin: 'auto' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)' }}>
-                <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <FileText size={20} /> Preview Berkas PDF
-                </h3>
-                <button onClick={() => setIsViewModalOpen(false)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
-                  <X size={24} />
-                </button>
-              </div>
-              <div style={{ flex: 1, background: 'rgba(0,0,0,0.2)', width: '100%', height: '100%' }}>
-                {viewPdfUrl && (
-                  <iframe 
-                    src={viewPdfUrl} 
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    title="PDF Viewer"
-                  />
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Upload Modal - rendered via Portal */}
+      {createPortal(
+        <AnimatePresence>
+          {isUploadModalOpen && (
+            <div className="modal-overlay" style={{ zIndex: 99999 }}>
+              <motion.div 
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                className="modal-content glass-card"
+                style={{ maxWidth: '400px', width: '100%', padding: '2rem', textAlign: 'center' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h3 style={{ margin: 0 }}>Upload Berkas PDF</h3>
+                  <button onClick={handleCloseUpload} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
+                    <X size={24} />
+                  </button>
+                </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ padding: '2rem', border: '2px dashed var(--accent-color)', borderRadius: '12px', marginBottom: '1rem', background: 'var(--surface-alt, rgba(0,0,0,0.02))' }}>
+                    <FileText size={48} style={{ color: 'var(--accent-color)', marginBottom: '1rem' }} />
+                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--text-color, inherit)' }}>Pilih file PDF dari perangkat Anda</p>
+                    <input 
+                      type="file" 
+                      accept="application/pdf" 
+                      onChange={(e) => setSelectedFile(e.target.files[0])} 
+                      style={{ color: 'inherit', width: '100%', padding: '0.5rem', border: '1px solid var(--surface-border)', borderRadius: '8px' }}
+                    />
+                  </div>
+                  {isUploading && (
+                    <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59,130,246,0.06)', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.15)' }}>
+                      {/* Header persentase */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-color, #333)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {uploadProgress === 0
+                            ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
+                                Menginisialisasi...
+                              </span>
+                            : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', display: 'inline-block', animation: 'pulse 1s infinite' }}></span>
+                                Sedang mengunggah...
+                              </span>
+                          }
+                        </span>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#3b82f6' }}>{Math.round(uploadProgress)}%</span>
+                      </div>
+                      {/* Progress bar */}
+                      <div style={{ width: '100%', background: 'rgba(0,0,0,0.1)', borderRadius: '20px', overflow: 'hidden', height: '14px', marginBottom: '6px' }}>
+                        <div style={{ width: `${uploadProgress}%`, background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', height: '100%', borderRadius: '20px', transition: 'width 0.4s ease' }}></div>
+                      </div>
+                      {/* Info bytes */}
+                      {totalBytes > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'rgba(0,0,0,0.5)' }}>
+                          <span>{(uploadedBytes / (1024 * 1024)).toFixed(2)} MB diunggah</span>
+                          <span>{(totalBytes / (1024 * 1024)).toFixed(2)} MB total</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                  <button onClick={handleCloseUpload} className="btn-secondary" disabled={isUploading}>Batal</button>
+                  <button onClick={handleUploadFile} className="btn-primary" disabled={!selectedFile || isUploading}>
+                    {isUploading ? (uploadProgress > 0 ? `Mengunggah ${Math.round(uploadProgress)}%` : 'Memulai unggahan...') : 'Unggah File'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* View PDF Modal - rendered via Portal to escape stacking context */}
+      {createPortal(
+        <AnimatePresence>
+          {isViewModalOpen && (
+            <div className="modal-overlay" style={{ padding: '0.5rem', zIndex: 99999 }}>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="modal-content glass-card"
+                style={{ width: '100%', maxWidth: '1200px', height: '95vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', margin: 'auto' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--surface-border)' }}>
+                  <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <FileText size={20} /> Preview Berkas PDF
+                  </h3>
+                  <button onClick={() => setIsViewModalOpen(false)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}>
+                    <X size={24} />
+                  </button>
+                </div>
+                <div style={{ flex: 1, background: 'rgba(0,0,0,0.2)', width: '100%', height: '100%' }}>
+                  {viewPdfUrl && (
+                    <iframe 
+                      src={viewPdfUrl} 
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                      title="PDF Viewer"
+                    />
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };

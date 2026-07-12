@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, FileText, RotateCcw } from 'lucide-react';
 
@@ -31,9 +32,9 @@ const FloatingTatacara = ({
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="modal-overlay" style={{ zIndex: 2100 }} onClick={onClose}>
+      <div className="modal-overlay" style={{ zIndex: 99999 }} onClick={onClose}>
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -112,7 +113,8 @@ const FloatingTatacara = ({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

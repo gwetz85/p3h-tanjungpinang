@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, Camera, X, Upload, Bell, ChevronDown, UserCircle } from 'lucide-react';
@@ -236,6 +237,7 @@ const Topbar = () => {
         </div>
       </div>
       
+      {createPortal(
       <AnimatePresence>
         {showPhotoModal && (
           <div className="modal-overlay">
@@ -266,7 +268,9 @@ const Topbar = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };

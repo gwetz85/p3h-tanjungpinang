@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -330,14 +331,14 @@ const PerbaikanAkunSihalal = () => {
           <table className="verification-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '19%' }}>Pelaku Usaha</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '13%', whiteSpace: 'nowrap' }}>Kontak WA</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '12%', textAlign: 'center', whiteSpace: 'nowrap' }}>Jenis Pekerjaan</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '13%', textAlign: 'center' }}>Petugas</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '17%' }}>Keterangan</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '4%', textAlign: 'center' }}>Detail</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '13%', textAlign: 'center', whiteSpace: 'nowrap' }}>Jadwal &amp; Status</th>
-                <th style={{ padding: '12px 16px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em', width: '9%', textAlign: 'center' }}>Aksi</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '20%' }}>Pelaku Usaha</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '13%' }}>Kontak WA</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '13%', textAlign: 'center' }}>Jenis Pekerjaan</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '12%', textAlign: 'center' }}>Petugas</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '15%' }}>Keterangan</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '5%', textAlign: 'center' }}>Detail</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '12%', textAlign: 'center' }}>Jadwal &amp; Status</th>
+                <th style={{ padding: '12px 8px', borderBottom: '2px solid #f3f4f6', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.02em', width: '10%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -346,19 +347,19 @@ const PerbaikanAkunSihalal = () => {
               ) : (
                 data.map((item) => (
                   <tr key={item.id} style={{ transition: 'all 0.2s ease', borderBottom: '1px solid #f3f4f6' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <td style={{ padding: '14px 16px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>
+                    <td style={{ padding: '12px 8px', color: '#111827', fontSize: '0.875rem', fontWeight: '500', verticalAlign: 'middle' }}>
                       <div style={{ fontWeight: '600', color: '#111827' }}>{item.namaPelaku}</div>
                       {item.namaUsaha && <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{item.namaUsaha}</div>}
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
                       <a href={`https://wa.me/${item.kontak.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="whatsapp-link" style={{ color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <MessageSquare size={14} /> {item.kontak}
                       </a>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
                       <span style={{
                         display: 'inline-block',
-                        padding: '3px 10px',
+                        padding: '3px 8px',
                         borderRadius: '20px',
                         fontSize: '0.72rem',
                         fontWeight: 700,
@@ -370,38 +371,39 @@ const PerbaikanAkunSihalal = () => {
                         {(item.jenisPekerjaan === 'Perbaikan Si Halal') ? '🟠' : '🔵'} {item.jenisPekerjaan || 'Verval Si Halal'}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
                       <span className="badge-type-large" style={{ background: '#f8fafc', color: '#334155', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                         <User size={13} style={{ marginRight: '4px' }}/> {item.namaPetugas}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', maxWidth: '200px' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', maxWidth: '180px' }}>
                       <p style={{ fontSize: '0.85rem', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.keterangan}</p>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
                       <button className="btn-table-icon text-info" title="Lihat Detail" onClick={() => setViewDetailItem(item)}>
                         <Eye size={16} />
                       </button>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
                         <span className={`status-pill ${item.status === 'Selesai' ? 'success' : 'proses'}`}>
                           {item.status.toUpperCase()}
                         </span>
                         {item.jadwalKunjungan && (
-                          <span style={{ fontSize: '0.75rem', color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '0.7rem', color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
                             <Calendar size={12}/> {new Date(item.jadwalKunjungan).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})}
                           </span>
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center' }}>
+                    <td style={{ padding: '12px 8px', color: '#4b5563', fontSize: '0.875rem', verticalAlign: 'middle', textAlign: 'center', minWidth: '80px' }}>
                       <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 28px)',
-                        gap: '5px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
                         justifyContent: 'center',
-                        margin: '0 auto'
+                        alignItems: 'center',
+                        minWidth: '72px'
                       }}>
                         {item.status !== 'Selesai' && (
                           <>
@@ -507,6 +509,7 @@ const PerbaikanAkunSihalal = () => {
       </div>
 
       {/* Schedule Modal */}
+      {createPortal(
       <AnimatePresence>
         {isScheduleOpen && (
           <div className="modal-overlay" onClick={() => setIsScheduleOpen(false)}>
@@ -562,9 +565,12 @@ const PerbaikanAkunSihalal = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
 
       {/* Detail Modal */}
+      {createPortal(
       <AnimatePresence>
         {viewDetailItem && (
           <div className="modal-overlay" onClick={() => setViewDetailItem(null)}>
@@ -585,7 +591,9 @@ const PerbaikanAkunSihalal = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 };

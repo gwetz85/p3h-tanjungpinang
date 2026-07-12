@@ -2112,6 +2112,15 @@ select option {
   transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.sidebar-collapsed-layout .running-text-bar {
+  left: 72px;
+  width: calc(100% - 72px);
+}
+
+.sidebar-collapsed-layout .topbar {
+  left: 72px;
+}
+
 @media (max-width: 1024px) {
   .running-text-bar {
     left: 0;

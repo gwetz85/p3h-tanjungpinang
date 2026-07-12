@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { rtdb } from '../firebase';
 import { ref, push, onValue, remove, update } from 'firebase/database';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -297,6 +298,7 @@ const GudangBahan = () => {
       </div>
 
       {/* Detail Modal */}
+      {createPortal(
       <AnimatePresence>
         {activeGroup && (
           <motion.div 
@@ -392,7 +394,9 @@ const GudangBahan = () => {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
 
       {role === 'superadmin' && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="form-card glass-card mt-8" style={{ maxWidth: '800px', marginTop: '2rem' }}>
