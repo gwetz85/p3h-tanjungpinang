@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useCall } from '../context/CallContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, PhoneOff } from 'lucide-react';
 
 const IncomingCall = () => {
   const { callStatus, incomingCallData, answerCall, rejectCall } = useCall();
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (callStatus === 'ringing' && audioRef.current) {
+      audioRef.current.play().catch(e => console.log('Autoplay audio blocked by browser', e));
+    }
+  }, [callStatus]);
 
   if (callStatus !== 'ringing' || !incomingCallData) return null;
 
@@ -186,6 +193,11 @@ const IncomingCall = () => {
           }
         `}</style>
       </motion.div>
+      <audio 
+        ref={audioRef} 
+        src="https://actions.google.com/sounds/v1/alarms/phone_ringing.ogg" 
+        loop 
+      />
     </AnimatePresence>
   );
 };
