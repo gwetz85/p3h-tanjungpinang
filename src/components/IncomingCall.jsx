@@ -43,7 +43,7 @@ const IncomingCall = () => {
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9999;
+            z-index: 99999;
           }
           .incoming-call-card {
             background: rgba(15, 23, 42, 0.95) !important;
@@ -124,6 +124,65 @@ const IncomingCall = () => {
             40% { transform: rotate(-15deg); }
             50% { transform: rotate(0); }
             100% { transform: rotate(0); }
+          }
+          
+          /* Responsif untuk Smartphone (Full Screen) */
+          @media (max-width: 768px) {
+            .incoming-call-overlay {
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              transform: none;
+              background: rgba(15, 23, 42, 0.98);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .incoming-call-card {
+              width: 100%;
+              height: 100%;
+              max-width: none;
+              border-radius: 0;
+              border: none;
+              justify-content: center;
+              align-items: center;
+              padding: 2rem;
+              background: transparent !important;
+              box-shadow: none;
+            }
+            .caller-info {
+              flex-direction: column;
+              text-align: center;
+              margin-bottom: 3rem;
+            }
+            .caller-avatar {
+              width: 120px;
+              height: 120px;
+              margin-bottom: 1rem;
+            }
+            .caller-avatar svg {
+              width: 50px;
+              height: 50px;
+            }
+            .caller-info h3 {
+              font-size: 1.8rem !important;
+              margin-bottom: 0.5rem !important;
+            }
+            .caller-info p {
+              font-size: 1.1rem !important;
+            }
+            .call-actions {
+              width: 100%;
+              max-width: 400px;
+              gap: 1.5rem;
+              padding: 0 1rem;
+            }
+            .btn-reject, .btn-accept {
+              padding: 1.2rem;
+              font-size: 1.1rem;
+              border-radius: 16px;
+            }
           }
         `}</style>
       </motion.div>
