@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { rtdb } from '../firebase';
 import { ref, onValue, push, serverTimestamp, set, get, update, remove } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
+import { useCall } from '../context/CallContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MessageCircle, ArrowLeft, Circle, Users, Trash2 } from 'lucide-react';
+import { Send, Search, MessageCircle, ArrowLeft, Circle, Users, Trash2, Phone } from 'lucide-react';
 
 const Chat = () => {
   const { currentUser } = useAuth();
+  const { startCall } = useCall();
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -341,13 +343,23 @@ const Chat = () => {
                   <h3>{selectedUser.nama || selectedUser.email}</h3>
                   <span className="role-tag">{selectedUser.role}</span>
                 </div>
-                <button 
-                  onClick={handleClearChat} 
-                  className="clear-chat-btn"
-                  title="Hapus Riwayat Chat"
-                >
-                  <Trash2 size={18} />
-                </button>
+                
+                <div className="header-actions" style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                  <button 
+                    onClick={() => startCall(selectedUser.id, selectedUser.nama || selectedUser.email)} 
+                    className="call-btn"
+                    title="Panggil Suara"
+                  >
+                    <Phone size={18} />
+                  </button>
+                  <button 
+                    onClick={handleClearChat} 
+                    className="clear-chat-btn"
+                    title="Hapus Riwayat Chat"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
 
               {/* Messages */}
@@ -620,8 +632,13 @@ const Chat = () => {
           letter-spacing: 0.5px;
           color: #2563eb;
         }
-        .clear-chat-btn {
+        .header-actions {
           margin-left: auto;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .clear-chat-btn, .call-btn {
           background: none;
           border: none;
           color: #94a3b8;
@@ -636,6 +653,10 @@ const Chat = () => {
         .clear-chat-btn:hover {
           background: #fee2e2;
           color: #ef4444;
+        }
+        .call-btn:hover {
+          background: #dcfce7;
+          color: #22c55e;
         }
 
         /* Messages */

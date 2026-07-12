@@ -5,6 +5,8 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import NotificationManager from './NotificationManager';
 import RunningText from './RunningText';
+import IncomingCall from './IncomingCall';
+import CallScreen from './CallScreen';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
@@ -78,6 +80,8 @@ const Layout = () => {
 
       <RunningText />
       <PopoutModal />
+      <IncomingCall />
+      <CallScreen />
     </div>
   );
 };
