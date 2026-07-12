@@ -126,7 +126,19 @@ const MenuDaftarHalal = () => {
     }
   };
 
-  const handlePrintPDF = (reg) => {
+  const handlePrintPDF = async (reg) => {
+    let regPhotos = photos[reg.id];
+    if (!regPhotos) {
+      try {
+        const snapshot = await get(ref(rtdb, `daftar_halal_photos/${reg.id}`));
+        if (snapshot.exists()) {
+          regPhotos = snapshot.val();
+        }
+      } catch (e) {
+        console.error("Gagal load foto untuk cetak:", e);
+      }
+    }
+
     const baseUrl = window.location.origin;
     const now = new Date();
     const bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -158,6 +170,9 @@ table td:first-child { font-weight: 600; width: 35%; color: #374151; border-righ
 .doc-header-center .sub { font-size: 9pt; color: #6b7280; margin-top: 2px; }
 .badge { display: inline-block; padding: 4px 8px; background: #ecfdf5; color: #059669; border-radius: 4px; font-weight: 600; font-size: 9pt; border: 1px solid #a7f3d0; }
 .info-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 10pt; color: #4b5563; }
+.page-break { page-break-before: always; padding-top: 20px; }
+.attachment-title { text-align: center; margin-bottom: 20px; font-size: 15pt; color: #111827; }
+.attachment-img { max-width: 100%; max-height: 240mm; object-fit: contain; border: 1px solid #d1d5db; border-radius: 8px; padding: 4px; }
 @page { size: A4 portrait; margin: 18mm 15mm; }
 @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
@@ -215,6 +230,24 @@ table td:first-child { font-weight: 600; width: 35%; color: #374151; border-righ
     <p style="font-weight: bold; text-decoration: underline;">(....................................)</p>
   </div>
 </div>
+
+${regPhotos && regPhotos.photoProduk ? `
+<div class="page-break">
+  <h2 class="attachment-title">LAMPIRAN: FOTO PRODUK</h2>
+  <div style="text-align: center;">
+    <img src="${regPhotos.photoProduk}" alt="Foto Produk" class="attachment-img" />
+  </div>
+</div>
+` : ''}
+
+${regPhotos && regPhotos.photoKTP ? `
+<div class="page-break">
+  <h2 class="attachment-title">LAMPIRAN: FOTO KTP</h2>
+  <div style="text-align: center;">
+    <img src="${regPhotos.photoKTP}" alt="Foto KTP" class="attachment-img" />
+  </div>
+</div>
+` : ''}
 
 </body>
 </html>`;
