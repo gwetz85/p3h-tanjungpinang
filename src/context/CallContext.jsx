@@ -77,6 +77,18 @@ export const CallProvider = ({ children }) => {
             });
             setRemoteUser({ id: callData.callerId, name: callData.callerName || 'Pengguna' });
             setCallStatus('ringing');
+            
+            // Listen if the caller cancels before we answer
+            const incomingDocRef = ref(rtdb, `calls/${callId}`);
+            const unsubIncoming = onValue(incomingDocRef, (docSnap) => {
+               if (!docSnap.exists()) {
+                  setCallStatus('idle');
+                  setIncomingCallData(null);
+                  currentCallRef.current = null;
+                  off(incomingDocRef, 'value', unsubIncoming);
+               }
+            });
+            
             break;
           }
         }
@@ -85,25 +97,6 @@ export const CallProvider = ({ children }) => {
 
     return () => off(callsRef, 'value', unsubscribe);
   }, [currentUser, callStatus]);
-
-  // Handle remote hangup
-  useEffect(() => {
-    if (!currentCallRef.current) return;
-    const callDocRef = ref(rtdb, `calls/${currentCallRef.current}`);
-    
-    const unsubscribe = onValue(callDocRef, (snapshot) => {
-      if (!snapshot.exists() && callStatus !== 'idle' && callStatus !== 'ringing') {
-        endCall();
-      } else if (!snapshot.exists() && callStatus === 'ringing') {
-        // If caller cancels before we pick up
-        setCallStatus('idle');
-        setIncomingCallData(null);
-        currentCallRef.current = null;
-      }
-    });
-    
-    return () => off(callDocRef, 'value', unsubscribe);
-  }, [callStatus]);
 
   const initWebRTC = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -168,7 +161,17 @@ export const CallProvider = ({ children }) => {
       offer: { sdp: offerDescription.sdp, type: offerDescription.type }
     });
     
+    // Set onDisconnect to clean up if caller drops out
     onDisconnect(callRef).remove();
+
+    // Listen for hangup/reject (if document is deleted)
+    const callDocRef = ref(rtdb, `calls/${callRef.key}`);
+    const unsubHangup = onValue(callDocRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        endCall();
+      }
+    });
+    listenersRef.current.push(() => off(callDocRef, 'value', unsubHangup));
 
     // Listen for answer
     const answerRef = ref(rtdb, `calls/${callRef.key}/answer`);
@@ -218,10 +221,20 @@ export const CallProvider = ({ children }) => {
     const answerDescription = await pc.createAnswer();
     await pc.setLocalDescription(answerDescription);
 
+    // Write answer to DB
     await set(ref(rtdb, `calls/${currentCallRef.current}/answer`), {
       type: answerDescription.type,
       sdp: answerDescription.sdp,
     });
+
+    // Listen for remote hangup
+    const callDocRef = ref(rtdb, `calls/${currentCallRef.current}`);
+    const unsubHangup = onValue(callDocRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        endCall();
+      }
+    });
+    listenersRef.current.push(() => off(callDocRef, 'value', unsubHangup));
 
     // Listen for caller's ICE candidates
     const callerCandRef = ref(rtdb, `calls/${currentCallRef.current}/callerCandidates`);
