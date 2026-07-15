@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { rtdb } from '../firebase';
-import { ref, set, onValue, off, remove, push, onDisconnect, get } from 'firebase/database';
+import { ref, set, onValue, off, remove, push, onDisconnect, get, update } from 'firebase/database';
 import { useAuth } from './AuthContext';
 
 const CallContext = createContext();
@@ -26,6 +26,9 @@ export const CallProvider = ({ children }) => {
   const currentCallRef = useRef(null);
   const candidatesQueue = useRef([]);
   const listenersRef = useRef([]);
+  const callStartTimeRef = useRef(null);
+  const chatCallLogRef = useRef(null);
+  const remoteUserIdRef = useRef(null);
 
   const cleanupListeners = () => {
     listenersRef.current.forEach(unsub => unsub());
@@ -44,13 +47,32 @@ export const CallProvider = ({ children }) => {
     setRemoteStream(null);
     setCallStatus('idle');
     setIncomingCallData(null);
-    setRemoteUser(null);
     setIsMuted(false);
     candidatesQueue.current = [];
     cleanupListeners();
 
+    if (chatCallLogRef.current && currentUser && remoteUserIdRef.current) {
+      const chatId = [currentUser.uid, remoteUserIdRef.current].sort().join('_');
+      const duration = callStartTimeRef.current ? Math.floor((Date.now() - callStartTimeRef.current) / 1000) : 0;
+      const finalStatus = callStartTimeRef.current ? 'answered' : 'missed';
+      
+      try {
+        await update(ref(rtdb, `chats/${chatId}/calls/${chatCallLogRef.current}`), {
+          duration,
+          status: finalStatus
+        });
+      } catch (err) {
+        console.error("Failed to update call log", err);
+      }
+      chatCallLogRef.current = null;
+      remoteUserIdRef.current = null;
+      callStartTimeRef.current = null;
+    }
+
+    setRemoteUser(null);
+
     if (currentCallRef.current && currentUser) {
-      await remove(ref(rtdb, `calls/${currentCallRef.current}`));
+      try { await remove(ref(rtdb, `calls/${currentCallRef.current}`)); } catch(e){}
       currentCallRef.current = null;
     }
   };
@@ -132,7 +154,20 @@ export const CallProvider = ({ children }) => {
   const startCall = async (calleeId, calleeName) => {
     setCallStatus('calling');
     setRemoteUser({ id: calleeId, name: calleeName });
+    remoteUserIdRef.current = calleeId;
     candidatesQueue.current = [];
+    callStartTimeRef.current = null;
+    
+    // Create draft call log in chats
+    const chatId = [currentUser.uid, calleeId].sort().join('_');
+    const callLogRef = push(ref(rtdb, `chats/${chatId}/calls`));
+    chatCallLogRef.current = callLogRef.key;
+    await set(callLogRef, {
+      callerId: currentUser.uid,
+      timestamp: Date.now(),
+      duration: 0,
+      status: 'calling'
+    });
     
     const pc = await initWebRTC();
     
@@ -180,6 +215,7 @@ export const CallProvider = ({ children }) => {
       if (answer && pc.signalingState !== 'stable') {
         await pc.setRemoteDescription(new RTCSessionDescription(answer));
         setCallStatus('connected');
+        callStartTimeRef.current = Date.now();
         processCandidatesQueue(pc);
       }
     });
@@ -207,6 +243,7 @@ export const CallProvider = ({ children }) => {
     
     const pc = await initWebRTC();
     setCallStatus('connected');
+    callStartTimeRef.current = Date.now();
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {

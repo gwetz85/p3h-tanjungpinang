@@ -21,9 +21,6 @@ const Chat = () => {
   const [isMobileListOpen, setIsMobileListOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('pesan');
   const [calls, setCalls] = useState([]);
-  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
-  const [callState, setCallState] = useState('idle'); // idle, calling, connected
-  const [callDuration, setCallDuration] = useState(0);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -157,17 +154,6 @@ const Chat = () => {
     return () => unsubCleared();
   }, [selectedUser, currentUser]);
 
-  // Call Timer Effect
-  useEffect(() => {
-    let interval;
-    if (callState === 'connected') {
-      interval = setInterval(() => {
-        setCallDuration((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [callState]);
-
   // Fetch calls in selected conversation
   useEffect(() => {
     if (!selectedUser || !currentUser) return;
@@ -188,37 +174,6 @@ const Chat = () => {
 
     return () => unsubCalls();
   }, [selectedUser, currentUser]);
-
-  const handleStartCall = () => {
-    setIsCallModalOpen(true);
-    setCallState('calling');
-    setCallDuration(0);
-  };
-
-  const handleSimulateAnswer = () => {
-    setCallState('connected');
-  };
-
-  const handleEndCall = async () => {
-    if (!selectedUser || !currentUser) return;
-    
-    const chatId = getChatId(currentUser.uid, selectedUser.id);
-    const callRef = push(ref(rtdb, `chats/${chatId}/calls`));
-    
-    // If ended before connected, it's missed. Otherwise answered.
-    const status = callState === 'calling' ? 'missed' : 'answered';
-    
-    await set(callRef, {
-      callerId: currentUser.uid,
-      timestamp: Date.now(),
-      duration: callState === 'connected' ? callDuration : 0,
-      status: status
-    });
-    
-    setCallState('idle');
-    setIsCallModalOpen(false);
-    setCallDuration(0);
-  };
 
   const formatDuration = (seconds) => {
     if (!seconds) return '00:00';
@@ -438,17 +393,9 @@ const Chat = () => {
                   <button 
                     onClick={() => startCall(selectedUser.id, selectedUser.nama || selectedUser.email)} 
                     className="call-btn"
-                    title="Panggil Suara (WebRTC)"
+                    title="Panggil Suara"
                   >
                     <Phone size={18} />
-                  </button>
-                  
-                  <button 
-                    onClick={handleStartCall} 
-                    className="phone-btn"
-                    title="Simulasi Panggil & Log"
-                  >
-                    <PhoneCall size={18} />
                   </button>
 
                   <button 
@@ -460,45 +407,6 @@ const Chat = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Call Simulation Modal */}
-              <AnimatePresence>
-                {isCallModalOpen && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="call-modal"
-                  >
-                    <div className="call-modal-content glass-card">
-                      <div className="call-avatar" style={{ background: `linear-gradient(135deg, ${getRoleColor(selectedUser.role)}, ${getRoleColor(selectedUser.role)}88)` }}>
-                        {getUserPhoto(selectedUser) ? (
-                          <img src={getUserPhoto(selectedUser)} alt={selectedUser.nama} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                        ) : (
-                          getInitials(selectedUser.nama)
-                        )}
-                      </div>
-                      <h3 className="call-name">{selectedUser.nama || selectedUser.email}</h3>
-                      <p className="call-status">
-                        {callState === 'calling' ? 'Memanggil...' : `Terhubung - ${formatDuration(callDuration)}`}
-                      </p>
-                      
-                      <div className="call-actions">
-                        {callState === 'calling' && (
-                          <button onClick={handleSimulateAnswer} className="btn-answer">
-                            <PhoneCall size={20} />
-                            <span>Angkat (Simulasi)</span>
-                          </button>
-                        )}
-                        <button onClick={handleEndCall} className="btn-end">
-                          <Phone size={20} style={{ transform: 'rotate(135deg)' }} />
-                          <span>Akhiri</span>
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Main Content Area */}
               {activeTab === 'pesan' ? (
@@ -569,7 +477,7 @@ const Chat = () => {
                     <div className="call-list">
                       {calls.map((call, index) => {
                         const isCaller = call.callerId === currentUser.uid;
-                        const isMissed = call.status === 'missed' || call.duration === 0;
+                        const isMissed = call.status === 'missed' || call.status === 'calling' || call.duration === 0;
                         
                         let CallIcon = PhoneOutgoing;
                         let iconColor = '#10b981'; // green
