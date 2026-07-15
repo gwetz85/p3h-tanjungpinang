@@ -3,7 +3,7 @@ import { rtdb } from '../firebase';
 import { ref, onValue, push, serverTimestamp, set, get, update, remove } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Search, MessageCircle, ArrowLeft, Circle, Users, Trash2 } from 'lucide-react';
+import { Send, Search, MessageCircle, ArrowLeft, Circle, Users, Trash2, Phone, PhoneIncoming, PhoneOutgoing, PhoneMissed, PhoneCall } from 'lucide-react';
 
 const Chat = () => {
   const { currentUser } = useAuth();
@@ -17,6 +17,11 @@ const Chat = () => {
   const [unreadCounts, setUnreadCounts] = useState({});
   const [koordinators, setKoordinators] = useState([]);
   const [isMobileListOpen, setIsMobileListOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('pesan');
+  const [calls, setCalls] = useState([]);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [callState, setCallState] = useState('idle'); // idle, calling, connected
+  const [callDuration, setCallDuration] = useState(0);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -149,6 +154,76 @@ const Chat = () => {
 
     return () => unsubCleared();
   }, [selectedUser, currentUser]);
+
+  // Call Timer Effect
+  useEffect(() => {
+    let interval;
+    if (callState === 'connected') {
+      interval = setInterval(() => {
+        setCallDuration((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [callState]);
+
+  // Fetch calls in selected conversation
+  useEffect(() => {
+    if (!selectedUser || !currentUser) return;
+    const chatId = getChatId(currentUser.uid, selectedUser.id);
+    const callsRef = ref(rtdb, `chats/${chatId}/calls`);
+    
+    const unsubCalls = onValue(callsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const list = Object.entries(data)
+          .map(([id, val]) => ({ id, ...val }))
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)); // newest first
+        setCalls(list);
+      } else {
+        setCalls([]);
+      }
+    });
+
+    return () => unsubCalls();
+  }, [selectedUser, currentUser]);
+
+  const handleStartCall = () => {
+    setIsCallModalOpen(true);
+    setCallState('calling');
+    setCallDuration(0);
+  };
+
+  const handleSimulateAnswer = () => {
+    setCallState('connected');
+  };
+
+  const handleEndCall = async () => {
+    if (!selectedUser || !currentUser) return;
+    
+    const chatId = getChatId(currentUser.uid, selectedUser.id);
+    const callRef = push(ref(rtdb, `chats/${chatId}/calls`));
+    
+    // If ended before connected, it's missed. Otherwise answered.
+    const status = callState === 'calling' ? 'missed' : 'answered';
+    
+    await set(callRef, {
+      callerId: currentUser.uid,
+      timestamp: Date.now(),
+      duration: callState === 'connected' ? callDuration : 0,
+      status: status
+    });
+    
+    setCallState('idle');
+    setIsCallModalOpen(false);
+    setCallDuration(0);
+  };
+
+  const formatDuration = (seconds) => {
+    if (!seconds) return '00:00';
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -337,10 +412,34 @@ const Chat = () => {
                     getInitials(selectedUser.nama)
                   )}
                 </div>
-                <div className="header-info">
+                <div className="header-info" style={{ flex: 1 }}>
                   <h3>{selectedUser.nama || selectedUser.email}</h3>
                   <span className="role-tag">{selectedUser.role}</span>
                 </div>
+                
+                <div className="chat-tabs">
+                  <button 
+                    className={`tab-btn ${activeTab === 'pesan' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('pesan')}
+                  >
+                    Pesan
+                  </button>
+                  <button 
+                    className={`tab-btn ${activeTab === 'panggilan' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('panggilan')}
+                  >
+                    Panggilan
+                  </button>
+                </div>
+
+                <button 
+                  onClick={handleStartCall} 
+                  className="phone-btn"
+                  title="Panggil User"
+                >
+                  <Phone size={18} />
+                </button>
+
                 <button 
                   onClick={handleClearChat} 
                   className="clear-chat-btn"
@@ -350,8 +449,50 @@ const Chat = () => {
                 </button>
               </div>
 
-              {/* Messages */}
-              <div className="chat-messages">
+              {/* Call Simulation Modal */}
+              <AnimatePresence>
+                {isCallModalOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="call-modal"
+                  >
+                    <div className="call-modal-content glass-card">
+                      <div className="call-avatar" style={{ background: `linear-gradient(135deg, ${getRoleColor(selectedUser.role)}, ${getRoleColor(selectedUser.role)}88)` }}>
+                        {getUserPhoto(selectedUser) ? (
+                          <img src={getUserPhoto(selectedUser)} alt={selectedUser.nama} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                        ) : (
+                          getInitials(selectedUser.nama)
+                        )}
+                      </div>
+                      <h3 className="call-name">{selectedUser.nama || selectedUser.email}</h3>
+                      <p className="call-status">
+                        {callState === 'calling' ? 'Memanggil...' : `Terhubung - ${formatDuration(callDuration)}`}
+                      </p>
+                      
+                      <div className="call-actions">
+                        {callState === 'calling' && (
+                          <button onClick={handleSimulateAnswer} className="btn-answer">
+                            <PhoneCall size={20} />
+                            <span>Angkat (Simulasi)</span>
+                          </button>
+                        )}
+                        <button onClick={handleEndCall} className="btn-end">
+                          <Phone size={20} style={{ transform: 'rotate(135deg)' }} />
+                          <span>Akhiri</span>
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Main Content Area */}
+              {activeTab === 'pesan' ? (
+                <>
+                  {/* Messages */}
+                  <div className="chat-messages">
                 {messages.length === 0 ? (
                   <div className="empty-chat">
                     <MessageCircle size={48} style={{ opacity: 0.15 }} />
@@ -404,6 +545,64 @@ const Chat = () => {
                   <Send size={18} />
                 </button>
               </form>
+                </>
+              ) : (
+                <div className="call-history-container">
+                  {calls.length === 0 ? (
+                    <div className="empty-chat">
+                      <Phone size={48} style={{ opacity: 0.15 }} />
+                      <p>Belum ada riwayat panggilan</p>
+                    </div>
+                  ) : (
+                    <div className="call-list">
+                      {calls.map((call, index) => {
+                        const isCaller = call.callerId === currentUser.uid;
+                        const isMissed = call.status === 'missed' || call.duration === 0;
+                        
+                        let CallIcon = PhoneOutgoing;
+                        let iconColor = '#10b981'; // green
+                        let typeText = 'Panggilan Keluar';
+
+                        if (!isCaller) {
+                          CallIcon = PhoneIncoming;
+                          typeText = 'Panggilan Masuk';
+                        }
+                        
+                        if (isMissed) {
+                          CallIcon = PhoneMissed;
+                          iconColor = '#ef4444'; // red
+                          typeText = 'Panggilan Tidak Terjawab';
+                        }
+
+                        const showDate = index === 0 || 
+                          new Date(call.timestamp).toDateString() !== new Date(calls[index - 1].timestamp).toDateString();
+
+                        return (
+                          <React.Fragment key={call.id}>
+                            {showDate && (
+                              <div className="date-divider">
+                                <span>{new Date(call.timestamp).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                              </div>
+                            )}
+                            <div className="call-item glass-card">
+                              <div className="call-icon-wrap" style={{ color: iconColor, backgroundColor: `${iconColor}15` }}>
+                                <CallIcon size={20} />
+                              </div>
+                              <div className="call-details">
+                                <h4>{typeText}</h4>
+                                <span className="call-time">{new Date(call.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                              <div className="call-duration">
+                                {isMissed ? 'Tidak dijawab' : formatDuration(call.duration)}
+                              </div>
+                            </div>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <div className="no-chat-selected">
@@ -794,6 +993,185 @@ const Chat = () => {
         .no-chat-selected p {
           font-size: 0.85rem;
           color: #64748b;
+        }
+
+        /* Call Feature Styles */
+        .chat-tabs {
+          display: flex;
+          background: #f1f5f9;
+          border-radius: 8px;
+          padding: 4px;
+          margin: 0 10px;
+        }
+        .tab-btn {
+          background: transparent;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: #64748b;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .tab-btn.active {
+          background: #ffffff;
+          color: #3b82f6;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .phone-btn {
+          background: #ecfdf5;
+          color: #10b981;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-left: 8px;
+        }
+        .phone-btn:hover {
+          background: #10b981;
+          color: white;
+          transform: scale(1.05);
+        }
+
+        .call-modal {
+          position: absolute;
+          top: 70px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 50;
+          width: 300px;
+        }
+        .call-modal-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 24px;
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .call-avatar {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 16px;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .call-name {
+          margin: 0 0 8px 0;
+          font-size: 1.2rem;
+          color: #0f172a;
+        }
+        .call-status {
+          margin: 0 0 24px 0;
+          color: #64748b;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+        .call-actions {
+          display: flex;
+          gap: 16px;
+          width: 100%;
+        }
+        .btn-answer, .btn-end {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px;
+          border-radius: 16px;
+          border: none;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.8rem;
+          transition: all 0.2s;
+        }
+        .btn-answer {
+          background: #10b981;
+          color: white;
+        }
+        .btn-answer:hover { background: #059669; transform: translateY(-2px); }
+        .btn-end {
+          background: #ef4444;
+          color: white;
+        }
+        .btn-end:hover { background: #dc2626; transform: translateY(-2px); }
+
+        .call-history-container {
+          flex: 1;
+          overflow-y: auto;
+          background: #f8fafc;
+          padding: 1.5rem;
+        }
+        .call-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .call-item {
+          display: flex;
+          align-items: center;
+          padding: 16px;
+          border-radius: 12px;
+          background: white;
+          gap: 16px;
+          transition: all 0.2s;
+        }
+        .call-item:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .call-icon-wrap {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .call-details {
+          flex: 1;
+        }
+        .call-details h4 {
+          margin: 0 0 4px 0;
+          font-size: 0.95rem;
+          color: #0f172a;
+        }
+        .call-time {
+          font-size: 0.8rem;
+          color: #64748b;
+        }
+        .call-duration {
+          font-weight: 600;
+          color: #334155;
+          font-size: 0.9rem;
+          background: #f1f5f9;
+          padding: 4px 10px;
+          border-radius: 20px;
         }
 
         /* Scrollbar */
