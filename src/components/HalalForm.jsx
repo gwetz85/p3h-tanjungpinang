@@ -587,7 +587,7 @@ table td:first-child { font-weight: bold; width: 32%; white-space: nowrap; }
     <p>Formulir Pengajuan Sertifikasi Halal &mdash; Kota Tanjungpinang</p>
     <p class="sub">Pendampingan Proses Produk Halal (P3H)</p>
   </div>
-  <img class="doc-header-logo" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" />
+  <img class="doc-header-logo" src="${baseUrl}/logo-p3h-transparent.png" alt="P3H Logo" onerror="this.style.display='none'" style="border-radius: 50%;" />
 </div>
 <div class="identity-box">
   <table>

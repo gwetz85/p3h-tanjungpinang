@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CallProvider } from './context/CallContext';
 import Layout from './components/Layout';
 import { auth } from './firebase';
 
@@ -86,100 +87,101 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
-          <Route path="/setup" element={<Suspense fallback={<PageLoader />}><Setup /></Suspense>} />
-          <Route path="/daftar" element={<Suspense fallback={<PageLoader />}><DaftarHalalPublic /></Suspense>} />
-          <Route path="/pengumuman" element={<Suspense fallback={<PageLoader />}><PengumumanPublic /></Suspense>} />
-          
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Suspense fallback={<InlineLoader />}><Dashboard /></Suspense>} />
+      <CallProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+            <Route path="/setup" element={<Suspense fallback={<PageLoader />}><Setup /></Suspense>} />
+            <Route path="/daftar" element={<Suspense fallback={<PageLoader />}><DaftarHalalPublic /></Suspense>} />
+            <Route path="/pengumuman" element={<Suspense fallback={<PageLoader />}><PengumumanPublic /></Suspense>} />
             
-            <Route path="koordinator" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas']}>
-                <Suspense fallback={<InlineLoader />}><DataKoordinator /></Suspense>
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout />
               </ProtectedRoute>
-            } />
-
-
-            <Route path="users" element={
-              <ProtectedRoute allowedRoles={['superadmin']}>
-                <Suspense fallback={<InlineLoader />}><DataUser /></Suspense>
-              </ProtectedRoute>
-            } />
-
-            <Route path="running-text" element={
-              <ProtectedRoute allowedRoles={['superadmin']}>
-                <Suspense fallback={<InlineLoader />}><RunningTextSettings /></Suspense>
-              </ProtectedRoute>
-            } />
-
-            <Route path="admin-pengumuman" element={
-              <ProtectedRoute allowedRoles={['superadmin']}>
-                <Suspense fallback={<InlineLoader />}><PengumumanAdmin /></Suspense>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="input" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
-                <Suspense fallback={<InlineLoader />}><InputPekerjaan /></Suspense>
-              </ProtectedRoute>
-            } />
-
-            <Route path="pendaftaran" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
-                <Suspense fallback={<InlineLoader />}><PendaftaranSihalal /></Suspense>
-              </ProtectedRoute>
-            } />
-
-            <Route path="daftar-halal" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
-                <Suspense fallback={<InlineLoader />}><MenuDaftarHalal /></Suspense>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="gudang-bahan" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
-                <Suspense fallback={<InlineLoader />}><GudangBahan /></Suspense>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="cek" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Petugas', 'petugas']}>
-                <Suspense fallback={<InlineLoader />}><CekPekerjaan /></Suspense>
-              </ProtectedRoute>
-            } />
-            <Route path="verifikasi-pu" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Petugas', 'petugas']}>
-                <Suspense fallback={<InlineLoader />}><VerifikasiPU /></Suspense>
-              </ProtectedRoute>
-            } />
-            <Route path="selesai" element={<Suspense fallback={<InlineLoader />}><Selesai /></Suspense>} />
-            <Route path="perbaikan-akun" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
-                <Suspense fallback={<InlineLoader />}><PerbaikanAkunSihalal /></Suspense>
-              </ProtectedRoute>
-            } />
-            <Route path="catatan-akun" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
-                <Suspense fallback={<InlineLoader />}><CatatanAkunSihalal /></Suspense>
-              </ProtectedRoute>
-            } />
-            <Route path="arsip-sh" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
-                <Suspense fallback={<InlineLoader />}><ArsipSH /></Suspense>
+            }>
+              <Route index element={<Suspense fallback={<InlineLoader />}><Dashboard /></Suspense>} />
+              
+              <Route path="koordinator" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas']}>
+                  <Suspense fallback={<InlineLoader />}><DataKoordinator /></Suspense>
                 </ProtectedRoute>
               } />
-              <Route path="popout-settings" element={<ProtectedRoute allowedRoles={['superadmin']}><Suspense fallback={<InlineLoader />}><PopoutSettings /></Suspense></ProtectedRoute>} />
-              <Route path="chat" element={<Suspense fallback={<InlineLoader />}><Chat /></Suspense>} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+
+              <Route path="users" element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Suspense fallback={<InlineLoader />}><DataUser /></Suspense>
+                </ProtectedRoute>
+              } />
+
+              <Route path="running-text" element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Suspense fallback={<InlineLoader />}><RunningTextSettings /></Suspense>
+                </ProtectedRoute>
+              } />
+
+              <Route path="admin-pengumuman" element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                  <Suspense fallback={<InlineLoader />}><PengumumanAdmin /></Suspense>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="input" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
+                  <Suspense fallback={<InlineLoader />}><InputPekerjaan /></Suspense>
+                </ProtectedRoute>
+              } />
+
+              <Route path="pendaftaran" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
+                  <Suspense fallback={<InlineLoader />}><PendaftaranSihalal /></Suspense>
+                </ProtectedRoute>
+              } />
+
+              <Route path="daftar-halal" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin']}>
+                  <Suspense fallback={<InlineLoader />}><MenuDaftarHalal /></Suspense>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="gudang-bahan" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
+                  <Suspense fallback={<InlineLoader />}><GudangBahan /></Suspense>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="cek" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Petugas', 'petugas']}>
+                  <Suspense fallback={<InlineLoader />}><CekPekerjaan /></Suspense>
+                </ProtectedRoute>
+              } />
+              <Route path="verifikasi-pu" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Petugas', 'petugas']}>
+                  <Suspense fallback={<InlineLoader />}><VerifikasiPU /></Suspense>
+                </ProtectedRoute>
+              } />
+              <Route path="selesai" element={<Suspense fallback={<InlineLoader />}><Selesai /></Suspense>} />
+              <Route path="perbaikan-akun" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
+                  <Suspense fallback={<InlineLoader />}><PerbaikanAkunSihalal /></Suspense>
+                </ProtectedRoute>
+              } />
+              <Route path="catatan-akun" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
+                  <Suspense fallback={<InlineLoader />}><CatatanAkunSihalal /></Suspense>
+                </ProtectedRoute>
+              } />
+              <Route path="arsip-sh" element={
+                <ProtectedRoute allowedRoles={['superadmin', 'Admin', 'admin', 'Petugas', 'petugas', 'Monitoring']}>
+                  <Suspense fallback={<InlineLoader />}><ArsipSH /></Suspense>
+                  </ProtectedRoute>
+                } />
+                <Route path="popout-settings" element={<ProtectedRoute allowedRoles={['superadmin']}><Suspense fallback={<InlineLoader />}><PopoutSettings /></Suspense></ProtectedRoute>} />
+                <Route path="chat" element={<Suspense fallback={<InlineLoader />}><Chat /></Suspense>} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </CallProvider>
     </AuthProvider>
   );
 }
